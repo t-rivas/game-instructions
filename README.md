@@ -19,11 +19,11 @@ See [Vercel's build configuration documentation](https://vercel.com/docs/builds/
 ## Features
 
 - Five game-specific visual themes across the collection and all guide views: Coup (steel/crimson), Avalon (gold/misty blue), Poker (green felt/brass), Polilla (yellow/pink comic styling), and Dixit (sunset/storybook styling). Each supports light and dark modes and print-friendly output.
-- Complete English and Spanish text in three views: Learn, While playing, and Full rules.
+- Clear Spanish for readers in Uruguay, without local slang, and plain English for non-native speakers. Game terms are explained where they are introduced, with consistent wording across Learn, While playing, and Full rules.
 - The collection opens compact table references: turn order, short action rows and key reminders. Examples, practice tools and credits are expandable; Coup variant controls stay visible.
 - Print the compact reference directly with its print button. Dixit prints all scoring outcomes, independent of the selected interactive outcome.
 - Dixit includes full base-game rules, a live scoring selector, the three-player adjustments, and official box/component/card imagery.
-- Always-visible Inquisitor toggle on every Coup view: on replaces Ambassador; off uses Ambassador. The choice is saved locally. Reformation remains an independent setting.
+- Inquisitor and Reformation each have an always-visible, full-row switch on every Coup view. Both support touch and keyboard input and save choices locally. Inquisitor replaces Ambassador; Reformation independently adds sides and the coin reserve.
 - Avalon setup for 5–10 players, optional-role capacity checks, quest sizes and an opening script adapted to the selected roles.
 - Step-by-step lessons with progress preserved when switching languages.
 - A visual poker hand you can reveal from pre-flop through showdown.
@@ -60,3 +60,5 @@ Rule references are linked inside each guide. Poker uses No-Limit Texas Hold’e
 The current update passed 221 headless Chrome checks: all five games, three views, both languages and widths of 320, 390, 768 and 1440px; Dixit scoring outcomes and three-player adjustments; Coup role/expansion switching; Avalon quest exceptions; lesson navigation; offline decoding of all 32 official images; image dialogs; print layout; search; and the source and standalone builds. Phone and print screenshots were also reviewed. Actual Safari/iOS hardware was not available.
 
 The game-theme update additionally passed 358 theme checks across all five games, all three views, both languages and both color modes at 320–1440px. Palette checks verify at least 4.5:1 contrast for text, muted text and accent text against panels, and for selected-button text. Collection theme reset, offline source build and print decoration removal were also checked. Desktop and phone previews were visually reviewed.
+
+The language and mobile-controls update was checked in headless Chrome across all five games, three views, both languages and both themes at 320, 390, 768 and 1440px. Checks cover text rendering, horizontal overflow, Reformation touch/keyboard input, independent Inquisitor settings, saved preferences, and the offline export. Mobile screenshots were reviewed. These are browser-emulated phone checks, not tests on physical iOS devices.

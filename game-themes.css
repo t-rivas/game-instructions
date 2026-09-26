@@ -30,14 +30,13 @@ html:not([data-game=library]) body.compact-hero .detail-hero{padding:14px 20px;m
 /* Fit complete published box images inside the collection thumbnails. */
 .game-card[data-game] .game-art>img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}.theme-title>.theme-seal{margin-right:10px}body.compact-hero .theme-title>.theme-seal{margin-right:0}.table-sheet .quest-track{margin-bottom:16px}
 
-/* Coup's exchange variant is always visible and can be changed with one tap. */
+/* Both Coup options stay visible, with full-row touch and keyboard controls. */
 .settings.coup-variants{display:block;padding:0;margin:0 0 20px;border-radius:4px;overflow:hidden}
 .variant-switch{display:flex;align-items:center;justify-content:space-between;gap:18px;width:100%;min-height:76px;text-align:left;border:0;border-radius:0;background:var(--panel);color:var(--text);padding:16px 18px}
 .variant-copy{display:flex;flex-direction:column;gap:4px;min-width:0}.variant-copy strong{font-size:15px;line-height:1.4}.variant-copy>span{font-size:12px;line-height:1.5;color:var(--muted)}
 .switch-track{display:flex;align-items:center;width:50px;height:28px;padding:3px;flex-shrink:0;border:1px solid var(--muted);border-radius:18px;background:var(--panel2)}.switch-track>span{width:20px;height:20px;border-radius:50%;background:var(--muted);transition:transform .15s ease}
 .variant-switch[aria-checked=true] .switch-track{background:var(--accent);border-color:var(--accent)}.variant-switch[aria-checked=true] .switch-track>span{transform:translateX(22px);background:var(--on-accent)}
-.variant-switch:focus-visible{outline:3px solid var(--accent);outline-offset:-4px}.coup-variants>.check-label{padding:12px 18px;margin:0;border-top:1px solid var(--border);font-size:13px;min-height:48px}
-@media(max-width:600px){.variant-switch{padding:14px;gap:12px}.variant-copy strong{font-size:14px}.coup-variants>.check-label{padding:12px 14px}}
+@media(max-width:600px){.variant-switch{padding:14px;gap:12px}.variant-copy strong{font-size:14px}}
 
 /* Box art is cut out, so it sits on the themed panel with its own shadow. */
 .game-card[data-game] .game-art>img{padding:42px 14px 12px;filter:drop-shadow(0 8px 12px #0005)}
@@ -55,13 +54,16 @@ html[data-game=coup] .content :is(.lesson-copy h3,.section-tools h2,.practice-fo
 /* Practice tools read as a card with a preview line; sources collapse into one section. */
 .feature-fold{border-color:var(--theme-metal,var(--border))}.feature-fold>summary{display:flex;flex-direction:column;gap:3px;position:relative;list-style:none;padding:15px 50px 15px 18px;border-left:4px solid var(--accent)}.feature-fold>summary::-webkit-details-marker{display:none}.feature-fold>summary:after{content:'+';position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:24px;font-weight:400;color:var(--accent)}.feature-fold[open]>summary:after{content:'−'}.fold-title{font-size:15px;font-weight:650}.fold-hint{font-size:13px;font-weight:400;line-height:1.45;color:var(--muted)}
 #sources{margin-top:28px}#sources .sources{margin:0;padding:0;border:0}#sources .art-credits{margin-top:14px}
-/* Coup variant is a chip at the table; tap it to change. */
-.variant-chip{margin:0 0 12px}.variant-chip>summary{display:inline-flex;align-items:center;gap:12px;min-height:44px;padding:8px 16px;border:1px solid var(--theme-metal,var(--border));border-radius:999px;background:var(--panel);font-size:14px;cursor:pointer;list-style:none}.variant-chip>summary::-webkit-details-marker{display:none}.variant-chip-edit{color:var(--accent);font-weight:650;font-size:13px}.variant-chip[open]>summary{margin-bottom:10px}.variant-chip .settings.coup-variants{margin-bottom:0}
 /* Rows with card art open the image; the badge is no longer needed. */
 .quick-row.has-art{cursor:zoom-in}.quick-row.has-art:hover{background:var(--panel2)}.quick-art .zoom-hint{display:none}
 /* Avalon player count as one-tap buttons. */
 .sheet-controls>.picker-label{color:var(--text);font-size:14px}.player-picker{order:3;flex:1 1 100%;max-width:420px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}.player-picker button{min-height:48px;border:1px solid var(--border);border-radius:9px;background:var(--panel);color:var(--text);font-size:17px;font-variant-numeric:tabular-nums}.player-picker button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:700}
 /* A lone wide photo fills its frame instead of floating in it. */
 .image-strip:has(>figure:only-child){max-width:460px}.image-strip>figure:only-child .official-thumb img{width:100%;height:auto}
-@media(max-width:600px){.game-card[data-game] .game-art>img{padding:12px}.detail-hero .detail-cover{aspect-ratio:1.9}.turn-flow{flex-direction:column;gap:6px}.turn-flow li{display:flex;align-items:baseline;gap:10px;padding:10px 12px;font-size:14px!important}.turn-flow li:before{margin:0;min-width:12px}html[data-game=moth] .turn-flow li:nth-child(2){transform:rotate(.6deg)}.variant-chip>summary{width:100%;justify-content:space-between}}
-@media print{#sources,.variant-chip{display:none!important}.game-card[data-game] .game-art>img,.detail-cover img{filter:none}}
+@media(max-width:600px){.game-card[data-game] .game-art>img{padding:12px}.detail-hero .detail-cover{aspect-ratio:1.9}.turn-flow{flex-direction:column;gap:6px}.turn-flow li{display:flex;align-items:baseline;gap:10px;padding:10px 12px;font-size:14px!important}.turn-flow li:before{margin:0;min-width:12px}html[data-game=moth] .turn-flow li:nth-child(2){transform:rotate(.6deg)}}
+@media print{#sources{display:none!important}.game-card[data-game] .game-art>img,.detail-cover img{filter:none}}
+
+.coup-variants>.variant-switch+.variant-switch{border-top:1px solid var(--border)}
+.variant-switch{touch-action:manipulation;cursor:pointer}
+.variant-switch:focus-visible{outline:3px solid var(--accent);outline-offset:-4px}
+@media(max-width:480px){.variant-switch{padding:14px;gap:12px}.variant-copy strong{font-size:15px}.variant-copy>span{font-size:13px}}

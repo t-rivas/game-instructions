@@ -1,0 +1,418 @@
+[
+  {
+    "id": "coup-box",
+    "src": "assets/official/coup-box.jpg",
+    "title": {
+      "en": "Coup · original box",
+      "es": "Coup · caja original"
+    },
+    "owner": "Indie Boards & Cards",
+    "url": "https://indieboardsandcards.com/wp-content/uploads/2019/10/Untitled-design-4.png",
+    "group": "coup",
+    "width": 800,
+    "height": 800
+  },
+  {
+    "id": "avalon-box",
+    "src": "assets/official/avalon-box.jpg",
+    "title": {
+      "en": "Avalon · classic box",
+      "es": "Avalon · caja clásica"
+    },
+    "owner": "Indie Boards & Cards",
+    "url": "https://indieboardsandcards.com/wp-content/uploads/2019/10/Untitled-design-15.png",
+    "group": "avalon",
+    "width": 800,
+    "height": 800
+  },
+  {
+    "id": "moth-box",
+    "src": "assets/official/moth-box.jpg",
+    "title": {
+      "en": "Cheating Moth · German box",
+      "es": "La Polilla Tramposa · caja alemana"
+    },
+    "owner": "Drei Magier / Schmidt Spiele",
+    "url": "https://www.schmidtspiele.de/assets/images/g/40862_Mogel_Motte_Kartenspiele_Kinder_72ppi_Packshot-e7dzt0kxnbyexcx.png",
+    "group": "moth",
+    "width": 491,
+    "height": 550
+  },
+  {
+    "id": "poker-box",
+    "src": "assets/official/poker-box.jpg",
+    "title": {
+      "en": "Bicycle · standard playing cards",
+      "es": "Bicycle · baraja estándar"
+    },
+    "owner": "The United States Playing Card Company / Bicycle",
+    "url": "https://store.asmodee.com/cdn/shop/products/BIC10015462-4.jpg",
+    "group": "poker",
+    "width": 850,
+    "height": 850
+  },
+  {
+    "id": "coup-duke",
+    "src": "assets/official/coup-duke.jpg",
+    "title": {
+      "en": "Duke",
+      "es": "Duque"
+    },
+    "owner": "Indie Boards & Cards",
+    "url": "https://www.ultraboardgames.com/coup/gfx/coup1.jpg",
+    "group": "coup",
+    "width": 227,
+    "height": 194
+  },
+  {
+    "id": "coup-assassin",
+    "src": "assets/official/coup-assassin.jpg",
+    "title": {
+      "en": "Assassin",
+      "es": "Asesino"
+    },
+    "owner": "Indie Boards & Cards",
+    "url": "https://www.ultraboardgames.com/coup/gfx/coup2.jpg",
+    "group": "coup",
+    "width": 224,
+    "height": 203
+  },
+  {
+    "id": "coup-captain",
+    "src": "assets/official/coup-captain.jpg",
+    "title": {
+      "en": "Captain",
+      "es": "Capitán"
+    },
+    "owner": "Indie Boards & Cards",
+    "url": "https://www.ultraboardgames.com/coup/gfx/coup3.jpg",
+    "group": "coup",
+    "width": 225,
+    "height": 191
+  },
+  {
+    "id": "coup-ambassador",
+    "src": "assets/official/coup-ambassador.jpg",
+    "title": {
+      "en": "Ambassador",
+      "es": "Embajador"
+    },
+    "owner": "Indie Boards & Cards",
+    "url": "https://www.ultraboardgames.com/coup/gfx/coup4.jpg",
+    "group": "coup",
+    "width": 225,
+    "height": 196
+  },
+  {
+    "id": "coup-contessa",
+    "src": "assets/official/coup-contessa.jpg",
+    "title": {
+      "en": "Contessa",
+      "es": "Condesa"
+    },
+    "owner": "Indie Boards & Cards",
+    "url": "https://www.ultraboardgames.com/coup/gfx/coup5.jpg",
+    "group": "coup",
+    "width": 233,
+    "height": 196
+  },
+  {
+    "id": "coup-inquisitor",
+    "src": "assets/official/coup-inquisitor.jpg",
+    "title": {
+      "en": "Inquisitor · official box portrait",
+      "es": "Inquisidor · retrato de la caja oficial"
+    },
+    "owner": "Indie Boards & Cards",
+    "url": "https://www.spelhuis.be/Files/7/112000/112353/Attachments/Product/aD1jf4U81u46a97ia1719S97Nm9925v8.pdf",
+    "group": "coup",
+    "width": 373,
+    "height": 571
+  },
+  {
+    "id": "coup-actions",
+    "src": "assets/official/coup-actions.jpg",
+    "title": {
+      "en": "Action reference & coins",
+      "es": "Referencia de acciones y monedas"
+    },
+    "owner": "Indie Boards & Cards",
+    "url": "https://indieboardsandcards.com/wp-content/uploads/2019/10/MG_8582.jpg",
+    "group": "coup",
+    "width": 1100,
+    "height": 733
+  },
+  {
+    "id": "reformation-box",
+    "src": "assets/official/reformation-box.jpg",
+    "title": {
+      "en": "Coup: Reformation · expansion box",
+      "es": "Coup: Reformation · caja de la expansión"
+    },
+    "owner": "Indie Boards & Cards",
+    "url": "https://indieboardsandcards.com/wp-content/uploads/2019/10/Untitled-design-16.png",
+    "group": "coup",
+    "width": 800,
+    "height": 800
+  },
+  {
+    "id": "avalon-merlin",
+    "src": "assets/official/avalon-merlin.jpg",
+    "title": {
+      "en": "Merlin",
+      "es": "Merlín"
+    },
+    "owner": "Indie Boards & Cards",
+    "url": "https://www.ultraboardgames.com/avalon/gfx/merlin.jpg",
+    "group": "avalon",
+    "width": 100,
+    "height": 154
+  },
+  {
+    "id": "avalon-assassin",
+    "src": "assets/official/avalon-assassin.jpg",
+    "title": {
+      "en": "Assassin",
+      "es": "Asesino"
+    },
+    "owner": "Indie Boards & Cards",
+    "url": "https://www.ultraboardgames.com/avalon/gfx/assassin.jpg",
+    "group": "avalon",
+    "width": 100,
+    "height": 158
+  },
+  {
+    "id": "avalon-percival",
+    "src": "assets/official/avalon-percival.jpg",
+    "title": {
+      "en": "Percival",
+      "es": "Percival"
+    },
+    "owner": "Indie Boards & Cards",
+    "url": "https://www.ultraboardgames.com/avalon/gfx/percival.jpg",
+    "group": "avalon",
+    "width": 100,
+    "height": 154
+  },
+  {
+    "id": "avalon-morgana",
+    "src": "assets/official/avalon-morgana.jpg",
+    "title": {
+      "en": "Morgana",
+      "es": "Morgana"
+    },
+    "owner": "Indie Boards & Cards",
+    "url": "https://www.ultraboardgames.com/avalon/gfx/morgana.jpg",
+    "group": "avalon",
+    "width": 100,
+    "height": 158
+  },
+  {
+    "id": "avalon-mordred",
+    "src": "assets/official/avalon-mordred.jpg",
+    "title": {
+      "en": "Mordred",
+      "es": "Mordred"
+    },
+    "owner": "Indie Boards & Cards",
+    "url": "https://www.ultraboardgames.com/avalon/gfx/mordred.jpg",
+    "group": "avalon",
+    "width": 100,
+    "height": 158
+  },
+  {
+    "id": "avalon-oberon",
+    "src": "assets/official/avalon-oberon.jpg",
+    "title": {
+      "en": "Oberon",
+      "es": "Oberón"
+    },
+    "owner": "Indie Boards & Cards",
+    "url": "https://www.ultraboardgames.com/avalon/gfx/oberon.jpg",
+    "group": "avalon",
+    "width": 100,
+    "height": 158
+  },
+  {
+    "id": "avalon-team",
+    "src": "assets/official/avalon-team.jpg",
+    "title": {
+      "en": "Approve / Reject · team votes",
+      "es": "Aprobar / Rechazar · votos del equipo"
+    },
+    "owner": "Indie Boards & Cards",
+    "url": "https://www.ultraboardgames.com/avalon/gfx/team.jpg",
+    "group": "avalon",
+    "width": 250,
+    "height": 161
+  },
+  {
+    "id": "avalon-mission",
+    "src": "assets/official/avalon-mission.jpg",
+    "title": {
+      "en": "Success / Fail · quest cards",
+      "es": "Éxito / Fracaso · cartas de misión"
+    },
+    "owner": "Indie Boards & Cards",
+    "url": "https://www.ultraboardgames.com/avalon/gfx/mission.jpg",
+    "group": "avalon",
+    "width": 250,
+    "height": 180
+  },
+  {
+    "id": "avalon-components",
+    "src": "assets/official/avalon-components.jpg",
+    "title": {
+      "en": "Avalon · game components",
+      "es": "Avalon · componentes"
+    },
+    "owner": "Indie Boards & Cards",
+    "url": "https://www.ultraboardgames.com/avalon/gfx/components.jpg",
+    "group": "avalon",
+    "width": 500,
+    "height": 274
+  },
+  {
+    "id": "moth-mosquito",
+    "src": "assets/official/moth-mosquito.jpg",
+    "title": {
+      "en": "Mosquito",
+      "es": "Mosquito"
+    },
+    "owner": "Drei Magier / Schmidt Spiele",
+    "url": "https://www.schmidtspiele.de/files/Produkte/4/40862%20-%20Mogel%20Motte/40862_Mogelmotte_DE_GB_FR_IT.pdf",
+    "group": "moth",
+    "width": 163,
+    "height": 253
+  },
+  {
+    "id": "moth-spider",
+    "src": "assets/official/moth-spider.jpg",
+    "title": {
+      "en": "Spider",
+      "es": "Araña"
+    },
+    "owner": "Drei Magier / Schmidt Spiele",
+    "url": "https://www.schmidtspiele.de/files/Produkte/4/40862%20-%20Mogel%20Motte/40862_Mogelmotte_DE_GB_FR_IT.pdf",
+    "group": "moth",
+    "width": 163,
+    "height": 253
+  },
+  {
+    "id": "moth-number",
+    "src": "assets/official/moth-number.jpg",
+    "title": {
+      "en": "Number card",
+      "es": "Carta numérica"
+    },
+    "owner": "Drei Magier / Schmidt Spiele",
+    "url": "https://www.schmidtspiele.de/files/Produkte/4/40862%20-%20Mogel%20Motte/40862_Mogelmotte_DE_GB_FR_IT.pdf",
+    "group": "moth",
+    "width": 163,
+    "height": 253
+  },
+  {
+    "id": "moth-cockroach",
+    "src": "assets/official/moth-cockroach.jpg",
+    "title": {
+      "en": "Cockroach",
+      "es": "Cucaracha"
+    },
+    "owner": "Drei Magier / Schmidt Spiele",
+    "url": "https://www.schmidtspiele.de/files/Produkte/4/40862%20-%20Mogel%20Motte/40862_Mogelmotte_DE_GB_FR_IT.pdf",
+    "group": "moth",
+    "width": 163,
+    "height": 253
+  },
+  {
+    "id": "moth-ant",
+    "src": "assets/official/moth-ant.jpg",
+    "title": {
+      "en": "Ant",
+      "es": "Hormiga"
+    },
+    "owner": "Drei Magier / Schmidt Spiele",
+    "url": "https://www.schmidtspiele.de/files/Produkte/4/40862%20-%20Mogel%20Motte/40862_Mogelmotte_DE_GB_FR_IT.pdf",
+    "group": "moth",
+    "width": 163,
+    "height": 253
+  },
+  {
+    "id": "moth-moth",
+    "src": "assets/official/moth-moth.jpg",
+    "title": {
+      "en": "Cheating Moth",
+      "es": "Polilla tramposa"
+    },
+    "owner": "Drei Magier / Schmidt Spiele",
+    "url": "https://www.schmidtspiele.de/files/Produkte/4/40862%20-%20Mogel%20Motte/40862_Mogelmotte_DE_GB_FR_IT.pdf",
+    "group": "moth",
+    "width": 163,
+    "height": 253
+  },
+  {
+    "id": "moth-guard",
+    "src": "assets/official/moth-guard.jpg",
+    "title": {
+      "en": "Guard Bug",
+      "es": "Chinche guardiana"
+    },
+    "owner": "Drei Magier / Schmidt Spiele",
+    "url": "https://www.schmidtspiele.de/assets/images/e/40862_Mogel_Motte_Kartenspiele_Kinder_72ppi_Inhalt1-r6v3prm5pvwnx03.png",
+    "group": "moth",
+    "width": 354,
+    "height": 550
+  },
+  {
+    "id": "dixit-box",
+    "src": "assets/official/dixit-box.jpg",
+    "title": {
+      "en": "Dixit · 2021 base-game box",
+      "es": "Dixit · caja base de 2021"
+    },
+    "owner": "Libellud / Asmodee · Marie Cardouat",
+    "url": "https://store.asmodee.com/cdn/shop/products/DIX01N-1.jpg",
+    "group": "dixit",
+    "width": 850,
+    "height": 850
+  },
+  {
+    "id": "dixit-components",
+    "src": "assets/official/dixit-components.jpg",
+    "title": {
+      "en": "Dixit · board, cards & voting dials",
+      "es": "Dixit · tablero, cartas y diales de voto"
+    },
+    "owner": "Libellud / Asmodee · Marie Cardouat",
+    "url": "https://store.asmodee.com/cdn/shop/products/DIX01N-4.jpg",
+    "group": "dixit",
+    "width": 850,
+    "height": 850
+  },
+  {
+    "id": "dixit-hourglass",
+    "src": "assets/official/dixit-hourglass.jpg",
+    "title": {
+      "en": "Dixit · hourglass illustration",
+      "es": "Dixit · ilustración del reloj de arena"
+    },
+    "owner": "Libellud / Asmodee · Marie Cardouat",
+    "url": "https://cdn.svc.asmodee.net/production-asmodeeca/uploads/2023/07/DIXIT_REFRESH_RULES_US-UK-AU_BD.pdf",
+    "group": "dixit",
+    "width": 105,
+    "height": 153
+  },
+  {
+    "id": "dixit-birthday",
+    "src": "assets/official/dixit-birthday.jpg",
+    "title": {
+      "en": "Dixit · illustrated card example",
+      "es": "Dixit · ejemplo de carta ilustrada"
+    },
+    "owner": "Libellud / Asmodee · Marie Cardouat",
+    "url": "https://cdn.svc.asmodee.net/production-asmodeeca/uploads/2023/07/DIXIT_REFRESH_RULES_US-UK-AU_BD.pdf",
+    "group": "dixit",
+    "width": 105,
+    "height": 153
+  }
+]

@@ -19,6 +19,7 @@ See [Vercel's build configuration documentation](https://vercel.com/docs/builds/
 ## Features
 
 - Five game-specific visual themes across the collection and all guide views: Coup (steel/crimson), Avalon (gold/misty blue), Poker (green felt/brass), Polilla (yellow/pink comic styling), and Dixit (sunset/storybook styling). Each supports light and dark modes and print-friendly output.
+- Spanish is the default on first visit; a saved English or Spanish choice is restored on later visits.
 - Clear Spanish for readers in Uruguay, without local slang, and plain English for non-native speakers. Game terms are explained where they are introduced, with consistent wording across Learn, While playing, and Full rules.
 - The collection opens compact table references: turn order, short action rows and key reminders. Examples, practice tools and credits are expandable; Coup variant controls stay visible.
 - Print the compact reference directly with its print button. Dixit prints all scoring outcomes, independent of the selected interactive outcome.
@@ -49,7 +50,7 @@ This regenerates `game-night.html`. There is no build dependency to install. The
 
 ## Rule scope
 
-Coup covers the base game, the independent Inquisitor replacement, Reformation allegiances, and the published player-count variants. Avalon covers its classic base box, four optional roles, Lady of the Lake and optional quest targeting. The setup helper uses normal quest order. Crossovers requiring other games’ expansion cards and Avalon Big Box modules are outside this edition.
+Coup supports 2–10 players with the extra Reformation cards. Use five character types with 3 copies each for 2–6 players, 4 for 7–8, or 5 for 9–10; leave extra copies out and deal 2 influence cards per player. The larger deck works with or without the Reformation side rules. Coup covers the base game, the independent Inquisitor replacement, Reformation allegiances, and the published player-count variants. Avalon covers its classic base box, four optional roles, Lady of the Lake and optional quest targeting. The setup helper uses normal quest order. Crossovers requiring other games’ expansion cards and Avalon Big Box modules are outside this edition.
 
 Dixit follows Libellud’s 2021 standard base-game rules (3–8 players), including the three-player setup. Some older 3–6-player boxes have different ending rules; the edition note explains this. Odyssey and Disney are separate editions and are not covered.
 

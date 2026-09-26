@@ -5,7 +5,7 @@ const escapeHTML = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;'
 let saved = {};
 try { saved = JSON.parse(localStorage.getItem('tablefolk-preferences') || '{}') || {}; } catch {}
 const state = {
-  lang: saved.lang === 'es' ? 'es' : 'en', theme: saved.theme === 'light' ? 'light' : 'dark',
+  lang: saved.lang === 'en' ? 'en' : 'es', theme: saved.theme === 'light' ? 'light' : 'dark',
   game: null, tab: 'learn', exchange: saved.exchange === 'ambassador' ? 'ambassador' : 'inquisitor',
   reformation: typeof saved.reformation === 'boolean' ? saved.reformation : false,
   seen: Array.isArray(saved.seen) ? saved.seen.filter(id => typeof id === 'string') : [], compact: false,

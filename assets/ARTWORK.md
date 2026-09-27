@@ -2,7 +2,19 @@
 
 Created with the built-in image generation tool. Original themed illustrations, not official game packaging.
 
-Optimized images: coup.jpg, avalon.jpg, poker.jpg and moth.jpg. Full-resolution originals are in originals/. The HTML export embeds the optimized images for offline use.
+The original interior-guide images are `coup.jpg`, `avalon.jpg`, `poker.jpg` and `moth.jpg`, with their full-resolution versions preserved in `assets/originals/`. The seven additional interior-guide scenes live in `assets/ai/`. The HTML export embeds the optimized banners for offline use. These illustrations are used only as atmospheric guide banners; game boxes, pieces and card references use real published imagery.
+
+## Additional interior guide scenes
+
+- `ai/catan.png`: friends playing on a hexagonal island board.
+- `ai/secret-hitler.png`: a dramatic hidden-government table scene.
+- `ai/el-camarero.png`: a restaurant table with food cards and service bell.
+- `ai/monopoly.png`: a property-trading board-game scene.
+- `ai/chess.png`: a photographed-style chess match.
+- `ai/burako.png`: a social tile-game table with racks and melds.
+- `ai/truco.png`: an Uruguayan café game with Spanish-suited cards and mate.
+
+All seven are 1536 × 1024 original illustrations generated with the built-in image tool. They are not representations of official packaging or exact game components.
 
 ## coup
 

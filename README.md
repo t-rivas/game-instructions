@@ -1,12 +1,12 @@
 # Tablefolk
 
-A bilingual, offline game-night guide for No-Limit Texas Hold’em, Coup, Coup: Reformation (with either Ambassador or Inquisitor), The Resistance: Avalon, Cheating Moth / La Polilla Tramposa, and Dixit (standard 2021 base game).
+A bilingual, offline game-night guide for No-Limit Texas Hold’em, Coup, Coup: Reformation, The Resistance: Avalon, Cheating Moth / La Polilla Tramposa, Dixit, Catan, Secret Hitler, El Camarero, Monopoly, Chess, Burako and Uruguayan Truco.
 
 ## Open
 
 Double-click **game-night.html**. Everything is included in that one file; no installation, account, internet connection, or server is needed. External rulebook links need internet.
 
-Alternatively, open **index.html**, keeping all five CSS files, all six JavaScript files, and the `assets/` folder alongside it.
+Alternatively, open **index.html**, keeping all CSS and JavaScript files and the `assets/` folder alongside it.
 
 ## Deploy on Vercel
 
@@ -18,7 +18,7 @@ See [Vercel's build configuration documentation](https://vercel.com/docs/builds/
 
 ## Features
 
-- Five game-specific visual themes across the collection and all guide views: Coup (steel/crimson), Avalon (gold/misty blue), Poker (green felt/brass), Polilla (yellow/pink comic styling), and Dixit (sunset/storybook styling). Each supports light and dark modes and print-friendly output.
+- Game-specific visual themes across the full collection and all guide views. Each supports light and dark modes and print-friendly output.
 - Spanish is the default on first visit; a saved English or Spanish choice is restored on later visits.
 - Clear Spanish for readers in Uruguay, without local slang, and plain English for non-native speakers. Game terms are explained where they are introduced, with consistent wording across Learn, While playing, and Full rules.
 - The collection opens compact table references: turn order, short action rows and key reminders. Examples, practice tools and credits are expandable; Coup variant controls stay visible.
@@ -31,22 +31,24 @@ See [Vercel's build configuration documentation](https://vercel.com/docs/builds/
 - Coup coin-budget helper and challenge example; Avalon quest-result simulator that follows player-count exceptions.
 - Interactive Polilla discard practice with guard/moth restrictions, plus a round penalty calculator.
 - Search, dark/light themes, keyboard navigation, print layout and local language/theme/Coup preferences.
-- 32 published images: game boxes, Coup characters/action reference, Avalon roles/vote/quest cards, Polilla insect cards, a Bicycle deck example, and Dixit artwork. Tap images to enlarge them and see their source. The Inquisitor uses the official box portrait, explicitly captioned as such.
-- Generated artwork is reserved for the decorative home-page hero. Source/edition details for published artwork are in `assets/official/SOURCES.md` and the guide’s expandable image credits.
+- The collection cards use real product photographs. The new boxes are clean transparent cutouts, so they sit directly on each card’s theme without a white rectangle. Chess includes a photographed reference for every piece and its movement; Uruguayan Truco highlights the Mazo Yorugua and the five pieces created by the muestra.
+- Inside each game guide, the header keeps its atmospheric AI illustration. Factual box, card, board and component references remain published photographs or scans that can be enlarged to see their source.
+- Source and edition details are available in `assets/official/SOURCES.md`, `assets/real/SOURCES.md`, `assets/ARTWORK.md` and the guide’s expandable image credits.
 - Phone layouts from 320px up, sticky language and guide controls, 44px navigation targets, 16px mobile form inputs, safe-area spacing, landscape adjustments, and reduced-motion support.
 - System fonts and local assets; no trackers or network dependencies.
 
 ## Edit
 
-`data.js` contains paired English/Spanish explanations and source references; `dixit.js` adds the Dixit rules. `table-guide.js` and `table-guide.css` implement the compact table references, Dixit scoring and reference print layout. `app.js` contains the interface, translated labels and interactive helpers. `enhancements.js` contains the illustrations and interactive learning tools. `official.js` contains the image registry, bilingual captions, credits and accessible image viewer; `official.css` styles these additions. `styles.css` and `enhancements.css` control the shared presentation, including the phone layouts. `game-themes.css` supplies game-specific palettes, typography, borders and decorative textures. `app.js` assigns the active game to the HTML `data-game` attribute and to each collection card; returning home resets the page palette.
+`data.js` contains the original paired English/Spanish explanations; `dixit.js` and `new-games.js` add the remaining guides. `table-guide.js` and `table-guide.css` implement the compact table references and print layout. `app.js` contains the interface and translated labels. `enhancements.js` contains the interactive learning tools. `official.js` contains the real-image registry, the separate in-guide illustration registry, bilingual captions, credits and accessible image viewer; `official.css` styles these additions. `styles.css`, `enhancements.css` and `game-themes.css` control the responsive presentation and game-specific themes. Run `scripts/make-cover-cutouts.ps1` to recreate the transparent product cutouts from the downloaded real photographs.
 
 After editing, run:
 
 ```sh
 python3 build.py
+# or: node build.mjs
 ```
 
-This regenerates `game-night.html`. There is no build dependency to install. The export embeds the illustrations and published images and is approximately 3.0 MB. Original downloaded source material is kept separately in `assets/official/sources/`; it is not embedded in the export.
+This regenerates `game-night.html`. There is no build dependency to install. The export embeds the published photographs and card references so it works offline.
 
 ## Rule scope
 
@@ -58,8 +60,4 @@ Rule references are linked inside each guide. Poker uses No-Limit Texas Hold’e
 
 ## Verification
 
-The current update passed 221 headless Chrome checks: all five games, three views, both languages and widths of 320, 390, 768 and 1440px; Dixit scoring outcomes and three-player adjustments; Coup role/expansion switching; Avalon quest exceptions; lesson navigation; offline decoding of all 32 official images; image dialogs; print layout; search; and the source and standalone builds. Phone and print screenshots were also reviewed. Actual Safari/iOS hardware was not available.
-
-The game-theme update additionally passed 358 theme checks across all five games, all three views, both languages and both color modes at 320–1440px. Palette checks verify at least 4.5:1 contrast for text, muted text and accent text against panels, and for selected-button text. Collection theme reset, offline source build and print decoration removal were also checked. Desktop and phone previews were visually reviewed.
-
-The language and mobile-controls update was checked in headless Chrome across all five games, three views, both languages and both themes at 320, 390, 768 and 1440px. Checks cover text rendering, horizontal overflow, Reformation touch/keyboard input, independent Inquisitor settings, saved preferences, and the offline export. Mobile screenshots were reviewed. These are browser-emulated phone checks, not tests on physical iOS devices.
+The source scripts pass Node syntax checks, every registered real-image asset is present locally, and the standalone offline build is regenerated after each content change. The new product, component, card and chess-piece images were also reviewed visually. Browser-emulated checks do not replace testing on physical iOS or Android devices.

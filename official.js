@@ -338,21 +338,55 @@ const OFFICIAL = {
  }
 };
 Object.assign(OFFICIAL, {"dixit-box": {"src": "assets/official/dixit-box.webp", "title": {"en": "Dixit · 2021 base-game box", "es": "Dixit · caja base de 2021"}, "owner": "Libellud / Asmodee · Marie Cardouat", "url": "https://store.asmodee.com/cdn/shop/products/DIX01N-1.jpg", "group": "dixit", "width": 718, "height": 803}, "dixit-components": {"src": "assets/official/dixit-components.jpg", "title": {"en": "Dixit · board, cards & voting dials", "es": "Dixit · tablero, cartas y ruedas para votar"}, "owner": "Libellud / Asmodee · Marie Cardouat", "url": "https://store.asmodee.com/cdn/shop/products/DIX01N-4.jpg", "group": "dixit", "width": 850, "height": 850}, "dixit-hourglass": {"src": "assets/official/dixit-hourglass.jpg", "title": {"en": "Dixit · hourglass illustration", "es": "Dixit · ilustración del reloj de arena"}, "owner": "Libellud / Asmodee · Marie Cardouat", "url": "https://cdn.svc.asmodee.net/production-asmodeeca/uploads/2023/07/DIXIT_REFRESH_RULES_US-UK-AU_BD.pdf", "group": "dixit", "width": 105, "height": 153}, "dixit-birthday": {"src": "assets/official/dixit-birthday.jpg", "title": {"en": "Dixit · illustrated card example", "es": "Dixit · ejemplo de carta ilustrada"}, "owner": "Libellud / Asmodee · Marie Cardouat", "url": "https://cdn.svc.asmodee.net/production-asmodeeca/uploads/2023/07/DIXIT_REFRESH_RULES_US-UK-AU_BD.pdf", "group": "dixit", "width": 105, "height": 153}});
+Object.assign(OFFICIAL, NEW_GAME_ART);
 function officialImage(id, eager=false){const a=OFFICIAL[id];return `<img src="${a.src}" alt="${e(a.title)}" width="${a.width}" height="${a.height}" loading="${eager?'eager':'lazy'}" decoding="async">`;}
 function officialButton(id,cls=''){return `<button type="button" class="official-thumb ${cls}" data-art="${id}" aria-label="${tr('Enlarge image: ','Ampliar imagen: ')}${e(OFFICIAL[id].title)}">${officialImage(id)}<span class="zoom-hint" aria-hidden="true">↗</span></button>`;}
 function officialCover(id,interactive=false){return interactive?`<button class="official-cover" data-art="${id}-box" aria-label="${tr('Enlarge game image','Ampliar imagen del juego')}">${officialImage(id+'-box',true)}<span>${tr('View image ↗','Ver imagen ↗')}</span></button>`:officialImage(id+'-box');}
-function actionArtwork(title){
+const GUIDE_ART={
+ coup:['assets/coup.jpg',1200,800],avalon:['assets/avalon.jpg',1200,800],poker:['assets/poker.jpg',1200,800],moth:['assets/moth.jpg',1200,800],
+ catan:['assets/ai/catan.png',1536,1024],secret_hitler:['assets/ai/secret-hitler.png',1536,1024],el_camarero:['assets/ai/el-camarero.png',1536,1024],monopoly:['assets/ai/monopoly.png',1536,1024],chess:['assets/ai/chess.png',1536,1024],burako:['assets/ai/burako.png',1536,1024],truco:['assets/ai/truco.png',1536,1024]
+};
+function guideArtwork(id){const art=GUIDE_ART[id];return art?`<img class="guide-artwork" src="${art[0]}" alt="${tr('Atmospheric illustration for ','Ilustración ambiental de ')}${e(GAMES[id].name)}" width="${art[1]}" height="${art[2]}" loading="eager" decoding="async">`:officialCover(id,true);}
+function actionArtworkId(title){
  const name=title.en.split(' · ')[0];
- const ids=state.game==='coup'?{Duke:'duke',Assassin:'assassin',Captain:'captain',Ambassador:'ambassador',Inquisitor:'inquisitor',Contessa:'contessa'}:state.game==='moth'?{Spider:'spider',Mosquito:'mosquito',Cockroach:'cockroach',Ant:'ant'}:{};
- return ids[name]?officialButton(state.game+'-'+ids[name],'inline-card'):'';
+ const maps={
+  coup:{Duke:'duke',Assassin:'assassin',Captain:'captain',Ambassador:'ambassador',Inquisitor:'inquisitor',Contessa:'contessa'},
+  moth:{Spider:'spider',Mosquito:'mosquito',Cockroach:'cockroach',Ant:'ant'},
+  catan:{Roll:'board',Trade:'cards',Build:'board',Robber:'board'},
+  secret_hitler:{Nominate:'components',Vote:'components',Legislate:'components',Chaos:'components'},
+  el_camarero:{Serve:'cards',Return:'pair',Challenge:'components',Score:'cards'},
+  monopoly:{'Unowned property':'components','Owned property':'components',Doubles:'components','Color group':'components'},
+  chess:{King:'king',Queen:'queen',Rook:'rook',Bishop:'bishop',Knight:'knight',Pawn:'pawn'},
+  burako:{Draw:'rack',Meld:'rack',Canasta:'components',Close:'components'},
+  truco:{Pieces:'piece-2',Envido:'deck',Tricks:'matas','Truco ladder':'box'}
+ };
+ const ids=maps[state.game]||{};
+ return ids[name]?state.game+'-'+ids[name]:'';
+}
+function actionArtwork(title){
+ const id=actionArtworkId(title);
+ return id?officialButton(id,'inline-card'):'';
 }
 function imageStrip(ids){return `<div class="image-strip">${ids.map(id=>`<figure>${officialButton(id)}<figcaption>${e(OFFICIAL[id].title)}</figcaption></figure>`).join('')}</div>`;}
 function componentGallery(game){
- const ids={coup:['coup-actions',...(state.reformation?['reformation-box']:[])],avalon:['avalon-team','avalon-mission'],moth:['moth-guard','moth-moth','moth-number'],poker:['poker-box'],dixit:['dixit-components','dixit-hourglass','dixit-birthday']}[game];
- const copy={dixit:L('Each picture can suggest different stories. The storyteller gives a clue. The others try to find the storyteller’s card among the cards on the table.','Cada imagen puede sugerir muchas historias. El narrador da una pista; los demás intentan encontrar su carta entre las otras.'),coup:L('Match the role pictures below to your cards. Income, Foreign Aid and Coup do not have their own character cards.','Compara los personajes de abajo con tus cartas. Ingreso, Ayuda extranjera y Golpe no tienen cartas de personaje propias.'),avalon:L('Vote on the team first. Only an approved team plays the secret quest cards.','Primero se vota el equipo. Solo un equipo aprobado juega las cartas secretas de misión.'),moth:L('The guard watches for cheating. Other players must sneak their moths away; plain number cards have no special effect.','El guardián vigila las trampas. Los demás deben deshacerse de las polillas haciendo trampa; las cartas numéricas normales no tienen efecto especial.'),poker:L('A standard 52-card deck, without jokers. Bicycle is one example; Texas Hold’em has no single official deck. The interactive hand below uses simple teaching diagrams.','Un mazo estándar de 52 cartas, sin comodines. Bicycle es un ejemplo; Texas Hold’em no tiene un único mazo oficial. La mano interactiva de abajo usa diagramas sencillos para aprender.')};
- return `<section class="component-gallery block"><span class="eyebrow muted">${tr('FROM THE BOX','DE LA CAJA')}</span><h2>${tr('Recognize your pieces.','Reconoce tus piezas.')}</h2><p class="muted">${e(copy[game])}</p>${imageStrip(ids)}<p class="image-note">${tr('Tap any image to enlarge it and see its source. Printed language and artwork may vary by edition.','Toca cualquier imagen para ampliarla y ver su fuente. El idioma impreso y las ilustraciones pueden variar según la edición.')}</p></section>`;
+ const ids={
+  coup:['coup-actions',...(state.reformation?['reformation-box']:[])],
+  avalon:['avalon-team','avalon-mission'],
+  moth:['moth-guard','moth-moth','moth-number'],
+  poker:['poker-box'],
+  dixit:['dixit-components','dixit-hourglass','dixit-birthday'],
+  catan:['catan-board','catan-cards'],
+  secret_hitler:['secret_hitler-components'],
+  el_camarero:['el_camarero-components','el_camarero-cards','el_camarero-pair'],
+  monopoly:['monopoly-components'],
+  chess:['chess-king','chess-queen','chess-rook','chess-bishop','chess-knight','chess-pawn'],
+  burako:['burako-components','burako-rack'],
+  truco:['truco-deck','truco-piece-2','truco-piece-4','truco-piece-5','truco-piece-11','truco-piece-10','truco-matas']
+ }[game]||[game+'-components'];
+ const copy={dixit:L('Each picture can suggest different stories. The storyteller gives a clue. The others try to find the storyteller’s card among the cards on the table.','Cada imagen puede sugerir muchas historias. El narrador da una pista; los demás intentan encontrar su carta entre las otras.'),coup:L('Match the role pictures below to your cards. Income, Foreign Aid and Coup do not have their own character cards.','Compara los personajes de abajo con tus cartas. Ingreso, Ayuda extranjera y Golpe no tienen cartas de personaje propias.'),avalon:L('Vote on the team first. Only an approved team plays the secret quest cards.','Primero se vota el equipo. Solo un equipo aprobado juega las cartas secretas de misión.'),moth:L('The guard watches for cheating. Other players must sneak their moths away; plain number cards have no special effect.','El guardián vigila las trampas. Los demás deben deshacerse de las polillas haciendo trampa; las cartas numéricas normales no tienen efecto especial.'),poker:L('A standard 52-card deck, without jokers. Bicycle is one example; Texas Hold’em has no single official deck. The interactive hand below uses simple teaching diagrams.','Un mazo estándar de 52 cartas, sin comodines. Bicycle es un ejemplo; Texas Hold’em no tiene un único mazo oficial. La mano interactiva de abajo usa diagramas sencillos para aprender.')}[game]||GAMES[game].galleryCopy;
+ return `<section class="component-gallery block"><span class="eyebrow muted">${tr('FROM THE BOX','DE LA CAJA')}</span><h2>${tr('Recognize your pieces.','Reconoce tus piezas.')}</h2><p class="muted">${e(copy)}</p>${imageStrip(ids)}<p class="image-note">${tr('Tap any image to enlarge it and see its source. Printed language and artwork may vary by edition.','Toca cualquier imagen para ampliarla y ver su fuente. El idioma impreso y las ilustraciones pueden variar según la edición.')}</p></section>`;
 }
-function imageCredits(){const entries=Object.entries(OFFICIAL).filter(([,a])=>a.group===state.game);return `<div class="art-credits"><p>${tr('Published box, card and component artwork belongs to the credited publishers. This is an independent companion guide. Images keep their original printed language; explanations are available in English and Spanish.','Las imágenes publicadas de cajas, cartas y componentes pertenecen a las editoriales indicadas. Esta es una guía independiente. Las imágenes conservan su idioma impreso; las explicaciones están en inglés y español.')}</p>${imageStrip(entries.map(([id])=>id))}<p>${tr('The decorative home-page illustrations are AI-generated.','Las ilustraciones decorativas de la portada fueron generadas con IA.')}</p></div>`;}
+function imageCredits(){const entries=Object.entries(OFFICIAL).filter(([,a])=>a.group===state.game);const intro=GUIDE_ART[state.game]?tr('The guide header is an atmospheric AI illustration. Published box, card and component images below belong to their credited publishers, photographers or creators; crops are used only to identify pieces and cards.','La cabecera de la guía es una ilustración ambiental generada con IA. Las imágenes publicadas de cajas, cartas y componentes que aparecen debajo pertenecen a las editoriales, fotógrafos o creadores acreditados; los recortes se usan solo para identificar piezas y cartas.'):tr('Published box, card and component images belong to their credited publishers, photographers or creators. Crops are used only to identify pieces and cards.','Las imágenes publicadas de cajas, cartas y componentes pertenecen a las editoriales, fotógrafos o creadores acreditados. Los recortes se usan solo para identificar piezas y cartas.');return `<div class="art-credits"><p>${intro}</p>${imageStrip(entries.map(([id])=>id))}</div>`;}
 let imageOpener=null;
 function openOfficialImage(id,opener){
  const a=OFFICIAL[id];if(!a)return;

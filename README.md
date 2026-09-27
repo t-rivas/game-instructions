@@ -30,6 +30,7 @@ See [Vercel's build configuration documentation](https://vercel.com/docs/builds/
 - A visual poker hand you can reveal from pre-flop through showdown.
 - Coup coin-budget helper and challenge example; Avalon quest-result simulator that follows player-count exceptions.
 - Interactive Polilla discard practice with guard/moth restrictions, plus a round penalty calculator.
+- Two bilingual decision exercises for each of the seven new games, with immediate explanations, links to the relevant rule, keyboard controls and progress preserved when switching language or view.
 - Search, dark/light themes, keyboard navigation, print layout and local language/theme/Coup preferences.
 - The collection cards use real product photographs. The new boxes are clean transparent cutouts, so they sit directly on each card’s theme without a white rectangle. Chess includes a photographed reference for every piece and its movement; Uruguayan Truco highlights the Mazo Yorugua and the five pieces created by the muestra.
 - Inside each game guide, the header keeps its atmospheric AI illustration. Factual box, card, board and component references remain published photographs or scans that can be enlarged to see their source.
@@ -48,7 +49,9 @@ python3 build.py
 # or: node build.mjs
 ```
 
-This regenerates `game-night.html`. There is no build dependency to install. The export embeds the published photographs and card references so it works offline.
+This regenerates `game-night.html`. There is no build dependency to install. Both builders produce the same output, including with Windows line endings or when invoked from another directory. The export embeds the photographs, card references and decorative illustrations so it works offline. The current export is approximately 38.3 MiB; the source version loads its images separately.
+
+`practice.js` contains the seven new games’ teaching scenarios and their interaction state. These are examples for learning; each explanation links to its corresponding full-rules section.
 
 ## Rule scope
 
@@ -58,6 +61,20 @@ Dixit follows Libellud’s 2021 standard base-game rules (3–8 players), includ
 
 Rule references are linked inside each guide. Poker uses No-Limit Texas Hold’em with clearly identified choices for casual sessions and tournaments. These are companion explanations, not official publisher rulebooks.
 
+The new guides cover base CATAN, Secret Hitler, Maldón’s 2018 El Camarero, classic Monopoly, basic FIDE chess, the Argentine coastal Burako variant described by Al Burako, and Uruguayan Truco with muestra. Burako variants differ on groups, discards and closing; use the stated variant consistently. Truco’s local calling windows, Falta Envido and contested-flor raises must be agreed at the table; the guide labels that scope explicitly.
+
 ## Verification
 
-The source scripts pass Node syntax checks, every registered real-image asset is present locally, and the standalone offline build is regenerated after each content change. The new product, component, card and chess-piece images were also reviewed visually. Browser-emulated checks do not replace testing on physical iOS or Android devices.
+Run the repeatable checks with:
+
+```sh
+npm ci
+npx playwright install chromium
+npm test
+```
+
+If using an installed Google Chrome instead, run `CHROME_CHANNEL=chrome npm test`. Python 3 is required to compare the two dependency-free builders. Playwright is used only for development checks; opening or deploying the guide still requires no installation.
+
+The PR #1 review passed **1,405 checks** in headless Chrome: 1,152 view combinations across all twelve games, three views, both languages, both themes and widths of 320, 390, 768 and 1440px in both HTML entry points, plus build parity with CRLF/from another directory, embedded-script syntax, stale-export detection, image decoding, offline requests, fourteen practice scenarios, keyboard navigation, language persistence, image dialogs, Coup options, Avalon quest exceptions, Poker, Polilla and Dixit helpers, and reference printing. Mobile and desktop practice screenshots were reviewed visually. The suite writes screenshots to a temporary directory and prints its location.
+
+GitHub Actions runs the same suite for pushes and pull requests. Browser-emulated checks do not replace physical iOS/Android or assistive-technology testing, and cannot prove every regional rules variant. See [the PR review](docs/pr-1-review.md) for the corrected findings and rule references.

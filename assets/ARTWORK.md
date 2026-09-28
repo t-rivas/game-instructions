@@ -4,6 +4,8 @@ Created with the built-in image generation tool. Original themed illustrations, 
 
 The original interior-guide images are `coup.jpg`, `avalon.jpg`, `poker.jpg` and `moth.jpg`, with their full-resolution versions preserved in `assets/originals/`. The seven additional interior-guide scenes live in `assets/ai/`. The HTML export embeds the optimized banners for offline use. These illustrations are used only as atmospheric guide banners; game boxes, pieces and card references use real published imagery.
 
+The small action references in `assets/real/` are contextual crops from the published product photographs already credited by the site. Secret Hitler's nomination, vote, legislation and election-tracker references come from its official Print & Play PDF (CC BY-NC-SA 4.0). They are presented on a uniform white field so the component being explained remains identifiable at thumbnail size.
+
 ## Additional interior guide scenes
 
 - `ai/catan.png`: friends playing on a hexagonal island board.

@@ -81,14 +81,15 @@ html[data-game=coup] .content :is(.lesson-copy h3,.section-tools h2,.practice-fo
 /* New collection cards use real cutout products on the same themed surface as the original cards. */
 :is(.game-card[data-game=catan],.game-card[data-game=secret_hitler],.game-card[data-game=el_camarero],.game-card[data-game=monopoly],.game-card[data-game=chess],.game-card[data-game=burako],.game-card[data-game=truco]) .game-art{background-color:var(--panel2);background-image:var(--theme-pattern)}
 :is(.game-card[data-game=catan],.game-card[data-game=secret_hitler],.game-card[data-game=el_camarero],.game-card[data-game=monopoly],.game-card[data-game=chess],.game-card[data-game=burako],.game-card[data-game=truco]) .game-art>img{padding:13px;object-fit:contain;filter:drop-shadow(0 8px 12px #0005)}
+/* Let the grid size the banner. A fixed flex-basis becomes height on mobile. */
 /* The interior guide banner keeps the atmospheric AI illustration; factual references below remain real photos. */
-.guide-art-cover{flex:0 0 430px;width:430px;height:230px;overflow:hidden;border-radius:calc(var(--theme-radius) - 2px)!important}
-.detail-cover .guide-artwork{display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit;box-shadow:0 10px 24px #0005}
+.guide-art-cover{position:relative;flex:0 1 auto;min-width:0;width:100%;height:230px;overflow:hidden;border-radius:calc(var(--theme-radius) - 2px)!important}
+.detail-cover .guide-artwork{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit;box-shadow:0 10px 24px #0005}
 :is(html[data-game=catan],html[data-game=secret_hitler],html[data-game=el_camarero],html[data-game=monopoly],html[data-game=chess],html[data-game=burako],html[data-game=truco]) .component-gallery .official-thumb{padding:8px;background:#fff}
 :is(html[data-game=catan],html[data-game=secret_hitler],html[data-game=el_camarero],html[data-game=monopoly],html[data-game=chess],html[data-game=burako],html[data-game=truco]) .component-gallery .official-thumb img{width:100%;height:175px;object-fit:contain}
 @media(max-width:600px){.game-card[data-game] .game-art>img{padding:12px}.detail-hero .detail-cover{aspect-ratio:1.9}.turn-flow{flex-direction:column;gap:6px}.turn-flow li{display:flex;align-items:baseline;gap:10px;padding:10px 12px;font-size:14px!important}.turn-flow li:before{margin:0;min-width:12px}html[data-game=moth] .turn-flow li:nth-child(2){transform:rotate(.6deg)}}
-@media(max-width:600px){:is(.game-card[data-game=catan],.game-card[data-game=secret_hitler],.game-card[data-game=el_camarero],.game-card[data-game=monopoly],.game-card[data-game=chess],.game-card[data-game=burako],.game-card[data-game=truco]) .game-art>img{padding:8px}.guide-art-cover{width:42%;height:auto;aspect-ratio:1.35!important}.detail-cover .guide-artwork{object-position:center}}
-@media(max-width:900px) and (min-width:601px){.guide-art-cover{flex-basis:340px;width:340px;height:210px}}
+@media(max-width:600px){:is(.game-card[data-game=catan],.game-card[data-game=secret_hitler],.game-card[data-game=el_camarero],.game-card[data-game=monopoly],.game-card[data-game=chess],.game-card[data-game=burako],.game-card[data-game=truco]) .game-art>img{padding:8px}.guide-art-cover{flex-basis:auto;width:100%;height:auto;aspect-ratio:1.9}.detail-cover .guide-artwork{object-position:center}}
+@media(max-width:900px) and (min-width:601px){.guide-art-cover{height:210px}}
 @media print{#sources{display:none!important}.game-card[data-game] .game-art>img,.detail-cover img{filter:none}}
 
 .coup-variants>.variant-switch+.variant-switch{border-top:1px solid var(--border)}

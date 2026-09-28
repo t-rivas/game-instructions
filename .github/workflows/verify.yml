@@ -13,5 +13,7 @@ jobs:
         with:
           python-version: '3.x'
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install --with-deps chromium webkit
       - run: npm test
+      - run: npm run test:mobile
+      - run: BROWSER=webkit npm run test:mobile

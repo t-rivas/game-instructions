@@ -11,3 +11,10 @@
 
 .street-short{display:none}
 @media(max-width:600px){.street-full{display:none}.street-short{display:inline}}
+/* Teaching decisions use full-width targets and the active game's palette. */
+.scenario-choices{display:grid;gap:10px;padding:0 20px 18px}
+.scenario-choices button{min-height:48px;padding:12px 16px;text-align:left;white-space:normal;line-height:1.5;border:1px solid var(--border);border-radius:10px;background:var(--panel);color:var(--text)}
+.scenario-choices button[aria-pressed=true]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.scenario-choices button:focus-visible,.scenario-practice .demo-actions button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.scenario-practice>.inline-link{margin:12px 20px}.scenario-practice .demo-actions{flex-wrap:wrap}
+@media print{.scenario-practice{display:none!important}}

@@ -1,0 +1,11 @@
+{
+  "name": "tablefolk",
+  "private": true,
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node tests/verify.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.62.1"
+  }
+}

@@ -4,6 +4,7 @@
   "scripts": {
     "build": "node build.mjs",
     "test": "node tests/verify.cjs",
+    "test:cards": "node tests/card-guides.cjs",
     "test:mobile": "node tests/mobile-header.cjs"
   },
   "devDependencies": {

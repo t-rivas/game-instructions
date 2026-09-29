@@ -51,7 +51,7 @@ python3 build.py
 # or: node build.mjs
 ```
 
-This regenerates `game-night.html`. There is no build dependency to install. Both builders produce the same output, including with Windows line endings or when invoked from another directory. The export embeds the photographs, card references and decorative illustrations so it works offline. The current export is approximately 41.5 MiB; the source version loads its images separately.
+This regenerates `game-night.html`. There is no build dependency to install. Both builders produce the same output, including with Windows line endings or when invoked from another directory. The export embeds the photographs, card references and decorative illustrations so it works offline. The current export is approximately 42.7 MiB; the source version loads its images separately.
 
 `practice.js` contains the ten added games’ teaching scenarios and their interaction state. These are examples for learning; each explanation links to its corresponding full-rules section.
 
@@ -67,6 +67,8 @@ The new guides cover base CATAN, Secret Hitler, Maldón’s 2018 El Camarero, cl
 
 Skull King follows Grandpa Beck’s current base rules and the separately sold Expansion Pack. The base guide uses classic Skull King scoring and labels optional cards from the base box. The pack switch includes the additional numbered cards, Wild 15, Mary Thorne, First Mate Con and the other special cards. Sushi Go! follows its 108-card original rules; Sushi Go Party! follows the deluxe rules, including its different tie scoring and custom menus.
 
+The three guides include a bilingual card catalog with 53 published card-face images, accessible from “While playing” → “Card photos & guide” and the learning/full reference. Skull King’s catalog follows the expansion switch; optional base-box cards and Pirate powers are labeled separately. Two expansion number-card types have text references because their rulebook has no individual pictures. All artwork works offline and opens in the credited image viewer. Crop provenance is in [CARD-SOURCES.md](assets/official/CARD-SOURCES.md).
+
 ## Verification
 
 Run the repeatable checks with:
@@ -75,6 +77,7 @@ Run the repeatable checks with:
 npm ci
 npx playwright install chromium
 npm test
+npm run test:cards
 ```
 
 If using an installed Google Chrome instead, run `CHROME_CHANNEL=chrome npm test`. Python 3 is required to compare the two dependency-free builders. Playwright is used only for development checks; opening or deploying the guide still requires no installation.

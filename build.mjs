@@ -13,7 +13,7 @@ for (const name of ['styles.css', 'enhancements.css', 'official.css', 'table-gui
   );
 }
 
-const scriptNames = ['data.js', 'dixit.js', 'new-games.js', 'more-games.js', 'practice.js', 'enhancements.js', 'official.js', 'table-guide.js', 'app.js'];
+const scriptNames = ['data.js', 'dixit.js', 'new-games.js', 'more-games.js', 'practice.js', 'enhancements.js', 'official.js', 'card-guides.js', 'table-guide.js', 'app.js'];
 for (const name of scriptNames) {
   html = html.replace(`  <script src="${name}" defer></script>\n`, '');
 }

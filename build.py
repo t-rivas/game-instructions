@@ -8,9 +8,9 @@ html = html.replace('<link rel="stylesheet" href="enhancements.css">', '<style>\
 html = html.replace('<link rel="stylesheet" href="official.css">', '<style>\n' + (root / 'official.css').read_text(encoding='utf-8') + '\n</style>')
 html = html.replace('<link rel="stylesheet" href="table-guide.css">', '<style>\n' + (root / 'table-guide.css').read_text(encoding='utf-8') + '\n</style>')
 html = html.replace('<link rel="stylesheet" href="game-themes.css">', '<style>\n' + (root / 'game-themes.css').read_text(encoding='utf-8') + '\n</style>')
-for name in ('data.js', 'dixit.js', 'new-games.js', 'practice.js', 'enhancements.js', 'official.js', 'table-guide.js', 'app.js'):
+for name in ('data.js', 'dixit.js', 'new-games.js', 'more-games.js', 'practice.js', 'enhancements.js', 'official.js', 'table-guide.js', 'app.js'):
     html = html.replace(f'  <script src="{name}" defer></script>\n', '')
-scripts = '\n'.join((root / name).read_text(encoding='utf-8') for name in ('data.js', 'dixit.js', 'new-games.js', 'practice.js', 'enhancements.js', 'official.js', 'table-guide.js', 'app.js'))
+scripts = '\n'.join((root / name).read_text(encoding='utf-8') for name in ('data.js', 'dixit.js', 'new-games.js', 'more-games.js', 'practice.js', 'enhancements.js', 'official.js', 'table-guide.js', 'app.js'))
 mime = {'.jpg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp'}
 for image in [p for folder in ('assets', 'assets/official', 'assets/real', 'assets/ai') for p in (root / folder).iterdir() if p.is_file() and p.suffix.lower() in mime]:
     uri = f'data:{mime[image.suffix.lower()]};base64,' + base64.b64encode(image.read_bytes()).decode('ascii')

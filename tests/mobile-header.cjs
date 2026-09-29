@@ -22,7 +22,7 @@ let checks = 0;
       // Block internet requests without WebKit's offline mode, which rejects file:// navigation.
       await context.route(/^https?:/, route => route.abort());
       await page.goto(pathToFileURL(path.join(root,file)).href);
-      await page.waitForFunction(() => document.querySelectorAll('.game-card').length===12);
+      await page.waitForFunction(() => document.querySelectorAll('.game-card').length===Object.keys(GAMES).length);
       const games = await page.evaluate(() => ['catan', ...Object.keys(GAMES).filter(id=>id!=='catan')]);
       for (const width of [320,393,600]) {
         await page.setViewportSize({width,height:852});

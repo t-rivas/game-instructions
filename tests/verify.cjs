@@ -88,6 +88,19 @@ async function verifyInteractions(page,file) {
   }
   await page.reload();await page.waitForFunction(()=>state.game==='coup');
   check(await page.locator('#reformation-toggle').getAttribute('aria-checked')==='true','Coup preferences survive reload');
+  await visit(page,'skull_king','full');
+  if(await page.locator('#skull-expansion-toggle').getAttribute('aria-checked')==='true')await page.locator('#skull-expansion-toggle').click();
+  check(await page.locator('#expansion-setup').count()===0,'Skull King base guide hides expansion rules');
+  await page.locator('#skull-expansion-toggle').click();
+  check(await page.locator('#skull-expansion-toggle').getAttribute('aria-checked')==='true','Skull King expansion switch turns on');
+  check(await page.locator('#expansion-setup').count()===1,'Skull King expansion rules appear');
+  check((await page.locator('.edition').innerText()).includes('Expansion Pack'),'Skull King edition follows expansion switch');
+  await visit(page,'skull_king','reference');
+  check((await page.locator('#table-sheet').innerText()).includes('Wild 15'),'Skull King expansion changes quick reference');
+  await page.reload();await page.waitForFunction(()=>state.game==='skull_king');
+  check(await page.locator('#skull-expansion-toggle').getAttribute('aria-checked')==='true','Skull King expansion survives reload');
+  await page.locator('#skull-expansion-toggle').click();
+  check(!(await page.locator('#table-sheet').innerText()).includes('Wild 15'),'Skull King base quick reference restored');
   await visit(page,'coup');await openPractice(page);
   await page.locator('#coin-range').fill('10');
   check(await page.evaluate(()=>visualState.coins)===10,'Coup coin helper');
@@ -141,7 +154,7 @@ async function verifyInteractions(page,file) {
       const page=await context.newPage();const errors=[];const requests=[];
       page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>requests.push(r.url()));
       await page.goto(pathToFileURL(path.join(root,file)).href);
-      await page.waitForFunction(()=>document.querySelectorAll('.game-card').length===12);
+      await page.waitForFunction(()=>document.querySelectorAll('.game-card').length===Object.keys(GAMES).length);
       check(await page.locator('html').getAttribute('lang')==='es','Spanish default');
       const assets=await page.evaluate(async()=>{
         const entries=[...Object.entries(OFFICIAL).map(([id,a])=>[id,a.src]),...Object.entries(GUIDE_ART).map(([id,a])=>[id,a[0]])];

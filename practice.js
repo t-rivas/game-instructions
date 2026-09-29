@@ -1,5 +1,17 @@
 /* Small teaching scenarios, not a referee for an ongoing game. */
 const PRACTICE = {
+  skull_king: [
+    {question:L('Round 6: you bid zero and take one trick. What is your classic bid score?','Ronda 6: apostaste cero y ganaste una baza. ¿Cuánto puntúas por la apuesta clásica?'),choices:[L('−60 points','−60 puntos'),L('−10 points','−10 puntos'),L('+20 points','+20 puntos')],answer:0,explanation:L('A failed zero bid loses 10 points for each card dealt, regardless of how many tricks you actually won. Six cards were dealt, so the score is −60.','Fallar una apuesta de cero resta 10 por cada carta repartida, sin importar cuántas bazas ganaste. Se repartieron seis cartas: −60.'),section:'scoring'},
+    {question:L('A Pirate, the Skull King and a Mermaid are all in one trick. Who wins?','En una misma baza hay un Pirata, Skull King y una Sirena. ¿Quién gana?'),choices:[L('The Skull King','Skull King'),L('The Mermaid','La Sirena'),L('The Pirate','El Pirata')],answer:1,explanation:L('This three-way exception is always won by the Mermaid, no matter when the cards were played.','Esta excepción de tres personajes siempre la gana la Sirena, sin importar cuándo se jugaron.'),section:'hierarchy'}
+  ],
+  sushi_go: [
+    {question:L('You have one wasabi and play a squid nigiri. How many points is that nigiri worth?','Tienes un wasabi y juegas un nigiri de calamar. ¿Cuántos puntos vale ese nigiri?'),choices:[L('3 points','3 puntos'),L('6 points','6 puntos'),L('9 points','9 puntos')],answer:2,explanation:L('The next nigiri must go on an empty wasabi. Squid is worth 3, tripled to 9.','El siguiente nigiri debe ir sobre un wasabi libre. El calamar vale 3, triplicado a 9.'),section:'draft'},
+    {question:L('Two players tie for most maki icons in original Sushi Go!. What happens to the 6 points?','Dos personas empatan con más iconos maki en Sushi Go! original. ¿Qué ocurre con los 6 puntos?'),choices:[L('Each gets 6','Cada una recibe 6'),L('Each gets 3; no second place','Cada una recibe 3; no hay segundo puesto')],answer:1,explanation:L('Original Sushi Go! splits first-place maki points among tied players and awards no second-place points.','Sushi Go! original divide los puntos del primer puesto entre quienes empatan y no concede puntos por el segundo.'),section:'round-scoring'}
+  ],
+  sushi_go_party: [
+    {question:L('Seven people are building a Party menu. Can they include Special Order?','Siete personas arman un menú Party. ¿Pueden incluir Pedido especial?'),choices:[L('Yes, any special works','Sí, sirve cualquier especial'),L('No, Special Order is for 2–6 players','No, Pedido especial es para 2–6 personas')],answer:1,explanation:L('The published custom-menu rules exclude Menu and Special Order at seven or eight players.','Las reglas publicadas para crear menús excluyen Menú y Pedido especial con siete u ocho personas.'),section:'menu'},
+    {question:L('In Party, two players tie for the most pudding cards. How many points does each get?','En Party, dos personas empatan con más budines. ¿Cuántos puntos recibe cada una?'),choices:[L('3 points','3 puntos'),L('6 points','6 puntos')],answer:1,explanation:L('Party awards the full +6 to every player tied for most pudding; this differs from original Sushi Go!.','Party concede los +6 completos a cada persona empatada con más budines; es diferente de Sushi Go! original.'),section:'dessert'}
+  ],
   catan: [
     {
       question:L('A 7 is rolled. You hold 9 resource cards. How many must you discard?','Sale un 7 y tienes 9 cartas de recurso. ¿Cuántas descartas?'),

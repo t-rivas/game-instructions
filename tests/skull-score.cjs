@@ -99,9 +99,10 @@ async function visit(page, hash) {
       await start(page, ['<Ada>', 'Ben']);
       check(await page.locator('.scoreboard-heading #skull-new-game').isVisible(), 'Reset is prominent beside scoreboard title');
       check(await page.locator('.skull-player-entry').count() === 2, 'Only two real players are scored');
+      check(await page.locator('.skull-player-entry input[type=number]').evaluateAll(inputs => inputs.every(input => input.value === '0')), 'Bids, tricks, bonuses and adjustments start at zero');
       check(await page.locator('.skull-player-entry legend').first().textContent() === '<Ada>', 'Player names are escaped');
-      await fillEntry(page, 0, {bid:0, tricks:0, bonus:15, adjustment:-5, explanation:'Optional power'});
-      await fillEntry(page, 1, {bid:1, tricks:0, bonus:40, adjustment:10, explanation:'Documented exception'});
+      await fillEntry(page, 0, {bonus:15, adjustment:-5, explanation:'Optional power'});
+      await fillEntry(page, 1, {bid:1, bonus:40, adjustment:10, explanation:'Documented exception'});
       check((await page.locator('#skull-preview-0').innerText()).includes('20'), 'Live preview includes the separate adjustment');
       await page.locator('#skull-expansion-toggle').click();
       check((await page.locator('#skull-game-edition').textContent()).includes('Base box'), 'Guide expansion toggle does not reinterpret a base game');
@@ -112,6 +113,7 @@ async function visit(page, hash) {
       await page.locator('#lang-en').click();
       await page.locator('#skull-round-form button[type=submit]').focus(); await page.keyboard.press('Enter');
       check(await page.locator('[data-skull-total="0"]').textContent() === '20' && await page.locator('[data-skull-total="1"]').textContent() === '0', 'Keyboard save applies bonuses only to exact bids');
+      check(await page.locator('.skull-player-entry input[type=number]').evaluateAll(inputs => inputs.every(input => input.value === '0')), 'Each new round resets numeric entries to zero');
       await fillEntry(page, 0, {bid:0, tricks:0, adjustment:5, explanation:'   '});
       await fillEntry(page, 1, {bid:0, tricks:0});
       await page.locator('#skull-round-form button[type=submit]').click();

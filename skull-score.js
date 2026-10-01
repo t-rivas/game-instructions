@@ -73,7 +73,7 @@ function persistSkullScore() {
 function skullRoundDraft() {
   const round = skullScoreGame.rounds.length + 1;
   const last = skullScoreGame.rounds.at(-1);
-  return {round, cards: String(last && last.cards < round - 1 ? last.cards : round), entries: skullScoreGame.setup.players.map(() => ({bid: '', tricks: '', bonus: '0', adjustment: '0', explanation: ''}))};
+  return {round, cards: String(last && last.cards < round - 1 ? last.cards : round), entries: skullScoreGame.setup.players.map(() => ({bid: '0', tricks: '0', bonus: '0', adjustment: '0', explanation: ''}))};
 }
 
 function skullScoreError(code) {

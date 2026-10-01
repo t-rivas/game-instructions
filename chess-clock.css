@@ -1,0 +1,23 @@
+.chess-clock{margin:0 0 24px;padding:20px;border:1px solid var(--theme-metal,var(--border));border-radius:var(--theme-radius,12px);background:var(--panel)}
+.chess-clock h2{font-family:var(--theme-heading);font-size:26px;margin:0 0 10px}
+.chess-clock .chess-clock-hint{font-size:13px;line-height:1.6;color:var(--muted)}
+.chess-clock fieldset{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0 0 18px;padding:0;border:0;min-width:0}
+.chess-clock legend{font-size:13px;font-weight:650;margin-bottom:8px}
+.chess-clock label{display:flex;flex-direction:column;justify-content:space-between;gap:6px;font-size:12px;min-width:0}
+.chess-clock input,.chess-clock select{width:100%;min-height:44px;padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:16px}
+.chess-clock select{appearance:none;height:44px;padding-right:30px;background-image:linear-gradient(45deg,transparent 50%,var(--text) 50%),linear-gradient(135deg,var(--text) 50%,transparent 50%);background-position:calc(100% - 16px) 19px,calc(100% - 11px) 19px;background-size:5px 5px;background-repeat:no-repeat}
+.chess-clock fieldset:disabled{opacity:.6}
+.chess-clock-panels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.chess-clock-player{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-width:0;min-height:175px;padding:16px 8px;border:2px solid var(--border);border-radius:12px;background:var(--panel2);color:var(--text);user-select:none}
+.chess-clock-player strong{font-size:clamp(32px,7vw,64px);font-variant-numeric:tabular-nums;line-height:1.1;letter-spacing:-.04em}
+.chess-clock-player-state{font-size:12px;min-height:2.8em;display:flex;align-items:center}
+.chess-clock-player.is-active{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.chess-clock-player.is-expired{border-style:dashed;border-color:var(--text)}
+.chess-clock-player[aria-disabled=true]{cursor:default}
+.chess-clock #chess-clock-status{font-size:14px;margin:14px 0}
+.chess-clock-actions{display:flex;gap:10px}
+.chess-clock-actions button{min-height:44px;padding:8px 20px;border:1px solid var(--border);border-radius:8px;background:var(--panel2);color:var(--text)}
+.chess-clock-actions button:first-child{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.chess-clock .chess-clock-note{margin:14px 0 0}
+@media(max-width:600px){.chess-clock{padding:14px}.chess-clock fieldset{grid-template-columns:1fr 1fr;gap:10px}.chess-clock label:first-of-type{grid-column:1/-1}.chess-clock-panels{gap:8px}.chess-clock-player{min-height:150px}.chess-clock-player-state{font-size:11px}}
+@media print{.chess-clock{display:none!important}}

@@ -1,0 +1,31 @@
+.truco-score{margin:24px 0;padding:20px;border:1px solid var(--theme-metal,var(--border));border-radius:var(--theme-radius,12px);background:var(--panel);min-width:0}
+.truco-score h2{font-family:var(--theme-heading);font-size:26px;margin:0 0 12px}
+.truco-score h3{font-size:18px;margin:18px 0 10px;overflow-wrap:anywhere}
+.truco-score .truco-note{font-size:13px;line-height:1.6;color:var(--muted)}
+.truco-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0}
+.truco-score fieldset{border:0;min-width:0;padding:0;margin:16px 0 12px}
+.truco-score legend{font-weight:650;font-size:15px;margin-bottom:10px;overflow-wrap:anywhere}
+.truco-score label{display:flex;flex-direction:column;gap:6px;font-size:13px;min-width:0}
+.truco-score input,.truco-score select{width:100%;min-width:0;min-height:44px;padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:16px}
+.truco-score button{min-height:44px;padding:8px 14px;border:1px solid var(--border);border-radius:8px;background:var(--panel2);color:var(--text);font-size:14px;overflow-wrap:anywhere}
+.truco-score form>button{margin-top:10px}
+.truco-score button:disabled{opacity:.5;cursor:not-allowed}
+.truco-score :is(button,input,select,summary):focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.truco-actions{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.truco-side{padding:14px;border:1px solid var(--border);border-radius:10px;min-width:0}
+.truco-side h3{margin:0 0 10px}
+.truco-total{font-size:18px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.truco-total strong{font-size:26px}
+.truco-phase{min-height:24px;font-weight:650}
+.truco-finish,.truco-warning{padding:14px;border:2px solid var(--accent);border-radius:10px;overflow-wrap:anywhere}
+.truco-history{padding-left:26px;margin:12px 0}
+.truco-history li{padding:12px 0;border-bottom:1px solid var(--border);overflow-wrap:anywhere}
+.truco-history span{display:block;font-size:13px;line-height:1.6}
+.truco-history .truco-entry-warning{font-weight:650}
+.truco-excluded{border-left:3px solid var(--accent);padding-left:10px!important}
+.truco-names{margin:18px 0}
+.truco-names summary{padding:12px 0;min-height:44px;cursor:pointer;font-size:14px}
+#truco-score-error{font-size:14px;line-height:1.6;font-weight:650}
+#truco-score-error:empty{display:none}
+@media(max-width:600px){.truco-score{padding:14px}.truco-grid{grid-template-columns:1fr}}
+@media print{.truco-score{display:none!important}}

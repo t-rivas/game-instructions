@@ -1,0 +1,32 @@
+.skull-score{margin:0 0 24px;padding:20px;min-width:0;border:1px solid var(--theme-metal,var(--border));border-radius:var(--theme-radius,12px);background:var(--panel);overflow-wrap:anywhere}
+.skull-score h2{font-family:var(--theme-heading);font-size:26px;margin:0 0 10px}
+.skull-score h3{font-size:18px;margin:20px 0 12px}
+.skull-score .skull-hint{font-size:13px;line-height:1.6;color:var(--muted)}
+.skull-score label{display:flex;flex-direction:column;gap:6px;font-size:13px;min-width:0}
+.skull-score input,.skull-score select{width:100%;min-width:0;min-height:44px;padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:16px}
+.skull-score select{height:44px}
+.skull-score button{min-height:44px;padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:var(--panel2);color:var(--text);font-size:14px}
+.skull-score button[type=submit]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.skull-name-grid,.skull-entry-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:16px 0}
+.skull-score fieldset{min-width:0;padding:12px;border:1px solid var(--border);border-radius:10px;margin:0}
+.skull-score legend{font-weight:650;font-size:15px;overflow-wrap:anywhere;max-width:100%;padding:0 4px}
+.skull-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:12px}
+.skull-cards-label{max-width:320px}
+.skull-breakdown{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;font-size:12px;margin:14px 0 0;font-variant-numeric:tabular-nums}
+.skull-breakdown dt{color:var(--muted)}
+.skull-breakdown dd{margin:3px 0 0;font-size:18px;font-weight:650}
+.skull-score [id^=skull-preview-]{font-size:13px;margin-top:12px}
+.skull-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.skull-totals{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.skull-totals li{display:flex;justify-content:space-between;gap:10px;padding:12px;background:var(--panel2);border-radius:8px;min-width:0}
+.skull-totals strong{font-variant-numeric:tabular-nums}
+.skull-history details{min-width:0;margin:12px 0;border:1px solid var(--border);border-radius:8px;padding:10px}
+.skull-history summary{min-height:44px;cursor:pointer;padding:10px 0;font-size:14px;font-weight:650}
+.skull-table-scroll{max-width:100%;overflow-x:auto;margin-bottom:12px}
+.skull-score table{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+.skull-score caption{text-align:left;margin:8px 0;color:var(--muted)}
+.skull-score th,.skull-score td{padding:8px;text-align:left;border-bottom:1px solid var(--border);min-width:80px;max-width:240px;overflow-wrap:anywhere}
+#skull-score-notice:empty{display:none}
+#skull-game-result{padding:12px;border-left:3px solid var(--accent);background:var(--panel2)}
+@media(max-width:600px){.skull-score{padding:14px}.skull-entry-grid{grid-template-columns:1fr}.skull-name-grid{gap:10px}.skull-totals li{flex-direction:column}}
+@media print{.skull-score{display:none!important}}

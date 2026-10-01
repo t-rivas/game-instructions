@@ -1,0 +1,16 @@
+.poker-timer{margin:0 0 24px;padding:20px;border:1px solid var(--theme-metal,var(--border));border-radius:var(--theme-radius,12px);background:var(--panel)}
+.poker-timer h2{font-family:var(--theme-heading);font-size:26px;margin:0 0 10px}
+.poker-timer-hint{font-size:13px;line-height:1.6;color:var(--muted)}
+.poker-timer-display{text-align:center;padding:20px 10px;border:1px solid var(--border);border-radius:12px;background:var(--panel2)}
+.poker-timer-display h3{margin:0 0 8px}.poker-timer-display strong{display:block;font-size:clamp(48px,10vw,80px);font-variant-numeric:tabular-nums;line-height:1.1}
+.poker-timer-display p{margin:12px 0 0}.poker-timer-actions,.poker-timer-row-actions{display:flex;flex-wrap:wrap;gap:8px}
+.poker-timer button{min-height:44px;padding:8px 14px;border:1px solid var(--border);border-radius:8px;background:var(--panel2);color:var(--text);font-size:14px}
+.poker-timer button:disabled{opacity:.5;cursor:default}.poker-timer-actions button:first-child{background:var(--accent);color:var(--on-accent)}
+.poker-timer fieldset{min-width:0;margin:16px 0;padding:0;border:0}.poker-timer legend{font-weight:650;font-size:14px;margin-bottom:10px}
+.poker-timer-schedule{list-style:none;margin:0 0 12px;padding:0;display:grid;gap:12px}.poker-timer-schedule li{border:1px solid var(--border);border-radius:10px;padding:12px;min-width:0}
+.poker-timer-schedule li.is-current{border-color:var(--accent)}.poker-timer-schedule fieldset{margin:0}.poker-timer-fields{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:10px}
+.poker-timer-fields label{display:flex;flex-direction:column;justify-content:space-between;gap:6px;font-size:13px;min-width:0}.poker-timer-fields p{grid-column:span 3;font-size:14px}
+.poker-timer input{width:100%;min-height:44px;padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:16px}
+.poker-timer fieldset:disabled input{opacity:.65}#poker-timer-notice,#poker-timer-error{padding:12px;border:1px solid var(--accent);border-radius:8px;background:var(--panel2);font-size:14px}
+@media(max-width:600px){.poker-timer{padding:14px}.poker-timer-fields{grid-template-columns:repeat(2,minmax(0,1fr))}.poker-timer-fields p{grid-column:auto}.poker-timer-actions button{flex:1 1 40%}.poker-timer-row-actions button{padding:8px 10px}}
+@media print{.poker-timer{display:none!important}}

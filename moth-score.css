@@ -1,0 +1,29 @@
+.moth-score{margin:0 0 24px;padding:20px;min-width:0;border:1px solid var(--theme-metal,var(--border));border-radius:var(--theme-radius,12px);background:var(--panel);overflow-wrap:anywhere}
+.moth-score h2{font-family:var(--theme-heading);font-size:26px;margin:0 0 10px}
+.moth-score h3{font-size:18px;margin:20px 0 12px}
+.moth-hint{font-size:13px;line-height:1.6;color:var(--muted)}
+.moth-score label{display:flex;flex-direction:column;gap:6px;font-size:13px;min-width:0}
+.moth-score input,.moth-score select{width:100%;min-width:0;min-height:44px;padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:16px}
+.moth-score select{height:44px}
+.moth-score button{min-height:44px;padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:var(--panel2);color:var(--text);font-size:14px}
+.moth-score button[type=submit],#moth-save-round{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.moth-score select:disabled{opacity:.65}
+.moth-name-grid,.moth-entry-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:16px 0}
+.moth-score fieldset{min-width:0;padding:12px;border:1px solid var(--border);border-radius:10px;margin:0}
+.moth-score legend{font-weight:650;max-width:100%;padding:0 4px}
+.moth-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.moth-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.moth-standings,.moth-preview-list{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.moth-standings li{display:flex;justify-content:space-between;gap:10px;padding:12px;background:var(--panel2);border-radius:8px}
+.moth-standings strong{font-variant-numeric:tabular-nums}
+.moth-preview-list li{display:flex;flex-direction:column;gap:6px;padding:12px;background:var(--panel2);border-radius:8px;font-size:14px}
+.moth-score details{min-width:0;margin:12px 0;border:1px solid var(--border);border-radius:8px;padding:10px}
+.moth-score summary{min-height:44px;cursor:pointer;padding:10px 0;font-size:14px;font-weight:650}
+.moth-table-scroll{max-width:100%;overflow-x:auto;margin-bottom:12px}
+.moth-score table{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+.moth-score caption{text-align:left;margin:8px 0;color:var(--muted)}
+.moth-score th,.moth-score td{padding:8px;text-align:left;border-bottom:1px solid var(--border);min-width:80px}
+#moth-score-notice:empty{display:none}
+#moth-game-result{padding:12px;border-left:3px solid var(--accent);background:var(--panel2)}
+@media(max-width:600px){.moth-score{padding:14px}.moth-entry-grid{grid-template-columns:1fr}.moth-name-grid,.moth-fields{gap:8px}}
+@media print{.moth-score{display:none!important}}

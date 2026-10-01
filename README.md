@@ -25,14 +25,19 @@ See [Vercel's build configuration documentation](https://vercel.com/docs/builds/
 - Print the compact reference directly with its print button. Dixit prints all scoring outcomes, independent of the selected interactive outcome.
 - Dixit includes full base-game rules, a live scoring selector, the three-player adjustments, and official box/component/card imagery.
 - Inquisitor and Reformation each have an always-visible, full-row switch on every Coup view. Both support touch and keyboard input and save choices locally. Inquisitor replaces Ambassador; Reformation independently adds sides and the coin reserve.
+- Skull King includes a ten-round classic score sheet in “While playing”: final bids, actual hand sizes (including repeated sizes), manually entered signed capture bonuses, explained manual adjustments, cumulative totals, editable history and joint winners. The game snapshots the expansion choice at startup; Graybeard is not scored. Scores and unfinished entries survive guide, language and theme switches; reloading clears the sheet. Rascal/Cannonball scoring and automatic card effects are outside its scope.
 - Skull King has an always-visible switch for Grandpa Beck’s separate Expansion Pack. It updates the lesson, quick reference, complete rules and player count, and saves the choice locally. The optional Kraken, White Whale and Loot cards in the base box are explained separately.
 - Sushi Go! and Sushi Go Party! have separate guides, including their different maki and pudding tie rules. Party covers menu building, player-count limits and every dish type.
 - Avalon setup for 5–10 players, optional-role capacity checks, quest sizes and an opening script adapted to the selected roles.
 - Step-by-step lessons with progress preserved when switching languages.
 - A visual poker hand you can reveal from pre-flop through showdown.
 - Coup coin-budget helper and challenge example; Avalon quest-result simulator that follows player-count exceptions.
-- Interactive Polilla discard practice with guard/moth restrictions, plus a round penalty calculator.
+- Interactive Polilla discard practice with guard/moth restrictions and a round penalty calculator. The multiplayer scoreboard in “While playing” supports 3–5 named players and one round per player, explicit card counts checked against the edition’s deck, preview before saving, cumulative penalties, editable history, undo and shared victory for tied lowest totals. Membership locks after the first saved round; names remain editable. Scores and drafts survive guide, language and theme switches; reloading clears the scoreboard.
 - Two bilingual decision exercises for each of the ten added games, with immediate explanations, links to the relevant rule, keyboard controls and progress preserved when switching language or view.
+- Poker includes a local tournament blind timer in “While playing”: an editable ordered schedule of whole-minute levels and breaks, small/big blinds and optional per-player antes. Starting locks the schedule until reset. Pause/resume, previous/next rows and reset preserve the intended timing; deadlines recover missed levels and breaks after reload or sleep, and paused timers stay paused. Transitions show a notice; optional sound requires a click after each reload and does not replay missed alerts. The final row completes without looping.
+- Chess includes an offline two-player clock in “While playing”: 3/5/10-minute presets or 1–180 custom minutes, 0–60 seconds added per move, pause/resume, reset confirmation and time-up indicators. The clock keeps running across views and language/theme changes; reloading starts a fresh clock with saved time controls.
+- Coup includes a session scoreboard in “While playing” for 2–10 players. This is house scoring: default winner +3 / last eliminated +1 / others 0 (two-player loser 0), or Wins only +1 / others 0. Start with six games or another positive whole-number count. The first result locks participants, scoring mode and game count; names stay editable. Saved results, standings, corrections and undo survive guide variant switches and reloads when browser storage is available. Session ties use most wins, then shared victory. A new session keeps the names and clears scores.
+- Uruguayan Truco includes a manual scoreboard in “While playing” for exactly two named sides (people or partnerships). The default target is 30, with 0–14 malas and 15–29 buenas alongside cumulative totals. A custom positive whole-number target uses total/target only; the first award locks it, even after undo. Award +1/+2/+3/+4 or custom points with optional Truco/Envido/Flor/Other labels. Edit, delete or undo chronological entries; the first side at or above target wins with its actual total. Corrections replay history and visibly exclude entries after a corrected winning award. New awards stop at completion, while corrections and undo remain available. No card or bid values are calculated. Switching guide, language or theme preserves the scoreboard; reloading clears it.
 - Search, dark/light themes, keyboard navigation, print layout and local language/theme/Coup/Skull King preferences.
 - The collection cards use real product photographs. Earlier added boxes use clean transparent cutouts; the Skull King and Sushi Go editions use their publisher box images. Chess includes a photographed reference for every piece and its movement; Uruguayan Truco highlights the Mazo Yorugua and the five pieces created by the muestra.
 - Inside most game guides, the header keeps its atmospheric AI illustration. Skull King and the Sushi Go editions use publisher box images there. Factual box, card, board and component references can be enlarged to see their source.
@@ -78,6 +83,12 @@ npm ci
 npx playwright install chromium
 npm test
 npm run test:cards
+npm run test:poker
+npm run test:skull
+npm run test:moth
+npm run test:chess
+npm run test:coup
+npm run test:truco
 ```
 
 If using an installed Google Chrome instead, run `CHROME_CHANNEL=chrome npm test`. Python 3 is required to compare the two dependency-free builders. Playwright is used only for development checks; opening or deploying the guide still requires no installation.
@@ -87,3 +98,13 @@ The PR #1 review passed **1,405 checks** in headless Chrome: 1,152 view combinat
 GitHub Actions runs the same suite for pushes and pull requests. Browser-emulated checks do not replace physical iOS/Android or assistive-technology testing, and cannot prove every regional rules variant. See [the PR review](docs/pr-1-review.md) for the corrected findings and rule references.
 
 Mobile header regressions are checked separately in Chromium and WebKit (Safari’s engine): all games, first visits, returning visits and all guide views at 320, 393 and 600px, in both HTML entry points. These checks bound the banner dimensions, keep the tabs on the first screen and verify that navigation stays pinned below the site header when scrolling. Run `npm run test:mobile` for Chromium, or install WebKit with `npx playwright install webkit` and run `BROWSER=webkit npm run test:mobile`. CI runs both engines. This does not replace testing on a physical iPhone.
+
+Chess clock checks cover deterministic timing, increments, suspension, keyboard controls, saved preferences, both offline entry points and responsive layouts. Run `BROWSER=webkit npm run test:chess` to repeat in Safari’s engine.
+
+Coup session checks cover both scoring modes, the two-player exception, invalid and duplicate selections, one save per game, locked settings, ties, corrections, undoing the final result, renaming, new sessions, saved results, guide variants, and both offline entry points at mobile and desktop widths. Run `BROWSER=webkit npm run test:coup` to repeat in Safari’s engine.
+
+Skull King score-sheet checks cover classic positive and zero bids, signed bonuses and adjustments, eligibility, repeated hand sizes, corrections and tied winners in both offline entry points. Run `BROWSER=webkit npm run test:skull` for Safari’s engine. `skull-score.js` and `skull-score.css` implement the sheet.
+
+Poker timer checks use injected timestamps for transitions, missed levels and breaks, pause/resume, saved-state recovery, manual navigation, final completion, reset and schedule validation. Browser checks cover both offline entry points, editing locks, translated controls, notices, sound activation and responsive layouts. Run `CHROME_CHANNEL=chrome npm run test:poker` with installed Chrome, or `BROWSER=webkit npm run test:poker` with Playwright WebKit. `poker-timer.js` contains the timer and UI; `poker-timer.css` styles it.
+
+Truco scoreboard checks cover 14→15, 29→30, overshoots, custom targets, target locking, invalid points, corrections, deleting entries, undoing winning awards and flagged history after corrected wins in both offline entry points and responsive bilingual layouts. Run `BROWSER=webkit npm run test:truco` for Safari’s engine. `truco-score.js` and `truco-score.css` implement the scoreboard.

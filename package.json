@@ -5,7 +5,13 @@
     "build": "node build.mjs",
     "test": "node tests/verify.cjs",
     "test:cards": "node tests/card-guides.cjs",
-    "test:mobile": "node tests/mobile-header.cjs"
+    "test:mobile": "node tests/mobile-header.cjs",
+    "test:chess": "node tests/chess-clock.cjs",
+    "test:coup": "node tests/coup-session.cjs",
+    "test:poker": "node tests/poker-timer.cjs",
+    "test:skull": "node tests/skull-score.cjs",
+    "test:moth": "node tests/moth-score.cjs",
+    "test:truco": "node tests/truco-score.cjs"
   },
   "devDependencies": {
     "playwright": "1.62.1"

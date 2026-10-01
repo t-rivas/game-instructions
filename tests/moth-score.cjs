@@ -107,6 +107,9 @@ async function edit(page, round) {
       check(await page.locator('#moth-player-count option').count() === 3, 'Only 3–5-player setups available');
       for (const [i,name] of ['<Ada>','Ben','Cy'].entries()) await page.locator(`#moth-name-${i}`).fill(name);
       await page.locator('#moth-player-form button').click();
+      check(await page.locator('.scoreboard-heading #moth-new-game').isVisible(), 'Reset is prominent beside scoreboard title');
+      check(await page.locator('#moth-save-round').isVisible() && await page.locator('#moth-save-round').isDisabled(), 'Round confirmation is visible before preview and requires review');
+      check(await page.locator('#moth-save-round').textContent() === 'Confirm round', 'Confirmation has an explicit label');
       // Membership remains editable until round one is saved.
       await page.locator('#moth-players > summary').click();
       await page.locator('#moth-player-count').selectOption('4');
@@ -121,25 +124,26 @@ async function edit(page, round) {
       check(await page.locator('#moth-count-0-0').count() === 0 && (await page.locator('.moth-out-zero').textContent()).includes('0'), 'Empty hand automatically gets zero without count inputs');
       check(await page.locator('#moth-round-form legend').first().textContent() === '<Ada>', 'Names are safely escaped');
       await page.locator('#moth-preview-round').click();
-      check((await page.locator('#moth-score-notice').textContent()).includes('explicit') && await page.locator('#moth-save-round').count() === 0, 'Blank counts never mean zero');
+      check((await page.locator('#moth-score-notice').textContent()).includes('explicit') && await page.locator('#moth-save-round').isDisabled(), 'Blank counts never mean zero');
       await fill(page, 1, [2,1,1]); await fill(page, 2, [0,0,1]);
       for (const invalid of ['', '-1', '1.5', '1e1']) {
         await page.locator('#moth-count-1-0').fill(invalid);
         await page.locator('#moth-preview-round').click();
-        check(await page.locator('#moth-save-round').count() === 0 && await page.evaluate(() => mothScoreGame.rounds.length) === 0, 'Invalid count blocks preview and saving');
+        check(await page.locator('#moth-save-round').isDisabled() && await page.evaluate(() => mothScoreGame.rounds.length) === 0, 'Invalid count blocks preview and saving');
       }
       for (const [category, max] of [43,20,8].entries()) {
         const a = zero(), b = zero(); a[category] = max; b[category] = 1;
         await fill(page, 1, a); await fill(page, 2, b);
         await page.locator('#moth-preview-round').click();
-        check((await page.locator('#moth-score-notice').textContent()).includes('Across all hands') && await page.locator('#moth-save-round').count() === 0, 'Aggregate deck capacity enforced for each category');
+        check((await page.locator('#moth-score-notice').textContent()).includes('Across all hands') && await page.locator('#moth-save-round').isDisabled(), 'Aggregate deck capacity enforced for each category');
       }
       await fill(page, 1, [2,1,1]); await fill(page, 2, [0,0,1]);
       await page.locator('#moth-preview-round').click();
       check(await page.locator('[data-moth-preview="1"]').textContent() === '17' && await page.locator('[data-moth-preview="0"]').textContent() === '0', 'Preview shows 17 and empty-hand zero before saving');
       check(await page.evaluate(() => mothScoreGame.rounds.length) === 0, 'Preview does not save');
+      check(await page.locator('#moth-save-round').isEnabled(), 'Valid preview enables round confirmation');
       await page.locator('#moth-count-1-0').fill('3');
-      check(await page.locator('#moth-save-round').count() === 0, 'Changing a count invalidates the preview');
+      check(await page.locator('#moth-save-round').isDisabled(), 'Changing a count invalidates the preview');
       await page.locator('#moth-count-1-0').fill('2');
       await page.locator('#moth-preview-round').click();
       await page.locator('#lang-es').click(); await page.locator('#theme').click();
@@ -201,6 +205,8 @@ async function edit(page, round) {
       page.once('dialog', dialog => dialog.dismiss()); await page.locator('#moth-new-game').click();
       check(await page.locator('#moth-rounds-completed').count() === 1, 'Cancelled reset preserves history');
       page.once('dialog', dialog => dialog.accept()); await page.locator('#moth-new-game').click();
+      check(await page.locator('#moth-player-count').isEnabled() && await page.locator('#moth-name-0').inputValue() === 'Ada renamed', 'Reset returns to unlocked editable player setup');
+      check(await page.evaluate(() => mothScoreGame === null && mothScoreDraft === null && mothScorePending === null && mothScorePreview === null), 'Reset clears scores, drafts and previews');
       for (const n of [4,5]) {
         await page.locator('#moth-player-count').selectOption(String(n));
         for (let i = 0; i < n; i++) await page.locator(`#moth-name-${i}`).fill(`Player ${i+1}`);

@@ -96,7 +96,7 @@ function coupSessionView() {
   const draft = coupSetupDraft;
   const rules = tr('House session scoring · not official Coup scoring.', 'Puntuación casera de sesión · no es la puntuación oficial de Coup.');
   return `<section class="coup-session" id="coup-session" aria-labelledby="coup-session-heading">
-    <h2 id="coup-session-heading" tabindex="-1">${tr('Coup session scoreboard','Marcador de sesión de Coup')}</h2>
+    <div class="scoreboard-heading"><h2 id="coup-session-heading" tabindex="-1">${tr('Coup session scoreboard','Marcador de sesión de Coup')}</h2>${session.started ? `<button type="button" id="coup-new-session">${tr('Reset · edit players','Reiniciar · editar jugadores')}</button>` : ''}</div>
     <p class="coup-session-note"><strong>${rules}</strong><br>${tr('Default: winner +3, runner-up +1, everyone else 0. Runner-up is the last player eliminated. With 2 players: winner +3, loser 0. Wins only: winner +1, everyone else 0.', 'Normal: ganador +3, segundo +1, los demás 0. El segundo es el último jugador eliminado. Con 2 jugadores: ganador +3, perdedor 0. Solo victorias: ganador +1, los demás 0.')}</p>
     <p class="coup-session-note">${tr('Highest points wins the session; ties go to most wins. If still tied, share the session win.', 'Gana la sesión quien tenga más puntos; en un empate, quien tenga más victorias. Si el empate continúa, comparten la victoria de la sesión.')}</p>
     ${setup ? `<form id="coup-setup-form">
@@ -132,7 +132,7 @@ function coupActiveSessionView(session) {
     <h3>${tr('Result history','Historial de resultados')}</h3>
     ${session.results.length ? `<ol class="coup-session-history">${session.results.map((result,index) => `<li><div><strong>${tr(`Game ${index+1}`,`Partida ${index+1}`)}</strong><span>${tr('Winner: ','Ganador: ')}${escapeHTML(session.names[result.winner])} (+${session.mode==='wins'?1:3})</span>${result.runnerUp===null?'':`<span>${tr('Runner-up: ','Segundo: ')}${escapeHTML(session.names[result.runnerUp])} (+${session.mode==='default'&&session.names.length>2?1:0})</span>`}</div><button type="button" data-coup-correct="${index}" aria-label="${tr(`Correct game ${index+1}`,`Corregir partida ${index+1}`)}">${tr('Correct','Corregir')}</button></li>`).join('')}</ol><button type="button" id="coup-undo">${tr('Undo last result','Deshacer último resultado')}</button>` : `<p class="coup-session-note">${tr('No results yet.','Todavía no hay resultados.')}</p>`}
     <details class="coup-session-names"><summary>${tr('Edit player names','Editar nombres')}</summary><form id="coup-rename-form"><div class="coup-session-grid">${session.names.map((name,id) => `<label>${tr(`Player ${id+1}`,`Jugador ${id+1}`)}<input id="coup-rename-${id}" data-coup-rename="${id}" required value="${escapeHTML(name)}" autocomplete="off"></label>`).join('')}</div><button type="submit">${tr('Save names','Guardar nombres')}</button></form></details>
-    <button type="button" id="coup-new-session">${tr('New session · same names, zero scores','Nueva sesión · mismos nombres, cero puntos')}</button>`;
+    `;
 }
 
 function refreshCoupSession(focusId) {
@@ -201,7 +201,7 @@ function bindCoupSession() {
     changed('coup-session-heading');
   };
   if (find('coup-new-session')) find('coup-new-session').onclick = () => {
-    if (session.results.length && !window.confirm(tr('Start a new session with the same names and clear these results?', '¿Iniciar una sesión nueva con los mismos nombres y borrar estos resultados?'))) return;
-    coupSession.newSession(); coupSetupDraft = null; clearResult(); changed('coup-start');
+    if (session.results.length && !window.confirm(tr('Clear all scores and results and return to player setup?', '¿Borrar todos los puntos y resultados y volver a configurar los jugadores?'))) return;
+    coupSession.newSession(); coupSetupDraft = null; clearResult(); changed('coup-name-0');
   };
 }

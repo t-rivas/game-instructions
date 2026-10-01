@@ -169,7 +169,11 @@ check(!overflow.correct(0, 0, Number.MAX_SAFE_INTEGER), 'Reject corrections over
       check(await page.locator('#truco-winner').count() === 0 && await page.locator('.truco-excluded').count() === 0 && await total(0) === '14 / 30', 'Deleting corrected winning entry reopens game');
       while (await page.locator('[data-truco-entry]').count()) await page.locator('#truco-undo').click();
       check(await total(0) === '0 / 30' && await total(1) === '0 / 30' && await page.locator('#truco-edit-setup').count() === 0, 'Undo all entries keeps target locked and totals nonnegative');
-      await page.locator('#truco-new-game').click(); await page.locator('#truco-target').fill('7'); await page.locator('#truco-start').click();
+      check(await page.locator('.scoreboard-heading #truco-new-game').isVisible(), 'Reset is prominent beside scoreboard title');
+      await page.locator('#truco-new-game').click();
+      check(await page.locator('#truco-name-0').isEditable() && await page.locator('#truco-target').isEnabled(), 'Reset reopens editable sides and target');
+      check(await page.evaluate(() => !trucoScore.snapshot().started && !trucoScore.snapshot().locked && trucoScore.snapshot().entries.length === 0 && trucoEditDraft === null), 'Reset clears scores, history and corrections');
+      await page.locator('#truco-target').fill('7'); await page.locator('#truco-start').click();
       check(await total(0) === '0 / 7' && !(await page.locator('#truco-score').textContent()).includes('buenas'), 'Custom target has no split');
       await page.locator('#truco-custom-1').fill('6'); await page.locator('#truco-award-label').selectOption('flor'); await page.locator('#theme').click();
       check(await page.locator('#truco-custom-1').inputValue() === '6' && await page.locator('#truco-award-label').inputValue() === 'flor', 'Pending custom award survives rerender');

@@ -94,6 +94,7 @@ async function visit(page, hash) {
       check(await page.locator('#skull-player-count option').count() === 7, 'Base setup supports 2–8');
       await page.locator('#lang-en').click();
       await start(page, ['<Ada>', 'Ben']);
+      check(await page.locator('.scoreboard-heading #skull-new-game').isVisible(), 'Reset is prominent beside scoreboard title');
       check(await page.locator('.skull-player-entry').count() === 2, 'Only two real players are scored');
       check(await page.locator('.skull-player-entry legend').first().textContent() === '<Ada>', 'Player names are escaped');
       await fillEntry(page, 0, {bid:0, tricks:0, bonus:15, adjustment:-5, explanation:'Optional power'});
@@ -156,6 +157,8 @@ async function visit(page, hash) {
       page.once('dialog', dialog => dialog.dismiss()); await page.locator('#skull-new-game').click();
       check(await page.locator('[data-skull-total="0"]').textContent() === '-360', 'Cancelled new game preserves scores');
       page.once('dialog', dialog => dialog.accept()); await page.locator('#skull-new-game').click();
+      check(await page.locator('#skull-player-count').isEnabled() && await page.locator('#skull-name-0').isEditable(), 'Reset reopens player membership and names');
+      check(await page.evaluate(() => skullScoreGame === null && skullScoreDraft === null && skullScorePending === null), 'Reset clears saved and unfinished rounds');
       check(await page.locator('#skull-player-count option').count() === 8, 'New expansion game supports nine players');
       await start(page, Array.from({length:9}, (_, i) => `Player ${i+1}`));
       await page.locator('#skull-expansion-toggle').click();

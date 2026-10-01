@@ -126,9 +126,9 @@ function skullScoreView() {
     body = `<p id="skull-game-edition">${tr('This game:', 'Esta partida:')} <strong>${game.setup.expansion ? tr('Base + Expansion Pack', 'Caja base + paquete de expansión') : tr('Base box', 'Caja base')}</strong> · ${game.setup.players.length} ${tr('scored players', 'jugadores con puntuación')}. ${tr('Guide switches do not change this game.', 'Los cambios de la guía no cambian esta partida.')}</p>
       <p id="skull-game-result" role="status">${summary.finished ? `${summary.winners.length > 1 ? tr('Joint winners', 'Ganadores conjuntos') : tr('Winner', 'Ganador')}: ${escapeHTML(winnerNames)} · ${Math.max(...summary.totals)} ${tr('points after round 10.', 'puntos tras la ronda 10.')}` : `${game.rounds.length} / 10 ${tr('rounds saved. Highest total after round 10 wins; tied leaders win jointly.', 'rondas guardadas. Gana el mayor total tras la ronda 10; quienes empaten arriba ganan conjuntamente.')}`}</p>
       <h3>${tr('Cumulative totals', 'Totales acumulados')}</h3><ol class="skull-totals">${game.setup.players.map((name, i) => `<li><span>${escapeHTML(name)}</span><strong data-skull-total="${i}">${summary.totals[i]}</strong></li>`).join('')}</ol>
-      ${skullScoreRoundForm()}${skullScoreHistory()}<div class="skull-actions"><button id="skull-new-game" type="button">${tr('New game', 'Nueva partida')}</button></div>`;
+      ${skullScoreRoundForm()}${skullScoreHistory()}`;
   }
-  return `<section id="skull-score" class="skull-score" aria-labelledby="skull-score-heading"><h2 id="skull-score-heading" tabindex="-1">${tr('Score sheet · Classic Skull King', 'Planilla de puntos · Skull King clásico')}</h2>
+  return `<section id="skull-score" class="skull-score" aria-labelledby="skull-score-heading"><div class="scoreboard-heading"><h2 id="skull-score-heading" tabindex="-1">${tr('Score sheet · Classic Skull King', 'Planilla de puntos · Skull King clásico')}</h2>${skullScoreGame ? `<button id="skull-new-game" type="button">${tr('Reset · edit players', 'Reiniciar · editar jugadores')}</button>` : ''}</div>
     <p class="skull-hint">${tr('Supports classic scoring only. Rascal and Cannonball scoring are not supported.', 'Solo admite la puntuación clásica. No admite puntuación Rascal ni Cannonball.')}</p>
     <p id="skull-score-notice" role="alert">${skullScoreNotice ? skullScoreError(skullScoreNotice) : ''}</p>${body}
     <p class="skull-hint">${tr('Scores and unfinished entries stay when switching views or languages. Reloading clears this sheet.', 'Los puntos y los datos sin guardar se conservan al cambiar de vista o idioma. Recargar borra esta planilla.')}</p></section>`;
@@ -197,7 +197,8 @@ function bindSkullScore() {
     skullScoreNotice = ''; redraw(); document.getElementById('skull-round-heading').scrollIntoView({block:'center', behavior:'instant'});
   };});
   document.getElementById('skull-new-game').onclick = () => {
-    if (!window.confirm(tr('Clear this score sheet and start a new game?', '¿Borrar esta planilla e iniciar una nueva partida?'))) return;
+    if (!window.confirm(tr('Clear all scores and rounds and return to player setup?', '¿Borrar todos los puntos y rondas y volver a configurar los jugadores?'))) return;
+    skullScoreSetup = {count: skullScoreGame.setup.players.length, names: [...skullScoreGame.setup.players, ...Array(9 - skullScoreGame.setup.players.length).fill('')]};
     skullScoreGame = null; skullScoreDraft = null; skullScorePending = null; skullScoreNotice = ''; redraw('skull-player-count');
   };
 }

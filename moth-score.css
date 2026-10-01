@@ -7,6 +7,7 @@
 .moth-score select{height:44px}
 .moth-score button{min-height:44px;padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:var(--panel2);color:var(--text);font-size:14px}
 .moth-score button[type=submit],#moth-save-round{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.moth-score button:disabled{opacity:.5;cursor:not-allowed}
 .moth-score select:disabled{opacity:.65}
 .moth-name-grid,.moth-entry-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:16px 0}
 .moth-score fieldset{min-width:0;padding:12px;border:1px solid var(--border);border-radius:10px;margin:0}

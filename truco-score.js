@@ -83,7 +83,7 @@ function trucoScoreView() {
   const setup = !game.started || trucoSetupDraft !== null;
   if (setup && !trucoSetupDraft) trucoSetupDraft = {names:[...game.names], target:String(game.target)};
   return `<section class="truco-score" id="truco-score" aria-labelledby="truco-score-heading">
-    <h2 id="truco-score-heading" tabindex="-1">${tr('Manual Truco scoreboard', 'Marcador manual de Truco')}</h2>
+    <div class="scoreboard-heading"><h2 id="truco-score-heading" tabindex="-1">${tr('Manual Truco scoreboard', 'Marcador manual de Truco')}</h2>${game.started ? `<button type="button" id="truco-new-game">${tr('Reset · edit sides', 'Reiniciar · editar lados')}</button>` : ''}</div>
     <p class="truco-note">${tr('Two sides: individuals or partnerships. Enter only the points agreed at your table. This scoreboard does not calculate card values, Envido, Falta Envido, Flor, accepted/refused bids or regional conventions.', 'Dos lados: personas o parejas. Ingresa solo los puntos acordados en la mesa. Este marcador no calcula valores de cartas, Envido, Falta Envido, Flor, cantos aceptados o rechazados ni convenciones regionales.')}</p>
     ${setup ? `<form id="truco-setup-form"><fieldset><legend>${tr('Set up the game', 'Preparar partida')}</legend>
       <div class="truco-grid">${trucoSetupDraft.names.map((name, side) => `<label>${tr(`Side ${side + 1} name`, `Nombre del lado ${side + 1}`)}<input id="truco-name-${side}" data-truco-name="${side}" required value="${escapeHTML(name)}" autocomplete="off"></label>`).join('')}</div>
@@ -120,7 +120,7 @@ function trucoActiveScoreView(game) {
     ${game.entries.length ? `<ol class="truco-history">${game.entries.map((entry, index) => `<li data-truco-entry="${index}" ${entry.counted ? '' : 'class="truco-excluded"'}><div><strong>${escapeHTML(game.names[entry.side])} +${entry.points}</strong>${entry.label ? `<span>${entry.label === 'other' ? tr('Other', 'Otro') : {truco:'Truco', envido:'Envido', flor:'Flor'}[entry.label]}</span>` : ''}${index === game.winningIndex ? `<span>${tr('Winning award', 'Anotación ganadora')}</span>` : ''}${entry.counted ? '' : `<span class="truco-entry-warning">${tr('After winning award · excluded from totals', 'Después de la anotación ganadora · fuera de los totales')}</span>`}</div><div class="truco-actions"><button type="button" id="truco-correct-${index}" data-truco-correct="${index}" aria-label="${tr(`Edit entry ${index + 1}`, `Editar entrada ${index + 1}`)}">${tr('Edit', 'Editar')}</button><button type="button" data-truco-delete="${index}" aria-label="${tr(`Delete entry ${index + 1}`, `Borrar entrada ${index + 1}`)}">${tr('Delete', 'Borrar')}</button></div></li>`).join('')}</ol>` : `<p class="truco-note">${tr('No awards yet.', 'Todavía no hay anotaciones.')}</p>`}
     <button type="button" id="truco-undo" ${game.entries.length ? '' : 'disabled'}>${tr('Undo latest entry', 'Deshacer última entrada')}</button>
     <details class="truco-names"><summary>${tr('Edit side names', 'Editar nombres de los lados')}</summary><form id="truco-rename-form"><div class="truco-grid">${(trucoRenameDraft || game.names).map((name, side) => `<label>${tr(`Side ${side + 1} name`, `Nombre del lado ${side + 1}`)}<input id="truco-rename-${side}" data-truco-rename="${side}" required value="${escapeHTML(name)}" autocomplete="off"></label>`).join('')}</div><button type="submit">${tr('Save names', 'Guardar nombres')}</button></form></details>
-    <button type="button" id="truco-new-game">${tr('New game', 'Nueva partida')}</button>`;
+    `;
 }
 function refreshTrucoScore(focusId) {
   const root = document.getElementById('truco-score');
@@ -197,8 +197,8 @@ function bindTrucoScore() {
     trucoRenameDraft = null; changed('truco-score-heading');
   };
   if (find('truco-new-game')) find('truco-new-game').onclick = () => {
-    if (game.entries.length && !window.confirm(tr('Clear this history and start a new game?', '¿Borrar este historial e iniciar una partida nueva?'))) return;
+    if (game.entries.length && !window.confirm(tr('Clear all points and history and return to side setup?', '¿Borrar todos los puntos e historial y volver a configurar los lados?'))) return;
     trucoScore.newGame(); trucoSetupDraft = null; trucoEditDraft = null; trucoRenameDraft = null;
-    trucoAwardDraft = {label:'', points:['', '']}; changed('truco-target');
+    trucoAwardDraft = {label:'', points:['', '']}; changed('truco-name-0');
   };
 }

@@ -7,3 +7,5 @@
 
 .print-dixit-rules{display:none}
 @media print{body.table-mode .print-dixit-rules{display:block}body.table-mode .dixit-score{display:none}body.table-mode .print-dixit-rules p{font-size:10pt!important}body.table-mode #dixit-sheet>.quick-list+ h3{display:none}}
+.scoreboard-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin:0 0 16px}
+.scoreboard-heading h2{flex:1 1 240px;margin:0;min-width:0;overflow-wrap:anywhere}

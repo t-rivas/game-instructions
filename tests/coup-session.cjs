@@ -100,6 +100,7 @@ for (const corruption of [null,{}, {...tie.snapshot(),mode:'custom'}, {...tie.sn
       check(await page.locator('#coup-name-0').inputValue()==='Alice', 'Setup draft survives theme switch');
       await page.locator('#coup-start').click();
       check(await page.locator('#coup-edit-setup').count()===1, 'Setup editable before first result');
+      check(await page.locator('.scoreboard-heading #coup-new-session').isVisible(), 'Reset is prominent beside scoreboard title');
       check(await page.locator('#coup-runner-up').count()===0, 'Duel form asks for winner only');
       await page.locator('#coup-save-result').click();
       check(await page.evaluate(()=>coupSession.snapshot().results.length)===0, 'Missing selection blocks save');
@@ -155,6 +156,9 @@ for (const corruption of [null,{}, {...tie.snapshot(),mode:'custom'}, {...tie.sn
       check(await page.evaluate(()=>coupSession.snapshot().results.length)===1, 'Cancelled new session preserves results');
       page.once('dialog',dialog=>dialog.accept()); await page.locator('#coup-new-session').click();
       check(await page.evaluate(()=>coupSession.snapshot().standings.every(p=>p.points===0&&p.wins===0&&p.runnerUps===0)), 'New session zeroes all totals');
+      check(await page.locator('#coup-setup-form').isVisible() && await page.locator('#coup-name-0').isEditable() && await page.locator('#coup-add-player').isEnabled(), 'Reset allows editing names and player membership');
+      await page.reload();
+      check(await page.evaluate(()=>!coupSession.snapshot().locked && !coupSession.snapshot().started && coupSession.snapshot().results.length===0), 'Reset remains unlocked with empty history after reload');
       await page.locator('#coup-mode').selectOption('wins'); await page.locator('#coup-planned').fill('1'); await page.locator('#coup-start').click();
       check(!await page.locator('#coup-runner-up').getAttribute('required'), 'Wins-only runner-up is optional');
       await page.locator('#coup-winner').selectOption('2'); await page.locator('#coup-save-result').click();

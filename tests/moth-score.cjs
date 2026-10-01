@@ -111,6 +111,7 @@ async function edit(page, round) {
       check(await page.locator('.scoreboard-heading #moth-new-game').isVisible(), 'Reset is prominent beside scoreboard title');
       check(await page.locator('#moth-save-round').isVisible() && await page.locator('#moth-save-round').isDisabled(), 'Round confirmation is visible and requires valid entries');
       check(await page.locator('#moth-save-round').textContent() === 'Confirm round', 'Confirmation has an explicit label');
+      check(await page.locator('[data-moth-category]').evaluateAll(inputs => inputs.every(input => input.value === '0')), 'Every card count starts at zero');
       // Membership remains editable until round one is saved.
       await page.locator('#moth-players > summary').click();
       await page.locator('#moth-player-count').selectOption('4');
@@ -124,6 +125,8 @@ async function edit(page, round) {
       await page.locator('#moth-out').selectOption('0');
       check(await page.locator('#moth-count-0-0').count() === 0 && (await page.locator('.moth-out-zero').textContent()).includes('0'), 'Empty hand automatically gets zero without count inputs');
       check(await page.locator('#moth-round-form legend').first().textContent() === '<Ada>', 'Names are safely escaped');
+      check(await page.locator('#moth-save-round').isEnabled(), 'Default zero counts are valid after selecting the empty hand');
+      await page.locator('#moth-count-1-0').fill('');
       await page.locator('#moth-preview-round').click();
       check((await page.locator('#moth-score-notice').textContent()).includes('explicit') && await page.locator('#moth-save-round').isDisabled(), 'Blank counts never mean zero');
       await fill(page, 1, [2,1,1]); await fill(page, 2, [0,0,1]);
@@ -156,6 +159,7 @@ async function edit(page, round) {
       await page.locator('#moth-player-count').selectOption('4');
       await page.locator('#moth-save-round').evaluate(button => {button.click(); button.click();});
       check(await page.evaluate(() => mothScoreGame.rounds.length) === 1, 'Duplicate activation saves exactly one round');
+      check(await page.locator('[data-moth-category]').evaluateAll(inputs => inputs.every(input => input.value === '0')), 'Each new round starts with zero counts');
       check(await page.locator('#moth-player-count').isDisabled(), 'First saved round locks membership');
       check(await page.locator('#moth-player-count').inputValue() === '3' && await page.locator('[data-moth-name]').count() === 3, 'Lock uses committed roster and discards an unsaved membership proposal');
       check(await page.locator('[data-moth-total="1"]').textContent() === '17', 'Saved cumulative penalty is correct');

@@ -2,7 +2,7 @@
 
 // Only manually agreed awards are stored. Replay stops at the first winning
 // entry; later entries remain in history so a correction can restore them.
-function createTrucoScore() {
+function createTrucoScore(saved = null) {
   let names = ['', ''], target = 30, started = false, locked = false, entries = [];
   const positive = value => Number.isSafeInteger(value) && value > 0;
   const validNames = values => Array.isArray(values) && values.length === 2 &&
@@ -18,6 +18,12 @@ function createTrucoScore() {
       return Number.isSafeInteger(total);
     });
   });
+  if (saved && validNames(saved.names) && positive(saved.target) && Array.isArray(saved.entries) &&
+      saved.entries.every(validEntry) && safeHistory(saved.entries) && typeof saved.started === 'boolean' && typeof saved.locked === 'boolean') {
+    names = saved.names.map(name => name.trim()); target = saved.target;
+    entries = saved.entries.map(({side, points, label}) => ({side, points, label}));
+    locked = saved.locked || entries.length > 0; started = saved.started || locked;
+  }
   function snapshot() {
     const totals = [0, 0];
     let winner = null, winningIndex = null;
@@ -67,7 +73,16 @@ function trucoScorePhase(total, target) {
   return total < 15 ? {points:total, name:'malas'} : {points:total - 15, name:'buenas'};
 }
 
-const trucoScore = createTrucoScore();
+let trucoScore = createTrucoScore();
+let trucoStorageOK = true;
+try {
+  const saved = JSON.parse(localStorage.getItem('tablefolk-truco-score-v1') || 'null');
+  if (saved?.version === 1) trucoScore = createTrucoScore(saved);
+} catch { trucoStorageOK = false; }
+function persistTrucoScore() {
+  try { localStorage.setItem('tablefolk-truco-score-v1', JSON.stringify({version:1, ...trucoScore.snapshot()})); trucoStorageOK = true; }
+  catch { trucoStorageOK = false; }
+}
 let trucoSetupDraft = null;
 let trucoAwardDraft = {label:'', points:['', '']};
 let trucoEditDraft = null;
@@ -84,33 +99,35 @@ function trucoScoreView() {
   if (setup && !trucoSetupDraft) trucoSetupDraft = {names:[...game.names], target:String(game.target)};
   return `<section class="truco-score" id="truco-score" aria-labelledby="truco-score-heading">
     <div class="scoreboard-heading"><h2 id="truco-score-heading" tabindex="-1">${tr('Manual Truco scoreboard', 'Marcador manual de Truco')}</h2>${game.started ? `<button type="button" id="truco-new-game">${tr('Reset · edit sides', 'Reiniciar · editar lados')}</button>` : ''}</div>
-    <p class="truco-note">${tr('Two sides: individuals or partnerships. Enter only the points agreed at your table. This scoreboard does not calculate card values, Envido, Falta Envido, Flor, accepted/refused bids or regional conventions.', 'Dos lados: personas o parejas. Ingresa solo los puntos acordados en la mesa. Este marcador no calcula valores de cartas, Envido, Falta Envido, Flor, cantos aceptados o rechazados ni convenciones regionales.')}</p>
+    <details class="score-help"><summary>${tr('How scoring works', 'Cómo anotar')}</summary><p class="truco-note">${tr('Two sides: individuals or partnerships. Enter only the points agreed at your table. This scoreboard does not calculate card values, Envido, Falta Envido, Flor, accepted/refused bids or regional conventions.', 'Dos lados: personas o parejas. Ingresa solo los puntos acordados en la mesa. Este marcador no calcula valores de cartas, Envido, Falta Envido, Flor, cantos aceptados o rechazados ni convenciones regionales.')}</p></details>
     ${setup ? `<form id="truco-setup-form"><fieldset><legend>${tr('Set up the game', 'Preparar partida')}</legend>
       <div class="truco-grid">${trucoSetupDraft.names.map((name, side) => `<label>${tr(`Side ${side + 1} name`, `Nombre del lado ${side + 1}`)}<input id="truco-name-${side}" data-truco-name="${side}" required value="${escapeHTML(name)}" autocomplete="off"></label>`).join('')}</div>
       <label>${tr('Target points', 'Puntos para ganar')}<input id="truco-target" type="number" inputmode="numeric" min="1" step="1" required value="${escapeHTML(trucoSetupDraft.target)}"></label>
       <p class="truco-note">${tr('Default: 30. The target locks after the first award, including after deleting or undoing every entry. Custom targets use total/target only.', 'Por defecto: 30. La meta queda fija tras la primera anotación, incluso si borras o deshaces todas las entradas. Las metas personalizadas muestran solo total/meta.')}</p>
       </fieldset><button type="submit" id="truco-start">${tr('Open scoreboard', 'Abrir marcador')}</button></form>` : trucoActiveScoreView(game)}
     <p id="truco-score-error" role="alert">${trucoScoreMessage ? escapeHTML(tr(...trucoScoreMessage)) : ''}</p>
-    <p class="truco-note">${tr('Scores stay while switching guides, language or theme. Reloading clears this scoreboard.', 'El marcador se conserva al cambiar de guía, idioma o tema. Recargar la página borra este marcador.')}</p>
+    <p class="truco-note">${trucoStorageOK ? tr('Results are saved on this device. Unfinished entries stay while this page is open.', 'Los resultados se guardan en este dispositivo. Los datos sin guardar se conservan mientras esta página siga abierta.') : tr('Local saving is unavailable. Keep this page open to retain your scores.', 'No se puede guardar en este dispositivo. Mantén esta página abierta para conservar los puntos.')}</p>
   </section>`;
 }
 function trucoActiveScoreView(game) {
   const excluded = game.entries.filter(entry => !entry.counted).length;
   return `<p class="truco-note">${game.locked ? tr('Target locked after the first award.', 'Meta fija desde la primera anotación.') : tr('The target can still be changed before the first award.', 'Todavía puedes cambiar la meta antes de la primera anotación.')} ${game.target === 30 ? tr('Totals 0–14: malas. Totals 15–29: buenas.', 'Totales 0–14: malas. Totales 15–29: buenas.') : ''}</p>
     ${game.locked ? '' : `<button type="button" id="truco-edit-setup">${tr('Edit setup', 'Editar configuración')}</button>`}
-    <div id="truco-score-status" role="status" aria-live="polite">
+    <div id="truco-score-status" role="status" aria-live="polite"><span class="score-visually-hidden">${game.names.map((name, side) => `${escapeHTML(name)}: ${game.totals[side]} / ${game.target}`).join('; ')}</span>
       ${game.finished ? `<p class="truco-finish" id="truco-winner">${tr('Winner: ', 'Ganador: ')}<strong>${escapeHTML(game.names[game.winner])}</strong> · ${game.totals[game.winner]} / ${game.target}</p>` : ''}
-      <div class="truco-grid">${game.names.map((name, side) => {
-        const phase = trucoScorePhase(game.totals[side], game.target);
-        return `<div class="truco-side" data-truco-side="${side}"><h3>${escapeHTML(name)}</h3><p class="truco-total">${tr('Total', 'Total')}: <strong>${game.totals[side]} / ${game.target}</strong></p><p class="truco-phase">${phase ? `${phase.points} ${phase.name}` : game.totals[side] >= game.target ? tr('Target reached', 'Meta alcanzada') : ''}</p></div>`;
-      }).join('')}</div>
       ${excluded ? `<p class="truco-warning" id="truco-history-warning">${tr(`${excluded} later entries are after the winning award and excluded from totals. Edit or delete them, or correct the winning award to include them again.`, `${excluded} entradas posteriores a la anotación ganadora quedan fuera de los totales. Edítalas o bórralas, o corrige la anotación ganadora para volver a incluirlas.`)}</p>` : ''}
     </div>
     <label>${tr('Optional award label', 'Etiqueta opcional de la anotación')}<select id="truco-award-label" ${game.finished ? 'disabled' : ''}>${trucoLabelOptions(trucoAwardDraft.label)}</select></label>
-    <div class="truco-grid">${game.names.map((name, side) => `<fieldset><legend>${tr('Award points to ', 'Sumar puntos a ')}${escapeHTML(name)}</legend>
-      <div class="truco-actions">${[1, 2, 3, 4].map(points => `<button type="button" id="truco-add-${side}-${points}" data-truco-award="${side}" data-points="${points}" aria-label="${escapeHTML(tr(`Award ${points} points to ${name}`, `Sumar ${points} puntos a ${name}`))}" ${game.finished ? 'disabled' : ''}>+${points}</button>`).join('')}</div>
-      <form data-truco-custom="${side}"><label>${tr('Custom points', 'Puntos personalizados')}<input id="truco-custom-${side}" type="number" inputmode="numeric" min="1" step="1" required value="${escapeHTML(trucoAwardDraft.points[side])}" ${game.finished ? 'disabled' : ''}></label><button type="submit" id="truco-custom-save-${side}" ${game.finished ? 'disabled' : ''}>${tr('Award points', 'Sumar puntos')}</button></form>
-    </fieldset>`).join('')}</div>
+    <div class="truco-grid truco-playing">${game.names.map((name, side) => {
+      const phase = trucoScorePhase(game.totals[side], game.target);
+      return `<div class="truco-side" data-truco-side="${side}"><h3>${escapeHTML(name)}</h3>
+        <p class="truco-total"><strong>${game.totals[side]} / ${game.target}</strong></p>
+        <p class="truco-phase">${phase ? `${phase.points} ${phase.name}` : game.finished && game.winner === side ? tr('Target reached', 'Meta alcanzada') : ''}</p>
+        <div class="truco-actions">${[1, 2, 3, 4].map(points => `<button type="button" id="truco-add-${side}-${points}" data-truco-award="${side}" data-points="${points}" aria-label="${escapeHTML(tr(`Award ${points} points to ${name}`, `Sumar ${points} puntos a ${name}`))}" ${game.finished ? 'disabled' : ''}>+${points}</button>`).join('')}</div>
+        <form data-truco-custom="${side}" class="truco-custom"><label>${tr('Other amount', 'Otra cantidad')}<input id="truco-custom-${side}" type="number" inputmode="numeric" min="1" step="1" required value="${escapeHTML(trucoAwardDraft.points[side])}" ${game.finished ? 'disabled' : ''}></label><button type="submit" id="truco-custom-save-${side}" ${game.finished ? 'disabled' : ''}>${tr('Add', 'Sumar')}</button></form>
+      </div>`;
+    }).join('')}</div>
+    <button type="button" id="truco-undo" ${game.entries.length ? '' : 'disabled'}>${tr('Undo latest entry', 'Deshacer última entrada')}</button>
     ${trucoEditDraft ? `<form id="truco-correction-form"><fieldset><legend>${tr(`Edit entry ${trucoEditDraft.index + 1}`, `Editar entrada ${trucoEditDraft.index + 1}`)}</legend><div class="truco-grid">
       <label>${tr('Side', 'Lado')}<select id="truco-edit-side">${game.names.map((name, side) => `<option value="${side}" ${String(side) === trucoEditDraft.side ? 'selected' : ''}>${escapeHTML(name)}</option>`).join('')}</select></label>
       <label>${tr('Points', 'Puntos')}<input id="truco-edit-points" type="number" inputmode="numeric" min="1" step="1" required value="${escapeHTML(trucoEditDraft.points)}"></label>
@@ -118,13 +135,14 @@ function trucoActiveScoreView(game) {
       </div><div class="truco-actions"><button type="submit" id="truco-save-correction">${tr('Save correction', 'Guardar corrección')}</button><button type="button" id="truco-cancel-correction">${tr('Cancel', 'Cancelar')}</button></div></fieldset></form>` : ''}
     <h3>${tr('Award history · oldest first', 'Historial de anotaciones · más antiguas primero')}</h3>
     ${game.entries.length ? `<ol class="truco-history">${game.entries.map((entry, index) => `<li data-truco-entry="${index}" ${entry.counted ? '' : 'class="truco-excluded"'}><div><strong>${escapeHTML(game.names[entry.side])} +${entry.points}</strong>${entry.label ? `<span>${entry.label === 'other' ? tr('Other', 'Otro') : {truco:'Truco', envido:'Envido', flor:'Flor'}[entry.label]}</span>` : ''}${index === game.winningIndex ? `<span>${tr('Winning award', 'Anotación ganadora')}</span>` : ''}${entry.counted ? '' : `<span class="truco-entry-warning">${tr('After winning award · excluded from totals', 'Después de la anotación ganadora · fuera de los totales')}</span>`}</div><div class="truco-actions"><button type="button" id="truco-correct-${index}" data-truco-correct="${index}" aria-label="${tr(`Edit entry ${index + 1}`, `Editar entrada ${index + 1}`)}">${tr('Edit', 'Editar')}</button><button type="button" data-truco-delete="${index}" aria-label="${tr(`Delete entry ${index + 1}`, `Borrar entrada ${index + 1}`)}">${tr('Delete', 'Borrar')}</button></div></li>`).join('')}</ol>` : `<p class="truco-note">${tr('No awards yet.', 'Todavía no hay anotaciones.')}</p>`}
-    <button type="button" id="truco-undo" ${game.entries.length ? '' : 'disabled'}>${tr('Undo latest entry', 'Deshacer última entrada')}</button>
+
     <details class="truco-names"><summary>${tr('Edit side names', 'Editar nombres de los lados')}</summary><form id="truco-rename-form"><div class="truco-grid">${(trucoRenameDraft || game.names).map((name, side) => `<label>${tr(`Side ${side + 1} name`, `Nombre del lado ${side + 1}`)}<input id="truco-rename-${side}" data-truco-rename="${side}" required value="${escapeHTML(name)}" autocomplete="off"></label>`).join('')}</div><button type="submit">${tr('Save names', 'Guardar nombres')}</button></form></details>
     `;
 }
 function refreshTrucoScore(focusId) {
   const root = document.getElementById('truco-score');
   if (!root) return;
+  persistTrucoScore();
   root.outerHTML = trucoScoreView(); bindTrucoScore();
   if (focusId) document.getElementById(focusId)?.focus({preventScroll:true});
 }
@@ -143,7 +161,7 @@ function bindTrucoScore() {
       if (!trucoScore.configure(trucoSetupDraft.names, Number(trucoSetupDraft.target))) {
         error('Enter two distinct names and a positive whole-number target.', 'Ingresa dos nombres distintos y una meta entera positiva.'); return;
       }
-      trucoSetupDraft = null; changed('truco-award-label');
+      trucoSetupDraft = null; changed('truco-score-heading');
     };
   }
   const game = trucoScore.snapshot();

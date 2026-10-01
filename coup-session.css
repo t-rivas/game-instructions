@@ -28,3 +28,6 @@
 #coup-session-error:empty{display:none}
 @media(max-width:600px){.coup-session{padding:14px}.coup-session-grid{grid-template-columns:1fr}.coup-session th,.coup-session td{padding:10px 4px}.coup-session th{font-size:11px}}
 @media print{.coup-session{display:none!important}}
+
+.coup-session{margin-top:0}#coup-result-preview{padding:10px;background:var(--panel2);border-radius:8px;font-weight:650}
+@media(max-width:600px){#coup-standings th,#coup-standings td{padding:8px 5px;min-width:0;overflow-wrap:anywhere}#coup-standings{table-layout:fixed}}

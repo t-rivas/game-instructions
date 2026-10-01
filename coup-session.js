@@ -75,8 +75,8 @@ function createCoupSession(savedSession) {
   };
 }
 
-let coupSavedSession;
-try { coupSavedSession = JSON.parse(localStorage.getItem('tablefolk-coup-session') || 'null'); } catch {}
+let coupSavedSession, coupStorageOK = true;
+try { coupSavedSession = JSON.parse(localStorage.getItem('tablefolk-coup-session') || 'null'); } catch { coupStorageOK = false; }
 const coupSession = createCoupSession(coupSavedSession);
 let coupSetupDraft = null;
 let coupResultDraft = {index:null, winner:'', runnerUp:''};
@@ -84,7 +84,7 @@ let coupSessionMessage = null;
 
 function persistCoupSession() {
   const {names, mode, planned, started, locked, results} = coupSession.snapshot();
-  try { localStorage.setItem('tablefolk-coup-session', JSON.stringify({names, mode, planned, started, locked, results})); } catch {}
+  try { localStorage.setItem('tablefolk-coup-session', JSON.stringify({names, mode, planned, started, locked, results})); coupStorageOK = true; } catch { coupStorageOK = false; }
 }
 function coupSessionError() {
   return coupSessionMessage ? tr(...coupSessionMessage) : '';
@@ -97,8 +97,8 @@ function coupSessionView() {
   const rules = tr('House session scoring · not official Coup scoring.', 'Puntuación casera de sesión · no es la puntuación oficial de Coup.');
   return `<section class="coup-session" id="coup-session" aria-labelledby="coup-session-heading">
     <div class="scoreboard-heading"><h2 id="coup-session-heading" tabindex="-1">${tr('Coup session scoreboard','Marcador de sesión de Coup')}</h2>${session.started ? `<button type="button" id="coup-new-session">${tr('Reset · edit players','Reiniciar · editar jugadores')}</button>` : ''}</div>
-    <p class="coup-session-note"><strong>${rules}</strong><br>${tr('Default: winner +3, runner-up +1, everyone else 0. Runner-up is the last player eliminated. With 2 players: winner +3, loser 0. Wins only: winner +1, everyone else 0.', 'Normal: ganador +3, segundo +1, los demás 0. El segundo es el último jugador eliminado. Con 2 jugadores: ganador +3, perdedor 0. Solo victorias: ganador +1, los demás 0.')}</p>
-    <p class="coup-session-note">${tr('Highest points wins the session; ties go to most wins. If still tied, share the session win.', 'Gana la sesión quien tenga más puntos; en un empate, quien tenga más victorias. Si el empate continúa, comparten la victoria de la sesión.')}</p>
+    <p class="coup-session-note"><strong>${rules}</strong></p><details class="score-help" id="coup-scoring-help"><summary>${tr('Points & tiebreaks', 'Puntos y desempates')}</summary><p class="coup-session-note">${tr('Default: winner +3, runner-up +1, everyone else 0. Runner-up is the last player eliminated. With 2 players: winner +3, loser 0. Wins only: winner +1, everyone else 0.', 'Normal: ganador +3, segundo +1, los demás 0. El segundo es el último jugador eliminado. Con 2 jugadores: ganador +3, perdedor 0. Solo victorias: ganador +1, los demás 0.')}</p>
+    <p class="coup-session-note">${tr('Highest points wins the session; ties go to most wins. If still tied, share the session win.', 'Gana la sesión quien tenga más puntos; en un empate, quien tenga más victorias. Si el empate continúa, comparten la victoria de la sesión.')}</p></details>
     ${setup ? `<form id="coup-setup-form">
       <fieldset><legend>${tr('Session setup · 2–10 players','Preparar sesión · 2–10 jugadores')}</legend>
         <p class="coup-session-note">${tr('For 7–10 players, use the extra cards described in the guide.', 'Para 7–10 jugadores, usa las cartas extra indicadas en la guía.')}</p>
@@ -111,7 +111,7 @@ function coupSessionView() {
       <button class="coup-primary" type="submit" id="coup-start">${tr('Start session','Iniciar sesión')}</button>
     </form>` : coupActiveSessionView(session)}
     <p id="coup-session-error" role="alert">${escapeHTML(coupSessionError())}</p>
-    <p class="coup-session-note">${tr('Saved on this device when browser storage is available.', 'Se guarda en este dispositivo cuando el navegador permite almacenamiento.')}</p>
+    <p class="coup-session-note">${coupStorageOK ? tr('Results are saved on this device.', 'Los resultados se guardan en este dispositivo.') : tr('Local saving is unavailable. Keep this page open to retain your scores.', 'No se puede guardar en este dispositivo. Mantén esta página abierta para conservar los puntos.')}</p>
   </section>`;
 }
 
@@ -127,7 +127,7 @@ function coupActiveSessionView(session) {
     ${canRecord ? `<form id="coup-result-form"><fieldset><legend>${editing?tr(`Correct game ${number}`,`Corregir partida ${number}`):tr(`Record game ${number}`,`Registrar partida ${number}`)}</legend><div class="coup-session-grid">
       <label>${tr('Winner','Ganador')}<select id="coup-winner" required>${options(coupResultDraft.winner)}</select></label>
       ${session.names.length>2 ? `<label>${session.mode==='default'?tr('Runner-up · last eliminated','Segundo · último eliminado'):tr('Runner-up (optional · 0 points)','Segundo (opcional · 0 puntos)')}<select id="coup-runner-up" ${session.mode==='default'?'required':''}>${options(coupResultDraft.runnerUp)}</select></label>` : ''}
-      </div></fieldset><div class="coup-session-actions"><button class="coup-primary" type="submit" id="coup-save-result">${editing?tr('Save correction','Guardar corrección'):tr('Save result','Guardar resultado')}</button>${editing?`<button type="button" id="coup-cancel-correction">${tr('Cancel correction','Cancelar corrección')}</button>`:''}</div></form>` : ''}
+      </div><p id="coup-result-preview" class="coup-session-note" role="status"></p></fieldset><div class="coup-session-actions"><button class="coup-primary" type="submit" id="coup-save-result">${editing?tr('Save correction','Guardar corrección'):tr('Save result','Guardar resultado')}</button>${editing?`<button type="button" id="coup-cancel-correction">${tr('Cancel correction','Cancelar corrección')}</button>`:''}</div></form>` : ''}
     ${session.mode==='wins' && session.names.length>2 ? `<p class="coup-session-note">${tr('Runner-up finishes count only when you record them; they do not add points in Wins only mode.', 'En Solo victorias, los segundos puestos se cuentan si los registras; no suman puntos.')}</p>` : ''}
     <h3>${tr('Result history','Historial de resultados')}</h3>
     ${session.results.length ? `<ol class="coup-session-history">${session.results.map((result,index) => `<li><div><strong>${tr(`Game ${index+1}`,`Partida ${index+1}`)}</strong><span>${tr('Winner: ','Ganador: ')}${escapeHTML(session.names[result.winner])} (+${session.mode==='wins'?1:3})</span>${result.runnerUp===null?'':`<span>${tr('Runner-up: ','Segundo: ')}${escapeHTML(session.names[result.runnerUp])} (+${session.mode==='default'&&session.names.length>2?1:0})</span>`}</div><button type="button" data-coup-correct="${index}" aria-label="${tr(`Correct game ${index+1}`,`Corregir partida ${index+1}`)}">${tr('Correct','Corregir')}</button></li>`).join('')}</ol><button type="button" id="coup-undo">${tr('Undo last result','Deshacer último resultado')}</button>` : `<p class="coup-session-note">${tr('No results yet.','Todavía no hay resultados.')}</p>`}
@@ -171,8 +171,23 @@ function bindCoupSession() {
     // append the same result to the next game.
     const index = coupResultDraft.index === null ? session.results.length : coupResultDraft.index;
     const editing = coupResultDraft.index !== null;
-    find('coup-winner').onchange = event => { coupResultDraft.winner = event.target.value; };
-    if (find('coup-runner-up')) find('coup-runner-up').onchange = event => { coupResultDraft.runnerUp = event.target.value; };
+    const previewResult = () => {
+      const winner = coupResultDraft.winner, runner = coupResultDraft.runnerUp;
+      const validWinner = winner !== '' && session.names[Number(winner)] !== undefined;
+      const validRunner = runner !== '' && runner !== winner && session.names[Number(runner)] !== undefined;
+      const ready = validWinner && (session.names.length === 2 || session.mode === 'wins' || validRunner);
+      if (find('coup-runner-up')) for (const option of find('coup-runner-up').options) option.disabled = option.value !== '' && option.value === winner;
+      const parts = validWinner ? [`${session.names[Number(winner)]} +${session.mode === 'wins' ? 1 : 3}`] : [];
+      if (validRunner && session.names.length > 2) parts.push(`${session.names[Number(runner)]} +${session.mode === 'wins' ? 0 : 1}`);
+      find('coup-result-preview').textContent = ready ? parts.join(' · ') : tr('Choose the winner' + (session.mode === 'default' && session.names.length > 2 ? ' and the last player eliminated.' : '.'), 'Elige al ganador' + (session.mode === 'default' && session.names.length > 2 ? ' y al último jugador eliminado.' : '.'));
+    };
+    find('coup-winner').onchange = event => {
+      coupResultDraft.winner = event.target.value;
+      if (coupResultDraft.runnerUp === coupResultDraft.winner) { coupResultDraft.runnerUp = ''; if (find('coup-runner-up')) find('coup-runner-up').value = ''; }
+      previewResult();
+    };
+    if (find('coup-runner-up')) find('coup-runner-up').onchange = event => { coupResultDraft.runnerUp = event.target.value; previewResult(); };
+    previewResult();
     find('coup-result-form').onsubmit = event => {
       event.preventDefault();
       const winner = coupResultDraft.winner === '' ? null : Number(coupResultDraft.winner);
@@ -180,7 +195,7 @@ function bindCoupSession() {
       if (!(editing ? coupSession.correct(index, winner, runnerUp) : coupSession.save(index, winner, runnerUp))) {
         error('Choose a valid winner and a different runner-up when required.', 'Elige un ganador válido y un segundo distinto cuando sea necesario.'); return;
       }
-      clearResult(); changed(session.results.length+1===session.planned&&!editing?'coup-new-session':'coup-winner');
+      clearResult(); changed(coupSession.snapshot().finished?'coup-session-heading':'coup-winner');
     };
   }
   root.querySelectorAll('[data-coup-correct]').forEach(button => button.onclick = () => {
@@ -188,7 +203,7 @@ function bindCoupSession() {
     coupResultDraft = {index, winner:String(result.winner), runnerUp:result.runnerUp===null?'':String(result.runnerUp)};
     coupSessionMessage = null; refreshCoupSession('coup-winner');
   });
-  if (find('coup-cancel-correction')) find('coup-cancel-correction').onclick = () => { clearResult(); coupSessionMessage = null; refreshCoupSession('coup-winner'); };
+  if (find('coup-cancel-correction')) find('coup-cancel-correction').onclick = () => { clearResult(); coupSessionMessage = null; refreshCoupSession(session.finished?'coup-session-heading':'coup-winner'); };
   if (find('coup-undo')) find('coup-undo').onclick = () => { coupSession.undo(); clearResult(); changed('coup-winner'); };
   if (find('coup-rename-form')) find('coup-rename-form').onsubmit = event => {
     event.preventDefault();

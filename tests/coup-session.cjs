@@ -118,11 +118,12 @@ for (const corruption of [null,{}, {...tie.snapshot(),mode:'custom'}, {...tie.sn
       check(await page.locator('#coup-name-0').inputValue()==='Alice', 'New session retains names');
       await page.locator('#coup-add-player').click(); await page.locator('#coup-name-2').fill('Carla');
       await page.locator('#coup-planned').fill('2'); await page.locator('#coup-start').click();
-      await page.locator('#coup-winner').selectOption('0'); await page.locator('#coup-runner-up').selectOption('0');
+      await page.locator('#coup-winner').selectOption('0');
+      check(await page.locator('#coup-runner-up option[value="0"]').evaluate(node => node.disabled), 'Winner cannot also be chosen as runner-up');
       await page.locator('#coup-save-result').click();
-      check((await page.locator('#coup-session-error').textContent()).includes('different runner-up'), 'Duplicate result selection shows error');
       check(await page.evaluate(()=>coupSession.snapshot().results.length)===0, 'Duplicate selection cannot change scores');
       await page.locator('#coup-runner-up').selectOption('1');
+      check((await page.locator('#coup-result-preview').textContent()).includes('Alice +3'), 'Result preview explains points before saving');
       await page.locator('#inquisitor-toggle').click(); await page.locator('#reformation-toggle').click();
       check(await page.locator('#coup-winner').inputValue()==='0' && await page.locator('#coup-runner-up').inputValue()==='1', 'Variant switches preserve pending result');
       // Call the same submit handler twice, simulating duplicate event delivery.

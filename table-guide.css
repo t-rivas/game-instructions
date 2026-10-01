@@ -9,3 +9,10 @@
 @media print{body.table-mode .print-dixit-rules{display:block}body.table-mode .dixit-score{display:none}body.table-mode .print-dixit-rules p{font-size:10pt!important}body.table-mode #dixit-sheet>.quick-list+ h3{display:none}}
 .scoreboard-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin:0 0 16px}
 .scoreboard-heading h2{flex:1 1 240px;margin:0;min-width:0;overflow-wrap:anywhere}
+
+.score-help{margin:12px 0;color:var(--muted);font-size:13px}
+.score-help>summary{cursor:pointer;min-height:44px;padding:12px 0;font-weight:600;color:var(--text)}
+:is(.poker-timer,.moth-score,.skull-score,.coup-session,.truco-score) :is(button,input,select,summary):focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+:is(.poker-timer,.moth-score,.skull-score,.coup-session,.truco-score) [tabindex="-1"]{scroll-margin-top:160px}
+
+.score-visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}

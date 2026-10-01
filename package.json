@@ -11,6 +11,7 @@
     "test:poker": "node tests/poker-timer.cjs",
     "test:skull": "node tests/skull-score.cjs",
     "test:moth": "node tests/moth-score.cjs",
+    "test:scoreboard-ux": "node tests/scoreboard-ux.cjs",
     "test:truco": "node tests/truco-score.cjs"
   },
   "devDependencies": {

@@ -23,6 +23,7 @@ function scoreSkullEntry(entry, cards) {
 function createSkullGame(names, expansion) {
   if (typeof expansion !== 'boolean' || !Array.isArray(names) || names.length < 2 || names.length > (expansion ? 9 : 8)) throw new Error('players');
   if (names.some(name => typeof name !== 'string' || !name.trim())) throw new Error('names');
+  if (new Set(names.map(name => name.trim().toLowerCase())).size !== names.length) throw new Error('names');
   // Freeze setup separately: the guide's expansion switch cannot change this game.
   return {setup: Object.freeze({mode: 'classic', expansion, players: Object.freeze(names.map(name => name.trim()))}), rounds: []};
 }
@@ -31,6 +32,7 @@ function saveSkullRound(game, round, cards, entries) {
   if (!Number.isInteger(round) || round < 1 || round > 10 || round > game.rounds.length + 1) throw new Error('round');
   if (!Array.isArray(entries) || entries.length !== game.setup.players.length) throw new Error('players');
   const scored = entries.map(entry => scoreSkullEntry(entry, cards));
+  if (scored.reduce((sum, entry) => sum + entry.tricks, 0) > cards) throw new Error('trick-total');
   // Validate first so an invalid correction leaves all saved scores intact.
   const rounds = game.rounds.slice();
   rounds[round - 1] = {round, cards, entries: scored};
@@ -52,6 +54,22 @@ let skullScoreDraft = null;
 let skullScorePending = null;
 let skullScoreNotice = '';
 
+let skullStorageOK = true;
+try {
+  const saved = JSON.parse(localStorage.getItem('tablefolk-skull-score-v1') || 'null');
+  if (saved?.version === 1 && saved.game) {
+    const game = createSkullGame(saved.game.setup.players, saved.game.setup.expansion);
+    if (!Array.isArray(saved.game.rounds) || saved.game.rounds.length > 10) throw new Error('rounds');
+    for (const row of saved.game.rounds) saveSkullRound(game, row.round, row.cards, row.entries);
+    skullScoreGame = game;
+    skullScoreDraft = skullGameSummary(game).finished ? null : skullRoundDraft();
+  }
+} catch { skullStorageOK = false; }
+function persistSkullScore() {
+  try { localStorage.setItem('tablefolk-skull-score-v1', JSON.stringify({version:1, game:skullScoreGame})); skullStorageOK = true; }
+  catch { skullStorageOK = false; }
+}
+
 function skullRoundDraft() {
   const round = skullScoreGame.rounds.length + 1;
   const last = skullScoreGame.rounds.at(-1);
@@ -64,7 +82,8 @@ function skullScoreError(code) {
     'signed-total': tr('Enter whole bonus and adjustment totals within the safe numeric range.', 'Ingresa bonificaciones y ajustes enteros dentro del rango numérico seguro.'),
     explanation: tr('Explain every nonzero manual adjustment.', 'Explica cada ajuste manual distinto de cero.'),
     players: tr('Use 2–8 players in the base game, or 2–9 with the Expansion Pack.', 'Usa de 2 a 8 jugadores en la caja base, o de 2 a 9 con el paquete de expansión.'),
-    names: tr('Enter a name for every player.', 'Ingresa un nombre para cada jugador.'),
+    names: tr('Enter a different name for every player.', 'Ingresa un nombre distinto para cada jugador.'),
+    'trick-total': tr('The total tricks won cannot exceed the cards dealt per player. Check each player’s tricks.', 'La suma de bazas ganadas no puede superar las cartas repartidas por persona. Revisa las bazas de cada jugador.'),
     round: tr('Enter the next round or correct a saved round, through round 10.', 'Ingresa la siguiente ronda o corrige una guardada, hasta la ronda 10.')})[code] || tr('Check the round entries.', 'Revisa los datos de la ronda.');
 }
 
@@ -84,16 +103,18 @@ function skullScoreRoundForm() {
   return `<form id="skull-round-form" aria-labelledby="skull-round-heading">
     <h3 id="skull-round-heading" tabindex="-1">${editing ? tr('Edit round', 'Editar ronda') : tr('Round', 'Ronda')} ${draft.round} / 10</h3>
     <label class="skull-cards-label">${tr('Actual cards dealt per player', 'Cartas realmente repartidas por persona')}<input id="skull-cards" type="number" min="1" max="10" step="1" required value="${escapeHTML(draft.cards)}" aria-describedby="skull-deal-note"></label>
-    <p id="skull-deal-note" class="skull-hint">${tr('Repeat the largest hand size your deck supports when needed. Enter the actual deal; zero bids use this value, not the round number. Trick totals need not match: Graybeard and destroyed tricks can account for the difference.', 'Repite el mayor tamaño de mano que permita el mazo cuando sea necesario. Ingresa el reparto real: las apuestas cero usan este valor, no el número de ronda. Las bazas totales no tienen que coincidir: Barbagris y las bazas destruidas pueden explicar la diferencia.')}</p>
-    <p id="skull-bonus-note" class="skull-hint">${tr('Manually enter the total of eligible capture bonuses, including signed expansion effects. Bonuses apply only to exact bids. Use the separate signed adjustment for optional powers or documented exceptions and explain every nonzero adjustment. These effects are not calculated automatically.', 'Ingresa manualmente el total de bonificaciones por capturas elegibles, incluidos efectos de expansión con signo positivo o negativo. Solo se aplican al acertar la apuesta. Usa el ajuste con signo por separado para poderes opcionales o excepciones documentadas y explica cada ajuste distinto de cero. Estos efectos no se calculan automáticamente.')}</p>
+    <details class="score-help" id="skull-scoring-help"><summary>${tr('Scoring help & special cards', 'Ayuda de puntuación y cartas especiales')}</summary><p id="skull-deal-note" class="skull-hint">${tr('Repeat the largest hand size your deck supports when needed. Enter the actual deal; zero bids use this value, not the round number. Total tricks won can be lower than cards dealt: Graybeard and destroyed tricks can account for the difference.', 'Repite el mayor tamaño de mano que permita el mazo cuando sea necesario. Ingresa el reparto real: las apuestas cero usan este valor, no el número de ronda. La suma de bazas ganadas puede ser menor que las cartas repartidas: Barbagris y las bazas destruidas pueden explicar la diferencia.')}</p>
+    <p id="skull-bonus-note" class="skull-hint">${tr('Manually enter the total of eligible capture bonuses, including signed expansion effects. Bonuses apply only to exact bids. Use the separate signed adjustment for optional powers or documented exceptions and explain every nonzero adjustment. These effects are not calculated automatically.', 'Ingresa manualmente el total de bonificaciones por capturas elegibles, incluidos efectos de expansión con signo positivo o negativo. Solo se aplican al acertar la apuesta. Usa el ajuste con signo por separado para poderes opcionales o excepciones documentadas y explica cada ajuste distinto de cero. Estos efectos no se calculan automáticamente.')}</p></details>
     <div class="skull-entry-grid">${draft.entries.map((entry, i) => `<fieldset class="skull-player-entry"><legend>${escapeHTML(skullScoreGame.setup.players[i])}</legend>
       <div class="skull-fields">${[
-        ['bid', tr('Final bid', 'Apuesta final'), 'min="0" max="'+escapeHTML(draft.cards)+'"'],
-        ['tricks', tr('Tricks won', 'Bazas ganadas'), 'min="0" max="'+escapeHTML(draft.cards)+'"'],
-        ['bonus', tr('Eligible capture-bonus total', 'Total de bonificaciones elegibles'), ''],
-        ['adjustment', tr('Manual adjustment (signed)', 'Ajuste manual (con signo)'), '']
-      ].map(([key, label, limits]) => `<label>${label}<input id="skull-${key}-${i}" data-skull-field="${key}" data-skull-player="${i}" type="number" ${limits} step="1" required value="${escapeHTML(entry[key])}"${key==='bonus'||key==='adjustment'?' aria-describedby="skull-bonus-note"':''}></label>`).join('')}</div>
-      <label>${tr('Adjustment explanation', 'Explicación del ajuste')}<input id="skull-explanation-${i}" data-skull-field="explanation" data-skull-player="${i}" type="text" value="${escapeHTML(entry.explanation)}"${Number(entry.adjustment)!==0?' required':''}></label>
+        ['bid', tr('Final bid', 'Apuesta final')], ['tricks', tr('Tricks won', 'Bazas ganadas')]
+      ].map(([key, label]) => `<label>${label}<input id="skull-${key}-${i}" data-skull-field="${key}" data-skull-player="${i}" type="number" inputmode="numeric" min="0" max="${escapeHTML(draft.cards)}" step="1" required value="${escapeHTML(entry[key])}"></label>`).join('')}</div>
+      <label>${tr('Capture bonus', 'Bonificación por capturas')}<input id="skull-bonus-${i}" data-skull-field="bonus" data-skull-player="${i}" type="number" step="1" required value="${escapeHTML(entry.bonus)}" aria-describedby="skull-bonus-note skull-bonus-status-${i}"></label>
+      <p id="skull-bonus-status-${i}" class="skull-hint" aria-live="polite"></p>
+      <details class="score-help" id="skull-adjustments-${i}" ${Number(entry.adjustment)!==0?'open':''}><summary>${tr('Special power / manual adjustment', 'Poder especial / ajuste manual')}</summary>
+        <label>${tr('Manual adjustment (signed)', 'Ajuste manual (con signo)')}<input id="skull-adjustment-${i}" data-skull-field="adjustment" data-skull-player="${i}" type="number" step="1" required value="${escapeHTML(entry.adjustment)}"></label>
+        <label>${tr('Adjustment explanation', 'Explicación del ajuste')}<input id="skull-explanation-${i}" data-skull-field="explanation" data-skull-player="${i}" type="text" value="${escapeHTML(entry.explanation)}"${Number(entry.adjustment)!==0?' required':''}></label>
+      </details>
       <div id="skull-preview-${i}"></div>
     </fieldset>`).join('')}</div>
     <div class="skull-actions"><button type="submit">${editing ? tr('Save correction', 'Guardar corrección') : tr('Save round', 'Guardar ronda')}</button>${editing ? `<button type="button" id="skull-edit-cancel">${tr('Cancel edit', 'Cancelar edición')}</button>` : ''}</div>
@@ -126,12 +147,12 @@ function skullScoreView() {
     body = `<p id="skull-game-edition">${tr('This game:', 'Esta partida:')} <strong>${game.setup.expansion ? tr('Base + Expansion Pack', 'Caja base + paquete de expansión') : tr('Base box', 'Caja base')}</strong> · ${game.setup.players.length} ${tr('scored players', 'jugadores con puntuación')}. ${tr('Guide switches do not change this game.', 'Los cambios de la guía no cambian esta partida.')}</p>
       <p id="skull-game-result" role="status">${summary.finished ? `${summary.winners.length > 1 ? tr('Joint winners', 'Ganadores conjuntos') : tr('Winner', 'Ganador')}: ${escapeHTML(winnerNames)} · ${Math.max(...summary.totals)} ${tr('points after round 10.', 'puntos tras la ronda 10.')}` : `${game.rounds.length} / 10 ${tr('rounds saved. Highest total after round 10 wins; tied leaders win jointly.', 'rondas guardadas. Gana el mayor total tras la ronda 10; quienes empaten arriba ganan conjuntamente.')}`}</p>
       <h3>${tr('Cumulative totals', 'Totales acumulados')}</h3><ol class="skull-totals">${game.setup.players.map((name, i) => `<li><span>${escapeHTML(name)}</span><strong data-skull-total="${i}">${summary.totals[i]}</strong></li>`).join('')}</ol>
-      ${skullScoreRoundForm()}${skullScoreHistory()}`;
+      ${skullScoreRoundForm()}${game.rounds.length ? `<button type="button" id="skull-undo-round">${tr('Undo last round', 'Deshacer última ronda')}</button>` : ''}${skullScoreHistory()}`;
   }
   return `<section id="skull-score" class="skull-score" aria-labelledby="skull-score-heading"><div class="scoreboard-heading"><h2 id="skull-score-heading" tabindex="-1">${tr('Score sheet · Classic Skull King', 'Planilla de puntos · Skull King clásico')}</h2>${skullScoreGame ? `<button id="skull-new-game" type="button">${tr('Reset · edit players', 'Reiniciar · editar jugadores')}</button>` : ''}</div>
     <p class="skull-hint">${tr('Supports classic scoring only. Rascal and Cannonball scoring are not supported.', 'Solo admite la puntuación clásica. No admite puntuación Rascal ni Cannonball.')}</p>
-    <p id="skull-score-notice" role="alert">${skullScoreNotice ? skullScoreError(skullScoreNotice) : ''}</p>${body}
-    <p class="skull-hint">${tr('Scores and unfinished entries stay when switching views or languages. Reloading clears this sheet.', 'Los puntos y los datos sin guardar se conservan al cambiar de vista o idioma. Recargar borra esta planilla.')}</p></section>`;
+    <p id="skull-score-notice" role="alert" tabindex="-1">${skullScoreNotice ? skullScoreError(skullScoreNotice) : ''}</p>${body}
+    ${skullStorageOK ? '' : `<p role="status">${tr('Local saving is unavailable. Keep this page open to retain your scores.', 'No se puede guardar en este dispositivo. Mantén esta página abierta para conservar los puntos.')}</p>`}<p class="skull-hint">${tr('Scores and unfinished entries stay when switching views or languages. Saved rounds are restored when you reload.', 'Los puntos y los datos sin guardar se conservan al cambiar de vista o idioma. Las rondas guardadas se recuperan al recargar.')}</p></section>`;
 }
 
 function skullDraftEntry(entry) {
@@ -147,6 +168,9 @@ function refreshSkullPreview() {
     explanation.setCustomValidity(explanation.required && !entry.explanation.trim() ? skullScoreError('explanation') : '');
     for (const key of ['bid', 'tricks']) document.getElementById(`skull-${key}-${i}`).max = skullScoreDraft.cards;
     const preview = document.getElementById(`skull-preview-${i}`);
+    document.getElementById(`skull-bonus-status-${i}`).textContent = entry.bid !== '' && entry.tricks !== '' && Number(entry.bid) !== Number(entry.tricks)
+      ? tr('Bid missed: capture bonus will not count.', 'Apuesta fallada: la bonificación por capturas no se suma.')
+      : tr('Only counts when the final bid is exact.', 'Solo se suma si aciertas la apuesta final.');
     try { preview.innerHTML = skullScoreBreakdown(scoreSkullEntry(skullDraftEntry(entry), Number(skullScoreDraft.cards))); }
     catch { preview.textContent = tr('Complete valid entries to preview the score.', 'Completa los datos válidos para ver los puntos.'); }
   });
@@ -155,7 +179,11 @@ function refreshSkullPreview() {
 function bindSkullScore() {
   const root = document.getElementById('skull-score');
   if (!root) return;
-  const redraw = (focus = 'skull-round-heading') => {render(true); document.getElementById(focus)?.focus({preventScroll: true});};
+  const redraw = (focus = 'skull-round-heading') => {persistSkullScore(); refreshScorePanel('skull-score', skullScoreView, bindSkullScore, focus);};
+  root.addEventListener('invalid', event => {
+    const details = event.target.closest('details');
+    if (details) details.open = true;
+  }, true);
   const setup = document.getElementById('skull-score-setup');
   if (setup) {
     document.getElementById('skull-player-count').onchange = event => {skullScoreSetup.count = Number(event.target.value); redraw('skull-player-count');};
@@ -171,18 +199,20 @@ function bindSkullScore() {
   }
   const form = document.getElementById('skull-round-form');
   if (form) {
+    const draft = skullScoreDraft;
     document.getElementById('skull-cards').oninput = event => {skullScoreDraft.cards = event.target.value; refreshSkullPreview();};
     root.querySelectorAll('[data-skull-field]').forEach(input => {input.oninput = () => {
       skullScoreDraft.entries[Number(input.dataset.skullPlayer)][input.dataset.skullField] = input.value; refreshSkullPreview();
     };});
     form.onsubmit = event => {
       event.preventDefault();
+      if (draft !== skullScoreDraft) return;
       try {
         const editing = skullScoreDraft.round <= skullScoreGame.rounds.length;
         saveSkullRound(skullScoreGame, skullScoreDraft.round, Number(skullScoreDraft.cards), skullScoreDraft.entries.map(skullDraftEntry));
         skullScoreDraft = editing && skullScorePending ? skullScorePending : skullScoreGame.rounds.length < 10 ? skullRoundDraft() : null;
         skullScorePending = null; skullScoreNotice = ''; redraw(skullScoreDraft ? 'skull-round-heading' : 'skull-score-heading');
-      } catch (error) {skullScoreNotice = error.message; document.getElementById('skull-score-notice').textContent = skullScoreError(error.message);}
+      } catch (error) {skullScoreNotice = error.message; document.getElementById('skull-score-notice').textContent = skullScoreError(error.message); document.getElementById('skull-score-notice').focus();}
     };
     document.getElementById('skull-edit-cancel')?.addEventListener('click', () => {
       skullScoreDraft = skullScorePending || (skullScoreGame.rounds.length < 10 ? skullRoundDraft() : null);
@@ -196,6 +226,12 @@ function bindSkullScore() {
     skullScoreDraft = {round: row.round, cards: String(row.cards), entries: row.entries.map(entry => ({bid: String(entry.bid), tricks: String(entry.tricks), bonus: String(entry.bonus), adjustment: String(entry.adjustment), explanation: entry.explanation}))};
     skullScoreNotice = ''; redraw(); document.getElementById('skull-round-heading').scrollIntoView({block:'center', behavior:'instant'});
   };});
+  document.getElementById('skull-undo-round')?.addEventListener('click', () => {
+    const row = skullScoreGame.rounds.pop();
+    if (!row) return;
+    skullScoreDraft = {round:row.round, cards:String(row.cards), entries:row.entries.map(entry => ({bid:String(entry.bid), tricks:String(entry.tricks), bonus:String(entry.bonus), adjustment:String(entry.adjustment), explanation:entry.explanation}))};
+    skullScorePending = null; skullScoreNotice = ''; redraw();
+  });
   document.getElementById('skull-new-game').onclick = () => {
     if (!window.confirm(tr('Clear all scores and rounds and return to player setup?', '¿Borrar todos los puntos y rondas y volver a configurar los jugadores?'))) return;
     skullScoreSetup = {count: skullScoreGame.setup.players.length, names: [...skullScoreGame.setup.players, ...Array(9 - skullScoreGame.setup.players.length).fill('')]};

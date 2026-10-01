@@ -127,30 +127,33 @@ function pokerTimerTime(milliseconds) {
   return `${Math.floor(seconds/60)}:${String(seconds%60).padStart(2,'0')}`;
 }
 function pokerTimerView() {
-  const field = (row,index,key,label,min,optional=false) => `<label>${label}<input id="poker-row-${index}-${key}" data-row="${index}" data-field="${key}" type="number" min="${min}" step="1" ${optional?'':'required'} value="${escapeHTML(row[key])}" ${optional?'placeholder="0"':''}></label>`;
+  const ready = pokerTimer.snapshot().phase === 'ready';
+  const field = (row,index,key,label,min,optional=false) => `<label>${label}<input id="poker-row-${index}-${key}" data-row="${index}" data-field="${key}" type="number" inputmode="numeric" min="${min}" step="1" ${optional?'':'required'} value="${escapeHTML(row[key])}" ${optional?'placeholder="0"':''}></label>`;
   return `<section class="poker-timer" id="poker-timer" aria-labelledby="poker-timer-heading">
-    <h2 id="poker-timer-heading">${tr('Tournament blind timer','Reloj de ciegas del torneo')}</h2>
-    <p class="poker-timer-hint">${tr('Set the levels and breaks in order. Reset to edit the schedule after starting. All antes are paid per player.','Ordena los niveles y descansos. Reinicia para editar el programa después de comenzar. Todos los antes se pagan por jugador.')}</p>
+    <h2 id="poker-timer-heading" tabindex="-1">${tr('Tournament blind timer','Reloj de ciegas del torneo')}</h2>
+    <p class="poker-timer-hint">${tr('Set your blinds, then start. Each level advances automatically. Antes are per player.','Configura las ciegas y comienza. Los niveles avanzan automáticamente. Los antes son por jugador.')}</p>
     <div class="poker-timer-display">
       <h3 id="poker-timer-current"></h3><strong id="poker-timer-time" aria-label="${tr('Remaining time','Tiempo restante')}"></strong>
-      <p id="poker-timer-blinds"></p><p id="poker-timer-phase" role="status"></p>
+      <progress id="poker-timer-progress" max="100" value="0" aria-label="${tr('Current level progress','Avance del nivel actual')}"></progress><p id="poker-timer-blinds"></p><p id="poker-timer-phase" role="status"></p>
     </div>
     <p id="poker-timer-next"></p><p id="poker-timer-notice" role="status" aria-atomic="true" hidden></p>
     <form id="poker-timer-form" novalidate>
       <div class="poker-timer-actions">
         <button type="submit" id="poker-timer-toggle">${tr('Start','Iniciar')}</button>
-        <button type="button" id="poker-timer-previous">${tr('Previous row','Fila anterior')}</button>
-        <button type="button" id="poker-timer-forward">${tr('Next row','Fila siguiente')}</button>
-        <button type="button" id="poker-timer-reset">${tr('Reset','Reiniciar')}</button>
+        <button type="button" id="poker-timer-previous">${tr('Previous level / break','Nivel / descanso anterior')}</button>
+        <button type="button" id="poker-timer-forward">${tr('Next level / break','Siguiente nivel / descanso')}</button>
+        <button type="button" id="poker-timer-reset">${tr('Reset / edit schedule','Reiniciar / editar programa')}</button>
       </div>
+      <p class="poker-timer-hint" id="poker-navigation-note" ${ready?'hidden':''}>${tr('Previous and next start that level or break from its full duration.', 'Anterior y siguiente reinician la duración completa de ese nivel o descanso.')}</p>
       <p id="poker-timer-error" role="alert" hidden></p>
+      <details id="poker-schedule-details" ${ready?'open':''}><summary id="poker-schedule-summary"></summary>
       <fieldset id="poker-timer-settings"><legend>${tr('Ordered schedule · minutes','Programa ordenado · minutos')}</legend>
         <ol class="poker-timer-schedule">${pokerTimerDraft.map((row,index) => `<li data-schedule-row="${index}"><fieldset><legend>${index+1}. ${pokerTimerRowTitle(row,index,pokerTimerDraft)}</legend>
           <div class="poker-timer-fields">${field(row,index,'duration',tr('Duration (minutes)','Duración (minutos)'),1)}${row.type==='level'?field(row,index,'smallBlind',tr('Small blind','Ciega chica'),1)+field(row,index,'bigBlind',tr('Big blind','Ciega grande'),1)+field(row,index,'ante',tr('Ante per player (optional)','Ante por jugador (opcional)'),0,true):`<p>${tr('Break · no blinds or ante','Descanso · sin ciegas ni ante')}</p>`}</div>
           <div class="poker-timer-row-actions"><button type="button" data-poker-edit="up" data-row="${index}" ${index===0?'disabled':''}>${tr('Move up','Subir')}</button><button type="button" data-poker-edit="down" data-row="${index}" ${index===pokerTimerDraft.length-1?'disabled':''}>${tr('Move down','Bajar')}</button><button type="button" data-poker-edit="remove" data-row="${index}" ${pokerTimerDraft.length===1?'disabled':''}>${tr('Remove','Quitar')}</button></div>
         </fieldset></li>`).join('')}</ol>
         <div class="poker-timer-row-actions"><button type="button" data-poker-edit="level">${tr('Add level','Agregar nivel')}</button><button type="button" data-poker-edit="break">${tr('Add break','Agregar descanso')}</button></div>
-      </fieldset>
+      </fieldset></details>
     </form>
     <button type="button" id="poker-timer-sound" aria-pressed="${pokerTimerSound}"></button>
     <p class="poker-timer-hint">${tr('Timing continues across views, reloads and sleep; pauses stay paused. Sound needs a click to enable on each page load. It may not play while the browser is suspended; missed sounds are not replayed.','El tiempo continúa al cambiar de vista, recargar o suspender; las pausas se conservan. Activa el sonido con un clic después de cada recarga. Puede no sonar mientras el navegador esté suspendido; no se reproducen avisos atrasados.')}</p>
@@ -189,6 +192,12 @@ function refreshPokerTimer(silent = false) {
   if (!root) return;
   const setText = (id,value) => { const node = document.getElementById(id); if (node.textContent !== value) node.textContent = value; };
   const current = clock.schedule[clock.index];
+  root.dataset.phase = clock.phase;
+  const progress = document.getElementById('poker-timer-progress');
+  progress.value = 100 * (1 - clock.remaining / (current.duration * 60000));
+  const minutes = clock.schedule.reduce((sum, row) => sum + row.duration, 0);
+  setText('poker-schedule-summary', tr(`Schedule · ${clock.schedule.length} stages · ${minutes} min`, `Programa · ${clock.schedule.length} etapas · ${minutes} min`));
+  document.getElementById('poker-navigation-note').hidden = clock.phase === 'ready';
   setText('poker-timer-current',pokerTimerRowTitle(current,clock.index,clock.schedule));
   setText('poker-timer-time',pokerTimerTime(clock.remaining));
   setText('poker-timer-blinds',current.type === 'break'?tr('No blinds or ante during this break.','Sin ciegas ni ante durante este descanso.'):tr(`Small blind ${current.smallBlind} / Big blind ${current.bigBlind} · Ante per player ${current.ante}`,`Ciega chica ${current.smallBlind} / Ciega grande ${current.bigBlind} · Ante por jugador ${current.ante}`));
@@ -204,7 +213,7 @@ function refreshPokerTimer(silent = false) {
   const notice = document.getElementById('poker-timer-notice'); notice.hidden = !clock.notice;
   if (clock.notice) setText('poker-timer-notice',clock.notice.kind === 'complete'?tr('Schedule complete. Reset to start again.','Programa terminado. Reinicia para volver a empezar.'):`${clock.notice.kind==='manual'?tr('Row changed:','Cambio de fila:'):tr('Transition:','Transición:')} ${pokerTimerRowSummary(current,clock.index,clock.schedule)}${clock.notice.crossed>1?tr(` · Caught up across ${clock.notice.crossed} rows.`,` · Se recuperó el tiempo de ${clock.notice.crossed} filas.`):''}`);
   document.getElementById('poker-timer-error').hidden = !pokerTimerError;
-  setText('poker-timer-error',tr('Use positive whole minutes and blinds, small blind ≤ big blind, and a whole ante ≥ 0 (or blank). Values must be finite and safely representable.','Usa minutos y ciegas enteros positivos, ciega chica ≤ ciega grande y ante entero ≥ 0 (o vacío). Los valores deben ser finitos y representables con precisión.'));
+  setText('poker-timer-error',tr('Check the highlighted fields: use whole minutes and blinds above 0. The big blind must be at least the small blind; ante can be 0 or blank.', 'Revisa los campos marcados: usa minutos y ciegas enteros mayores que 0. La ciega grande debe ser al menos igual a la chica; el ante puede ser 0 o quedar vacío.'));
   setText('poker-timer-sound',pokerTimerSoundFailed?tr('Sound unavailable · try again','Sonido no disponible · reintentar'):pokerTimerSound?tr('Disable transition sound','Desactivar sonido de transición'):tr('Enable transition sound','Activar sonido de transición'));
   document.getElementById('poker-timer-sound').setAttribute('aria-pressed',String(pokerTimerSound));
   document.getElementById('poker-timer-storage').hidden = pokerTimerStorageOK;
@@ -212,7 +221,21 @@ function refreshPokerTimer(silent = false) {
 }
 function bindPokerTimer() {
   const form = document.getElementById('poker-timer-form'); if (!form) return;
-  const configure = () => { pokerTimerError = !pokerTimer.configure(pokerTimerRows()); refreshPokerTimer(true); return !pokerTimerError; };
+  const configure = () => {
+    const rows = pokerTimerRows();
+    pokerTimerError = !pokerTimer.configure(rows);
+    form.querySelectorAll('[data-field]').forEach(input => {
+      const row = rows[Number(input.dataset.row)], key = input.dataset.field;
+      if (!row || !(key in row)) return;
+      const value = row[key];
+      const invalid = !Number.isSafeInteger(value) || value < (key === 'ante' ? 0 : 1) ||
+        (key === 'bigBlind' && value < row.smallBlind);
+      input.setAttribute('aria-invalid', String(invalid));
+      if (invalid) input.setAttribute('aria-describedby', 'poker-timer-error');
+      else input.removeAttribute('aria-describedby');
+    });
+    refreshPokerTimer(true); return !pokerTimerError;
+  };
   form.querySelectorAll('[data-field]').forEach(input => input.oninput = () => {
     if (pokerTimer.snapshot().phase !== 'ready') return;
     pokerTimerDraft[Number(input.dataset.row)][input.dataset.field] = input.value;
@@ -237,13 +260,19 @@ function bindPokerTimer() {
     if (phase === 'running') pokerTimer.pause();
     else if (phase !== 'ready' || configure()) pokerTimer.start();
     refreshPokerTimer();
+    if (pokerTimerError) {
+      document.getElementById('poker-schedule-details').open = true;
+      form.querySelector('[aria-invalid="true"]')?.focus();
+    } else if (phase === 'ready') document.getElementById('poker-schedule-details').open = false;
   };
   document.getElementById('poker-timer-previous').onclick = () => { pokerTimer.navigate(-1); refreshPokerTimer(); };
   document.getElementById('poker-timer-forward').onclick = () => { pokerTimer.navigate(1); refreshPokerTimer(); };
   document.getElementById('poker-timer-reset').onclick = () => {
+    if (pokerTimer.snapshot().phase !== 'ready' && !window.confirm(tr('Reset the timer to the first level and unlock the schedule?', '¿Reiniciar el reloj en el primer nivel y habilitar la edición del programa?'))) return;
     pokerTimer.reset(); pokerTimerError = false;
     pokerTimerDraft = pokerTimer.snapshot().schedule.map(row => Object.fromEntries(Object.entries(row).map(([key,value]) => [key,String(value)])));
     document.getElementById('poker-timer').outerHTML = pokerTimerView(); bindPokerTimer();
+    document.getElementById('poker-timer-toggle').focus({preventScroll:true});
   };
   document.getElementById('poker-timer-sound').onclick = async () => {
     if (pokerTimerSound) pokerTimerSound = false;
@@ -258,7 +287,8 @@ function bindPokerTimer() {
     }
     refreshPokerTimer(true);
   };
-  refreshPokerTimer(true);
+  if (pokerTimer.snapshot().phase === 'ready') configure();
+  else refreshPokerTimer(true);
 }
 
 // Wake-up and reload catch-up never replay missed sounds.

@@ -29,6 +29,11 @@ for (const number of [0, -1, 1.5, NaN, Infinity, Number.MAX_SAFE_INTEGER + 1]) {
   game.award(0, 1);
   check(!game.correct(0, 0, number) && totals(game) === '1,0', 'Invalid correction leaves totals unchanged');
 }
+const restoreGame = configured(); restoreGame.award(0, 5); restoreGame.award(1, 3); restoreGame.correct(0, 0, 30);
+const restoredGame = create(JSON.parse(JSON.stringify(restoreGame.snapshot())));
+check(totals(restoredGame) === '30,0' && restoredGame.snapshot().entries.length === 2, 'Restore preserves entries excluded by corrected win');
+restoredGame.correct(0, 0, 5); check(totals(restoredGame) === '5,3', 'Restored excluded entries can be reactivated');
+check(!create({...restoreGame.snapshot(), entries:[{side:0, points:-1, label:''}]}).snapshot().started, 'Corrupt saved history is rejected');
 const basic = configured();
 check(basic.configure(['Ana','Bea'], 30), 'Target and names editable before first award');
 for (const side of [-1, 2, 0.5, null, '0']) check(!basic.award(side, 1), 'Reject invalid side');
@@ -198,7 +203,7 @@ check(!overflow.correct(0, 0, Number.MAX_SAFE_INTEGER), 'Reject corrections over
       check(await page.locator('#truco-score').isHidden(), 'Scoreboard does not clutter printed rules');
       await page.emulateMedia({media:'screen'});
       await page.reload();
-      check(await page.locator('#truco-start').count() === 1 && await page.evaluate(() => trucoScore.snapshot().entries.length) === 0, 'Reload clears scores as documented');
+      check(await page.locator('#truco-start').count() === 0 && await total(1) === '10 / 7', 'Saved scores, custom target and winner survive reload');
       check(errors.length === 0, `No browser errors: ${errors.join(', ')}`);
       check(requests.length === 0, 'Scoreboard works offline');
       await context.close();

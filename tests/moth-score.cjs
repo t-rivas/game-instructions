@@ -38,9 +38,10 @@ for (const out of ['', -1, 3, 1.5, NaN]) rejects(() => score(3, out, [zero(),zer
 rejects(() => score(3, 0, [zero()]), 'players');
 rejects(() => score(3, 0, [zero(), [0,0], zero()]), 'counts');
 rejects(() => score(3, 0, [null, Array(3), zero()]), 'counts');
-for (const n of [3,4,5]) check(create(Array(n).fill('Player')).players.length === n, 'Supported setup');
+for (const n of [3,4,5]) check(create(Array.from({length:n}, (_,i) => `Player ${i}`)).players.length === n, 'Supported setup');
 for (const n of [0,2,6]) rejects(() => create(Array(n).fill('Player')), 'players');
 rejects(() => create(['A','B',' ']), 'names');
+rejects(() => create(['A',' a ','B']), 'names');
 rejects(() => create(Array(3)), 'names');
 const game = create([' A ', 'B', 'C']);
 check(game.players[0] === 'A', 'Trim names');
@@ -218,9 +219,11 @@ async function edit(page, round) {
         }
         check(await page.locator('#moth-round-form').count() === 0 && (await page.locator('#moth-rounds-completed').textContent()).startsWith(`${n} / ${n}`), 'Four/five-player game ends at its exact round limit');
         check(await page.evaluate(() => mothGameSummary(mothScoreGame).winners.length) === n, 'All tied players share victory in four/five-player game');
+        await page.reload();
+        check(await page.evaluate(() => mothScoreGame.rounds.length) === n, 'Confirmed rounds survive reload');
         page.once('dialog', dialog => dialog.accept()); await page.locator('#moth-new-game').click();
       }
-      await page.reload(); check(await page.locator('#moth-player-form').count() === 1, 'Reload resets scoreboard as documented');
+      await page.reload(); check(await page.locator('#moth-player-form').count() === 1, 'Explicit reset remains cleared after reload');
       check(errors.length === 0, `No browser errors: ${errors.join(', ')}`);
       await context.close();
     }

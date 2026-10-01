@@ -14,3 +14,10 @@
 .poker-timer fieldset:disabled input{opacity:.65}#poker-timer-notice,#poker-timer-error{padding:12px;border:1px solid var(--accent);border-radius:8px;background:var(--panel2);font-size:14px}
 @media(max-width:600px){.poker-timer{padding:14px}.poker-timer-fields{grid-template-columns:repeat(2,minmax(0,1fr))}.poker-timer-fields p{grid-column:auto}.poker-timer-actions button{flex:1 1 40%}.poker-timer-row-actions button{padding:8px 10px}}
 @media print{.poker-timer{display:none!important}}
+
+#poker-schedule-details{margin:16px 0}#poker-schedule-summary{cursor:pointer;min-height:44px;padding:12px 0;font-size:14px;font-weight:650}
+#poker-timer-progress{display:block;width:100%;height:6px;margin:16px 0;accent-color:var(--accent)}
+.poker-timer[data-phase="paused"] .poker-timer-display{border:2px dashed var(--accent)}
+.poker-timer[data-phase="running"] .poker-timer-display{border-color:var(--accent)}
+.poker-timer [aria-invalid="true"]{border:2px solid var(--accent)}
+.poker-timer .poker-timer-hint{font-size:13px;line-height:1.6}

@@ -28,3 +28,6 @@
 #moth-game-result{padding:12px;border-left:3px solid var(--accent);background:var(--panel2)}
 @media(max-width:600px){.moth-score{padding:14px}.moth-entry-grid{grid-template-columns:1fr}.moth-name-grid,.moth-fields{gap:8px}}
 @media print{.moth-score{display:none!important}}
+
+.moth-player-total{font-size:14px;font-weight:650;min-height:24px;margin:12px 0}.moth-score [data-moth-zero]{font-size:13px;width:100%}
+.moth-fields label{justify-content:space-between}

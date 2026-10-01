@@ -33,19 +33,20 @@ rejects(() => score(entry(1, 1, 0, 1, '   '), 1), 'explanation');
 for (const cards of [0, 11, 1.5, NaN]) rejects(() => score(entry(0, 0), cards), 'cards');
 for (const invalid of [entry(-1, 0), entry(3, 0), entry(1.5, 0), entry(0, 3), entry(0, -1), entry(NaN, 0)]) rejects(() => score(invalid, 2), 'bid-tricks');
 for (const invalid of [entry(0, 0, 1.5), entry(0, 0, Infinity), entry(0, 0, 0, NaN), entry(0, 0, Number.MAX_SAFE_INTEGER)]) rejects(() => score(invalid, 1), 'signed-total');
-for (const count of [2, 8]) check(create(Array(count).fill('Player'), false).setup.players.length === count, 'Base player count');
-check(create(Array(9).fill('Player'), true).setup.expansion, 'Expansion permits nine');
-for (const count of [0, 1, 9, 10]) rejects(() => create(Array(count).fill('Player'), false), 'players');
+for (const count of [2, 8]) check(create(Array.from({length:count}, (_,i) => `Player ${i}`), false).setup.players.length === count, 'Base player count');
+check(create(Array.from({length:9}, (_,i) => `Player ${i}`), true).setup.expansion, 'Expansion permits nine');
+for (const count of [0, 1, 9, 10]) rejects(() => create(Array.from({length:count}, (_,i) => `Player ${i}`), false), 'players');
 rejects(() => create(Array(10).fill('Player'), true), 'players');
 rejects(() => create(['A', '   '], false), 'names');
+rejects(() => create(['A', ' a '], false), 'names');
 const game = create([' A ', 'B'], false);
 check(game.setup.players.join(',') === 'A,B' && game.setup.mode === 'classic', 'Normalize names and label classic mode');
-for (let round = 1; round <= 10; round++) save(game, round, Math.min(round, 8), [entry(0, 1), entry(0, 1)]);
+for (let round = 1; round <= 10; round++) save(game, round, Math.min(round, 8), round === 1 ? [entry(1, 0), entry(1, 0)] : [entry(0, 1), entry(0, 1)]);
 check(game.rounds.slice(-3).every(row => row.cards === 8), 'Repeated hand sizes are independent of round number');
 check(game.rounds[9].entries[0].base === -80, 'Round-ten stored zero uses the actual eight cards');
 check(summary(game).totals.every(total => total === -520), 'Negative cumulative totals');
 check(summary(game).finished && summary(game).winners.join(',') === '0,1', 'Negative tied leaders jointly win');
-save(game, 1, 1, [entry(1, 1, 10), entry(0, 1)]);
+save(game, 1, 1, [entry(1, 1, 10), entry(1, 0)]);
 check(summary(game).totals[0] === -480 && summary(game).winners.join(',') === '0', 'Correction recalculates cumulative totals and final winner');
 save(game, 10, 7, [entry(0, 0), entry(0, 1)]);
 check(game.rounds[9].entries[0].base === 70 && summary(game).totals[0] === -330, 'Changing saved hand size recomputes zero bid');
@@ -58,13 +59,15 @@ const two = create(['A', 'B'], false);
 rejects(() => save(two, 2, 2, [entry(0, 0), entry(0, 0)]), 'round');
 save(two, 1, 1, [entry(0, 0), entry(0, 0)]);
 check(two.rounds[0].entries.length === 2 && summary(two).winners.length === 0, 'Graybeard is not scored, and unfinished games have no winners');
-save(two, 2, 2, [entry(2, 2), entry(2, 2)]);
-check(two.rounds[1].entries.every(e => e.total === 40), 'No aggregate trick constraint');
+rejects(() => save(two, 2, 2, [entry(2, 2), entry(2, 2)]), 'trick-total');
+save(two, 2, 2, [entry(1, 1), entry(0, 0)]);
+check(two.rounds[1].entries.every(e => e.total === 20), 'Fewer tricks than cards allows Graybeard or destroyed tricks');
 const nine = create(Array.from({length:9}, (_, i) => `Player ${i + 1}`), true);
 for (let round = 1; round <= 10; round++) save(nine, round, round, Array.from({length:9}, () => entry(0, 0)));
 check(summary(nine).winners.length === 9, 'Every tied leader wins without a tiebreaker');
 
 async function fillEntry(page, player, values) {
+  if ('adjustment' in values || 'explanation' in values) await page.locator(`#skull-adjustments-${player}`).evaluate(node => { node.open = true; });
   for (const [key, value] of Object.entries(values)) await page.locator(`#skull-${key}-${player}`).fill(String(value));
 }
 async function start(page, names) {
@@ -125,7 +128,7 @@ async function visit(page, hash) {
       check(await page.locator('#skull-adjustment-0').inputValue() === '5', 'Saving correction restores next-round draft');
       // Make both players score -10 in round 1, then identical results in rounds 2–10.
       await page.locator('[data-skull-edit="1"]').click();
-      for (const player of [0,1]) await fillEntry(page, player, {bid:0, tricks:1, bonus:50, adjustment:0, explanation:''});
+      for (const player of [0,1]) await fillEntry(page, player, {bid:1, tricks:0, bonus:50, adjustment:0, explanation:''});
       await page.locator('#skull-round-form button[type=submit]').click();
       for (let round = 2; round <= 10; round++) {
         await page.locator('#skull-cards').fill(String(Math.min(round, 8)));
@@ -181,7 +184,11 @@ async function visit(page, hash) {
       check(await page.locator('#skull-score').isHidden(), 'Guide print excludes interactive sheet');
       await page.emulateMedia({media:'screen'});
       await page.reload(); await page.waitForFunction(() => state.game === 'skull_king');
-      check(await page.locator('#skull-score-setup').count() === 1, 'Reload clears sheet as documented');
+      check(await page.locator('#skull-score-setup').count() === 0 && await page.evaluate(() => skullScoreGame.rounds.length) === 10, 'Saved rounds and expansion roster survive reload');
+      await page.locator('#skull-undo-round').click();
+      check(await page.evaluate(() => skullScoreGame.rounds.length) === 9 && await page.locator('#skull-bid-0').inputValue() === '0', 'Undo reopens last round with its entries');
+      await page.reload();
+      check(await page.evaluate(() => skullScoreGame.rounds.length) === 9, 'Undo is persisted');
       check(errors.length === 0, `No browser errors: ${errors.join(', ')}`);
       await context.close();
     }

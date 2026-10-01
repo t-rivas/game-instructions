@@ -16,6 +16,8 @@ jobs:
       - run: npx playwright install --with-deps chromium webkit
       - run: npm test
       - run: npm run test:cards
+      - run: npm run test:scoreboard-ux
+      - run: BROWSER=webkit npm run test:scoreboard-ux
       - run: npm run test:truco
       - run: BROWSER=webkit npm run test:truco
       - run: npm run test:moth

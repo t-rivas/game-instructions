@@ -29,3 +29,9 @@
 #truco-score-error:empty{display:none}
 @media(max-width:600px){.truco-score{padding:14px}.truco-grid{grid-template-columns:1fr}}
 @media print{.truco-score{display:none!important}}
+
+.truco-playing .truco-side{background:var(--panel2)}
+.truco-playing .truco-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.truco-playing .truco-actions button{padding:8px 4px;font-size:18px;font-weight:700;background:var(--accent);color:var(--on-accent)}
+.truco-custom{display:flex;align-items:end;gap:8px}.truco-custom label{flex:1}.truco-custom>button{margin:0}
+.truco-total{margin:8px 0}.truco-phase{margin:4px 0 12px}

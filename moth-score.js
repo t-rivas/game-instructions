@@ -19,6 +19,7 @@ function mothNames(names) {
   if (!Array.isArray(names) || names.length < 3 || names.length > 5) throw new Error('players');
   const players = Array.from(names);
   if (players.some(name => typeof name !== 'string' || !name.trim())) throw new Error('names');
+  if (new Set(players.map(name => name.trim().toLowerCase())).size !== players.length) throw new Error('names');
   return players.map(name => name.trim());
 }
 
@@ -73,6 +74,24 @@ let mothScorePending = null;
 let mothScorePreview = null;
 let mothScoreNotice = '';
 
+let mothStorageOK = true;
+try {
+  const saved = JSON.parse(localStorage.getItem('tablefolk-moth-score-v1') || 'null');
+  if (saved?.version === 1 && saved.game) {
+    const game = createMothGame(saved.game.players);
+    if (!Array.isArray(saved.game.rounds) || saved.game.rounds.length > game.players.length) throw new Error('rounds');
+    for (const row of saved.game.rounds) saveMothRound(game, row.round, row.out, row.entries.map(entry => entry.counts));
+    game.locked = game.locked || saved.game.locked === true;
+    mothScoreGame = game;
+    mothScoreSetup = {count:game.players.length, names:[...game.players, ...Array(5 - game.players.length).fill('')]};
+    mothScoreDraft = mothGameSummary(game).finished ? null : mothRoundDraft();
+  }
+} catch { mothStorageOK = false; }
+function persistMothScore() {
+  try { localStorage.setItem('tablefolk-moth-score-v1', JSON.stringify({version:1, game:mothScoreGame})); mothStorageOK = true; }
+  catch { mothStorageOK = false; }
+}
+
 function mothRoundDraft(row) {
   return row ? {round: row.round, out: String(row.out), entries: row.entries.map(entry => entry.counts.map(String))} :
     {round: mothScoreGame.rounds.length + 1, out: '', entries: mothScoreGame.players.map(() => ['', '', ''])};
@@ -80,7 +99,7 @@ function mothRoundDraft(row) {
 
 function mothScoreError(code) {
   return ({players: tr('Use 3–5 players.', 'Usa de 3 a 5 jugadores.'),
-    names: tr('Enter a name for every player.', 'Ingresa un nombre para cada jugador.'),
+    names: tr('Enter a different name for every player.', 'Ingresa un nombre distinto para cada jugador.'),
     locked: tr('Player membership is locked. Names can still change.', 'Los participantes quedan fijos. Puedes cambiar sus nombres.'),
     out: tr('Select the player who emptied their hand.', 'Elige quién vació su mano.'),
     counts: tr('Enter an explicit nonnegative whole number for every count, including zero.', 'Ingresa un número entero no negativo en cada campo, incluido el cero.'),
@@ -105,7 +124,7 @@ function mothScoreRoundForm() {
   const editing = draft.round <= mothScoreGame.rounds.length;
   return `<form id="moth-round-form" novalidate aria-labelledby="moth-round-heading"><h3 id="moth-round-heading" tabindex="-1">${editing ? tr('Edit round', 'Editar ronda') : tr('Round', 'Ronda')} ${draft.round} / ${mothScoreGame.players.length}</h3>
     <label>${tr('Who emptied their hand?', '¿Quién vació su mano?')}<select id="moth-out" required><option value="">${tr('Choose a player', 'Elige un jugador')}</option>${mothScoreGame.players.map((name, i) => `<option value="${i}"${draft.out === String(i) ? ' selected' : ''}>${escapeHTML(name)}</option>`).join('')}</select></label>
-    <div class="moth-entry-grid">${mothScoreGame.players.map((name, i) => `<fieldset><legend>${escapeHTML(name)}</legend>${draft.out === String(i) ? `<p class="moth-out-zero">${tr('Empty hand · 0 penalty points', 'Mano vacía · 0 puntos de penalización')}</p>` : `<div class="moth-fields">${mothCategoryLabels().map((label, category) => `<label>${label}<input id="moth-count-${i}-${category}" data-moth-player="${i}" data-moth-category="${category}" type="number" inputmode="numeric" min="0" max="${MOTH_DECK[category]}" step="1" required value="${escapeHTML(draft.entries[i][category])}" aria-describedby="moth-deck-note"></label>`).join('')}</div>`}</fieldset>`).join('')}</div>
+    <div class="moth-entry-grid">${mothScoreGame.players.map((name, i) => `<fieldset><legend>${escapeHTML(name)}</legend>${draft.out === String(i) ? `<p class="moth-out-zero">${tr('Empty hand · 0 penalty points', 'Mano vacía · 0 puntos de penalización')}</p>` : `<div class="moth-fields">${mothCategoryLabels().map((label, category) => `<label>${label}<input id="moth-count-${i}-${category}" data-moth-player="${i}" data-moth-category="${category}" type="number" inputmode="numeric" min="0" max="${MOTH_DECK[category]}" step="1" required value="${escapeHTML(draft.entries[i][category])}" aria-describedby="moth-deck-note"></label>`).join('')}</div><div class="moth-player-total" id="moth-player-total-${i}" aria-live="polite"></div><button type="button" data-moth-zero="${i}">${tr('Fill empty fields with 0', 'Completar campos vacíos con 0')}</button>`}</fieldset>`).join('')}</div>
     <div id="moth-round-preview" aria-live="polite">${mothScorePreview ? mothPreviewHTML() : ''}</div>
     <p id="moth-confirm-note" class="moth-hint">${tr('Preview the penalties, then confirm to save this round. Changing an entry requires a new preview.', 'Revisa las penalizaciones y luego confirma para guardar la ronda. Si cambias un dato, debes volver a revisar.')}</p>
     <div class="moth-actions"><button id="moth-preview-round" type="submit">${tr('Preview round', 'Revisar ronda')}</button><button id="moth-save-round" type="button" aria-describedby="moth-confirm-note"${mothScorePreview ? '' : ' disabled'}>${editing ? tr('Confirm correction', 'Confirmar corrección') : tr('Confirm round', 'Confirmar ronda')}</button>${editing ? `<button id="moth-edit-cancel" type="button">${tr('Cancel edit', 'Cancelar edición')}</button>` : ''}</div></form>`;
@@ -130,20 +149,20 @@ function mothScoreView() {
   const game = mothScoreGame;
   const summary = game && mothGameSummary(game);
   return `<section id="moth-score" class="moth-score" aria-labelledby="moth-score-heading"><div class="scoreboard-heading"><h2 id="moth-score-heading" tabindex="-1">${tr('La Polilla · Scoreboard', 'La Polilla · Planilla de puntos')}</h2>${game ? `<button id="moth-new-game" type="button">${tr('Reset · edit players', 'Reiniciar · editar jugadores')}</button>` : ''}</div>
-    <p id="moth-deck-note" class="moth-hint">${tr('Count only cards remaining in hands: up to 43 number cards, 20 action cards (5 each spider, mosquito, cockroach and ant), and 8 moths across all players. Exclude the Guard Bug, discarded and hidden cards. You do not need to account for the full deck.', 'Cuenta solo las cartas que quedan en las manos: hasta 43 numéricas, 20 especiales (5 de cada una: araña, mosquito, cucaracha y hormiga) y 8 polillas entre todos. Excluye la Chinche Guardiana, las cartas descartadas y las escondidas. No necesitas contabilizar todo el mazo.')}</p>
+    <p class="moth-hint">${tr('Count the cards left in each hand. Number cards: 1 point · action cards: 5 · moths: 10. Lowest total wins.', 'Cuenta las cartas que quedan en cada mano. Numéricas: 1 punto · especiales: 5 · polillas: 10. Gana el menor total.')}</p><details class="score-help" id="moth-count-help"><summary>${tr('Which cards do I count?', '¿Qué cartas cuento?')}</summary><p id="moth-deck-note" class="moth-hint">${tr('Count only cards remaining in hands: up to 43 number cards, 20 action cards (5 each spider, mosquito, cockroach and ant), and 8 moths across all players. Exclude the Guard Bug, discarded and hidden cards. You do not need to account for the full deck.', 'Cuenta solo las cartas que quedan en las manos: hasta 43 numéricas, 20 especiales (5 de cada una: araña, mosquito, cucaracha y hormiga) y 8 polillas entre todos. Excluye la Chinche Guardiana, las cartas descartadas y las escondidas. No necesitas contabilizar todo el mazo.')}</p></details>
     <p id="moth-score-notice" role="alert" tabindex="-1">${mothScoreNotice ? mothScoreError(mothScoreNotice) : ''}</p>
     ${game ? `<p id="moth-game-result" role="status">${summary.finished ? `${summary.winners.length > 1 ? tr('Joint winners', 'Ganadores conjuntos') : tr('Winner', 'Ganador')}: ${escapeHTML(summary.winners.map(i => game.players[i]).join(', '))} · ${Math.min(...summary.totals)} ${tr('penalty points.', 'puntos de penalización.')}` : tr('Lowest total wins after the required rounds. Equal lowest totals share victory.', 'Gana el menor total al completar las rondas. Quienes empaten con el menor total comparten la victoria.')}</p>
       <p id="moth-rounds-completed">${game.rounds.length} / ${game.players.length} ${tr('rounds completed', 'rondas completadas')}</p>
       <h3>${tr('Standings · lowest total first', 'Clasificación · menor total primero')}</h3><ol class="moth-standings">${summary.standings.map(row => `<li data-moth-standing="${row.player}"><span>${escapeHTML(game.players[row.player])}</span><strong data-moth-total="${row.player}">${row.total}</strong></li>`).join('')}</ol>
       <details id="moth-players"><summary>${game.locked ? tr('Edit names', 'Editar nombres') : tr('Edit players / names', 'Editar jugadores / nombres')}</summary>${mothPlayerForm()}</details>
       ${mothScoreRoundForm()}${mothScoreHistory()}${game.rounds.length ? `<div class="moth-actions"><button id="moth-undo-round" type="button">${tr('Undo last round', 'Deshacer última ronda')}</button></div>` : ''}` : mothPlayerForm()}
-    <p class="moth-hint">${tr('Play one round per player. Membership locks after the first saved round; names stay editable. Scores and drafts stay when switching guides or languages. Reloading clears this scoreboard.', 'Jueguen una ronda por participante. Los participantes quedan fijos tras guardar la primera ronda; los nombres se pueden editar. Los puntos y los borradores se conservan al cambiar de guía o idioma. Recargar borra esta planilla.')}</p></section>`;
+    ${mothStorageOK ? '' : `<p role="status">${tr('Local saving is unavailable. Keep this page open to retain your scores.', 'No se puede guardar en este dispositivo. Mantén esta página abierta para conservar los puntos.')}</p>`}<p class="moth-hint">${tr('Play one round per player. Membership locks after the first saved round; names stay editable. Scores and drafts stay when switching guides or languages. Confirmed rounds are saved on this device.', 'Jueguen una ronda por participante. Los participantes quedan fijos tras guardar la primera ronda; los nombres se pueden editar. Los puntos y los borradores se conservan al cambiar de guía o idioma. Las rondas confirmadas se guardan en este dispositivo.')}</p></section>`;
 }
 
 function bindMothScore() {
   const root = document.getElementById('moth-score');
   if (!root) return;
-  const redraw = (focus = 'moth-round-heading') => {render(true); document.getElementById(focus)?.focus({preventScroll: true});};
+  const redraw = (focus = 'moth-round-heading') => {persistMothScore(); refreshScorePanel('moth-score', mothScoreView, bindMothScore, focus);};
   const notice = code => {mothScoreNotice = code; document.getElementById('moth-score-notice').textContent = code ? mothScoreError(code) : '';};
   const invalidate = () => {mothScorePreview = null; document.getElementById('moth-round-preview').replaceChildren(); document.getElementById('moth-save-round').disabled = true; notice('');};
   const count = document.getElementById('moth-player-count');
@@ -163,9 +182,22 @@ function bindMothScore() {
   if (!mothScoreGame) return;
   const draft = mothScoreDraft;
   if (draft) {
+    const refreshTotals = () => draft.entries.forEach((counts, i) => {
+      const output = document.getElementById(`moth-player-total-${i}`);
+      if (!output) return;
+      try { output.textContent = tr('Penalty: ', 'Penalización: ') + mothPenalty(counts.map(mothCount)); }
+      catch { output.textContent = tr('Enter all three counts, including 0.', 'Completa las tres cantidades, incluido el 0.'); }
+    });
+    refreshTotals();
+    root.querySelectorAll('[data-moth-zero]').forEach(button => button.onclick = () => {
+      const i = Number(button.dataset.mothZero);
+      draft.entries[i] = draft.entries[i].map(value => value === '' ? '0' : value);
+      draft.entries[i].forEach((value, category) => { document.getElementById(`moth-count-${i}-${category}`).value = value; });
+      invalidate(); refreshTotals();
+    });
     document.getElementById('moth-out').onchange = event => {draft.out = event.target.value; mothScorePreview = null; mothScoreNotice = ''; redraw('moth-out');};
     root.querySelectorAll('[data-moth-category]').forEach(input => {input.oninput = () => {
-      draft.entries[Number(input.dataset.mothPlayer)][Number(input.dataset.mothCategory)] = input.value; invalidate();
+      draft.entries[Number(input.dataset.mothPlayer)][Number(input.dataset.mothCategory)] = input.value; invalidate(); refreshTotals();
     };});
     document.getElementById('moth-round-form').onsubmit = event => {
       event.preventDefault();
@@ -173,7 +205,7 @@ function bindMothScore() {
       try {
         mothScorePreview = scoreMothRound(mothScoreGame.players.length, draft.out === '' ? NaN : Number(draft.out), draft.entries);
         mothScoreNotice = ''; redraw('moth-save-round');
-      } catch (error) {invalidate(); notice(error.message); document.getElementById('moth-score-notice').focus({preventScroll: true});}
+      } catch (error) {invalidate(); notice(error.message); document.getElementById('moth-score-notice').focus();}
     };
     const preview = mothScorePreview;
     document.getElementById('moth-save-round')?.addEventListener('click', () => {

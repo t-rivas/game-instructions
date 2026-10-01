@@ -94,7 +94,7 @@ function persistMothScore() {
 
 function mothRoundDraft(row) {
   return row ? {round: row.round, out: String(row.out), entries: row.entries.map(entry => entry.counts.map(String))} :
-    {round: mothScoreGame.rounds.length + 1, out: '', entries: mothScoreGame.players.map(() => ['', '', ''])};
+    {round: mothScoreGame.rounds.length + 1, out: '', entries: mothScoreGame.players.map(() => ['0', '0', '0'])};
 }
 
 function mothScoreError(code) {
@@ -126,8 +126,9 @@ function mothScoreRoundForm() {
     <label>${tr('Who emptied their hand?', '¿Quién vació su mano?')}<select id="moth-out" required><option value="">${tr('Choose a player', 'Elige un jugador')}</option>${mothScoreGame.players.map((name, i) => `<option value="${i}"${draft.out === String(i) ? ' selected' : ''}>${escapeHTML(name)}</option>`).join('')}</select></label>
     <div class="moth-entry-grid">${mothScoreGame.players.map((name, i) => `<fieldset><legend>${escapeHTML(name)}</legend>${draft.out === String(i) ? `<p class="moth-out-zero">${tr('Empty hand · 0 penalty points', 'Mano vacía · 0 puntos de penalización')}</p>` : `<div class="moth-fields">${mothCategoryLabels().map((label, category) => `<label>${label}<input id="moth-count-${i}-${category}" data-moth-player="${i}" data-moth-category="${category}" type="number" inputmode="numeric" min="0" max="${MOTH_DECK[category]}" step="1" required value="${escapeHTML(draft.entries[i][category])}" aria-describedby="moth-deck-note"></label>`).join('')}</div><div class="moth-player-total" id="moth-player-total-${i}" aria-live="polite"></div><button type="button" data-moth-zero="${i}">${tr('Fill empty fields with 0', 'Completar campos vacíos con 0')}</button>`}</fieldset>`).join('')}</div>
     <div id="moth-round-preview" aria-live="polite">${mothScorePreview ? mothPreviewHTML() : ''}</div>
-    <p id="moth-confirm-note" class="moth-hint">${tr('Preview the penalties, then confirm to save this round. Changing an entry requires a new preview.', 'Revisa las penalizaciones y luego confirma para guardar la ronda. Si cambias un dato, debes volver a revisar.')}</p>
-    <div class="moth-actions"><button id="moth-preview-round" type="submit">${tr('Preview round', 'Revisar ronda')}</button><button id="moth-save-round" type="button" aria-describedby="moth-confirm-note"${mothScorePreview ? '' : ' disabled'}>${editing ? tr('Confirm correction', 'Confirmar corrección') : tr('Confirm round', 'Confirmar ronda')}</button>${editing ? `<button id="moth-edit-cancel" type="button">${tr('Cancel edit', 'Cancelar edición')}</button>` : ''}</div></form>`;
+    <p id="moth-confirm-note" class="moth-hint">${tr('All counts start at 0. Change only the categories with cards remaining. The preview updates automatically; check the penalties above, then confirm to save.', 'Todas las cantidades empiezan en 0. Cambia solo las categorías con cartas restantes. La vista previa se actualiza automáticamente; revisa las penalizaciones de arriba y confirma para guardar.')}</p>
+    <p id="moth-confirm-status" class="moth-hint" role="status"></p>
+    <div class="moth-actions"><button id="moth-preview-round" type="submit">${tr('Check entries', 'Revisar datos')}</button><button id="moth-save-round" type="button" aria-describedby="moth-confirm-note moth-confirm-status"${mothScorePreview ? '' : ' disabled'}>${editing ? tr('Confirm correction', 'Confirmar corrección') : tr('Confirm round', 'Confirmar ronda')}</button>${editing ? `<button id="moth-edit-cancel" type="button">${tr('Cancel edit', 'Cancelar edición')}</button>` : ''}</div></form>`;
 }
 
 function mothPreviewHTML() {
@@ -164,7 +165,6 @@ function bindMothScore() {
   if (!root) return;
   const redraw = (focus = 'moth-round-heading') => {persistMothScore(); refreshScorePanel('moth-score', mothScoreView, bindMothScore, focus);};
   const notice = code => {mothScoreNotice = code; document.getElementById('moth-score-notice').textContent = code ? mothScoreError(code) : '';};
-  const invalidate = () => {mothScorePreview = null; document.getElementById('moth-round-preview').replaceChildren(); document.getElementById('moth-save-round').disabled = true; notice('');};
   const count = document.getElementById('moth-player-count');
   count.onchange = () => {mothScoreSetup.count = Number(count.value); redraw('moth-player-count');};
   root.querySelectorAll('[data-moth-name]').forEach(input => {input.oninput = () => {mothScoreSetup.names[Number(input.dataset.mothName)] = input.value;};});
@@ -182,35 +182,54 @@ function bindMothScore() {
   if (!mothScoreGame) return;
   const draft = mothScoreDraft;
   if (draft) {
+    const confirm = document.getElementById('moth-save-round');
+    const refreshPreview = (showError = false) => {
+      if (draft !== mothScoreDraft || !root.isConnected) return false;
+      const preview = document.getElementById('moth-round-preview');
+      const status = document.getElementById('moth-confirm-status');
+      try {
+        mothScorePreview = scoreMothRound(mothScoreGame.players.length, draft.out === '' ? NaN : Number(draft.out), draft.entries);
+        preview.innerHTML = mothPreviewHTML();
+        confirm.disabled = false;
+        status.textContent = tr('Ready to confirm. Review the penalties above.', 'Lista para confirmar. Revisa las penalizaciones de arriba.');
+        notice('');
+        return true;
+      } catch (error) {
+        mothScorePreview = null;
+        preview.replaceChildren();
+        confirm.disabled = true;
+        status.textContent = mothScoreError(error.message);
+        notice(showError ? error.message : '');
+        return false;
+      }
+    };
     const refreshTotals = () => draft.entries.forEach((counts, i) => {
       const output = document.getElementById(`moth-player-total-${i}`);
       if (!output) return;
       try { output.textContent = tr('Penalty: ', 'Penalización: ') + mothPenalty(counts.map(mothCount)); }
       catch { output.textContent = tr('Enter all three counts, including 0.', 'Completa las tres cantidades, incluido el 0.'); }
     });
-    refreshTotals();
+    refreshTotals(); refreshPreview();
     root.querySelectorAll('[data-moth-zero]').forEach(button => button.onclick = () => {
       const i = Number(button.dataset.mothZero);
       draft.entries[i] = draft.entries[i].map(value => value === '' ? '0' : value);
       draft.entries[i].forEach((value, category) => { document.getElementById(`moth-count-${i}-${category}`).value = value; });
-      invalidate(); refreshTotals();
+      refreshTotals(); refreshPreview();
     });
     document.getElementById('moth-out').onchange = event => {draft.out = event.target.value; mothScorePreview = null; mothScoreNotice = ''; redraw('moth-out');};
     root.querySelectorAll('[data-moth-category]').forEach(input => {input.oninput = () => {
-      draft.entries[Number(input.dataset.mothPlayer)][Number(input.dataset.mothCategory)] = input.value; invalidate(); refreshTotals();
+      draft.entries[Number(input.dataset.mothPlayer)][Number(input.dataset.mothCategory)] = input.value; refreshTotals(); refreshPreview();
     };});
     document.getElementById('moth-round-form').onsubmit = event => {
       event.preventDefault();
       if (draft !== mothScoreDraft) return;
-      try {
-        mothScorePreview = scoreMothRound(mothScoreGame.players.length, draft.out === '' ? NaN : Number(draft.out), draft.entries);
-        mothScoreNotice = ''; redraw('moth-save-round');
-      } catch (error) {invalidate(); notice(error.message); document.getElementById('moth-score-notice').focus();}
+      if (refreshPreview(true)) confirm.focus();
+      else document.getElementById('moth-confirm-status').scrollIntoView({block: 'center', behavior: 'instant'});
     };
-    const preview = mothScorePreview;
-    document.getElementById('moth-save-round')?.addEventListener('click', () => {
+    confirm.addEventListener('click', () => {
       // A detached button/double click cannot save a new round using an old preview.
-      if (!preview || preview !== mothScorePreview || draft !== mothScoreDraft) return;
+      if (!confirm.isConnected || draft !== mothScoreDraft || !mothScorePreview) return;
+      const preview = mothScorePreview;
       try {
         const editing = draft.round <= mothScoreGame.rounds.length;
         const firstSave = !mothScoreGame.locked;

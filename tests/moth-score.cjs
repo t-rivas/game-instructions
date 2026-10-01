@@ -109,7 +109,7 @@ async function edit(page, round) {
       for (const [i,name] of ['<Ada>','Ben','Cy'].entries()) await page.locator(`#moth-name-${i}`).fill(name);
       await page.locator('#moth-player-form button').click();
       check(await page.locator('.scoreboard-heading #moth-new-game').isVisible(), 'Reset is prominent beside scoreboard title');
-      check(await page.locator('#moth-save-round').isVisible() && await page.locator('#moth-save-round').isDisabled(), 'Round confirmation is visible before preview and requires review');
+      check(await page.locator('#moth-save-round').isVisible() && await page.locator('#moth-save-round').isDisabled(), 'Round confirmation is visible and requires valid entries');
       check(await page.locator('#moth-save-round').textContent() === 'Confirm round', 'Confirmation has an explicit label');
       // Membership remains editable until round one is saved.
       await page.locator('#moth-players > summary').click();
@@ -127,6 +127,7 @@ async function edit(page, round) {
       await page.locator('#moth-preview-round').click();
       check((await page.locator('#moth-score-notice').textContent()).includes('explicit') && await page.locator('#moth-save-round').isDisabled(), 'Blank counts never mean zero');
       await fill(page, 1, [2,1,1]); await fill(page, 2, [0,0,1]);
+      check(await page.locator('#moth-save-round').isEnabled() && await page.locator('[data-moth-preview="1"]').textContent() === '17', 'Completing valid counts enables confirmation and previews penalties without an extra click');
       for (const invalid of ['', '-1', '1.5', '1e1']) {
         await page.locator('#moth-count-1-0').fill(invalid);
         await page.locator('#moth-preview-round').click();
@@ -144,9 +145,10 @@ async function edit(page, round) {
       check(await page.evaluate(() => mothScoreGame.rounds.length) === 0, 'Preview does not save');
       check(await page.locator('#moth-save-round').isEnabled(), 'Valid preview enables round confirmation');
       await page.locator('#moth-count-1-0').fill('3');
-      check(await page.locator('#moth-save-round').isDisabled(), 'Changing a count invalidates the preview');
+      check(await page.locator('#moth-save-round').isEnabled() && await page.locator('[data-moth-preview="1"]').textContent() === '18', 'Valid count changes refresh the preview and keep confirmation available');
+      await page.locator('#moth-count-1-0').fill('');
+      check(await page.locator('#moth-save-round').isDisabled() && (await page.locator('#moth-confirm-status').textContent()).includes('explicit'), 'Missing count disables confirmation and explains the reason beside the button');
       await page.locator('#moth-count-1-0').fill('2');
-      await page.locator('#moth-preview-round').click();
       await page.locator('#lang-es').click(); await page.locator('#theme').click();
       await visit(page, 'moth/full'); await visit(page, 'coup/reference'); await visit(page, 'moth/reference');
       check(await page.locator('[data-moth-preview="1"]').textContent() === '17', 'Preview and draft survive language, theme and view changes');
@@ -164,10 +166,10 @@ async function edit(page, round) {
       await fill(page, 0, [2,1,1]); await fill(page, 2, [0,1,0]);
       await edit(page, 1); await page.locator('#moth-edit-cancel').click();
       check(await page.locator('#moth-count-0-0').inputValue() === '2' && await page.locator('#moth-out').inputValue() === '1', 'Cancel correction restores unfinished next round');
-      await previewSave(page);
+      await page.locator('#moth-save-round').focus(); await page.keyboard.press('Enter');
       check(await page.locator('[data-moth-total="0"]').textContent() === '17' && await page.locator('[data-moth-total="2"]').textContent() === '15', 'Multiple rounds accumulate correctly');
       await page.locator('#moth-out').selectOption('2'); await fill(page, 0, zero()); await fill(page, 1, zero());
-      await previewSave(page);
+      await page.locator('#moth-save-round').click();
       check(await page.locator('#moth-round-form').count() === 0 && (await page.locator('#moth-game-result').textContent()).includes('Winner: Cy'), 'Game stops at three rounds and identifies lowest total');
       await edit(page, 1); await fill(page, 2, [2,0,1]); await previewSave(page);
       check((await page.locator('#moth-game-result').textContent()).includes('Joint winners: Ada renamed, Ben, Cy'), 'Correction produces a three-way lowest tie');

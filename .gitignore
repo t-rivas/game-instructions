@@ -6,3 +6,9 @@
 node_modules/
 __pycache__/
 *.py[cod]
+.next/
+out/
+*.tsbuildinfo
+src/generated/
+public/assets/
+public/game-night.html

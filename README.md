@@ -2,7 +2,25 @@
 
 A bilingual, offline game-night guide for No-Limit Texas Hold’em, Coup, Coup: Reformation, The Resistance: Avalon, Cheating Moth / La Polilla Tramposa, Dixit, Catan, Secret Hitler, El Camarero, Monopoly, Chess, Burako, Uruguayan Truco, Skull King, Sushi Go! and Sushi Go Party!.
 
-## Open
+## Develop and build the website
+
+The hosted site uses Next.js App Router, React and TypeScript. Node.js 20.9+ is required.
+
+```sh
+npm ci
+npm run dev
+```
+
+Open `http://localhost:3000`. The collection is available at `/`, `/es/` and `/en/`. Every game has `/[lang]/[game]/learn/`, `/[lang]/[game]/play/` and `/[lang]/[game]/rules/` routes. Rule sections use ordinary fragments, such as `/en/monopoly/rules/#movement`. Old root bookmarks such as `/#chess/reference` are migrated in the browser.
+
+```sh
+npm run build
+npm run serve
+```
+
+The production build statically generates all 90 game views plus the collection pages into `out/`. `serve` prints a local URL for inspecting that export. The deployed website needs only static file hosting; no application server or database is required. Page titles, descriptions, localized HTML and all rule text are generated before JavaScript runs. Interactive tools load in a separate browser module.
+
+## Open the offline guide
 
 Double-click **game-night.html**. Everything is included in that one file; no installation, account, internet connection, or server is needed. External rulebook links need internet.
 
@@ -12,7 +30,9 @@ Alternatively, open **index.html**, keeping all CSS and JavaScript files and the
 
 Import [t-rivas/game-instructions](https://github.com/t-rivas/game-instructions) from [Vercel's new project page](https://vercel.com/new) and click **Deploy**. Keep the root directory at the repository root.
 
-The included `vercel.json` selects the **Other** framework preset, skips installation and building, and serves the root directory. No environment variables are required. Vercel serves `index.html` with its local scripts, styles and assets; `game-night.html` remains available as the standalone offline version.
+The included `vercel.json` selects **Next.js**, installs with `npm ci`, runs `npm run build` and publishes `out/`. If the existing Vercel project has dashboard overrides for installation, build or output, remove those overrides so the checked-in configuration takes effect. The hosted collection includes a download link to `/game-night.html`.
+
+No environment variables are required. Optionally set `NEXT_PUBLIC_SITE_URL` to the production origin to generate absolute canonical URLs, language alternatives and social preview images. Vercel’s `VERCEL_PROJECT_PRODUCTION_URL` is used automatically when available. Local builds leave these absolute links out if no origin is configured.
 
 See [Vercel's build configuration documentation](https://vercel.com/docs/builds/configure-a-build) for static-site settings.
 
@@ -21,7 +41,7 @@ See [Vercel's build configuration documentation](https://vercel.com/docs/builds/
 - Game-specific visual themes across the full collection and all guide views. Each supports light and dark modes and print-friendly output.
 - Spanish is the default on first visit; a saved English or Spanish choice is restored on later visits.
 - Clear Spanish for readers in Uruguay, without local slang, and plain English for non-native speakers. Game terms are explained where they are introduced, with consistent wording across Learn, While playing, and Full rules.
-- The collection opens compact table references: turn order, short action rows and key reminders. Examples, practice tools and credits are expandable; Coup and Skull King option controls stay visible.
+- Play now opens compact table references: turn order, short action rows and key reminders. Examples, practice tools and credits are expandable; Coup and Skull King option controls stay visible.
 - Print the compact reference directly with its print button. Dixit prints all scoring outcomes, independent of the selected interactive outcome.
 - Every active scoreboard (Coup, La Polilla, Skull King and Truco) has a prominent “Reset · edit players” button beside its title. Reset clears results and unfinished entries and returns to editable setup. Chess and Poker keep their timer reset controls.
 - Dixit includes full base-game rules, a live scoring selector, the three-player adjustments, and official box/component/card imagery.
@@ -50,6 +70,10 @@ See [Vercel's build configuration documentation](https://vercel.com/docs/builds/
 
 ## Edit
 
+The website’s routes and layouts live in `src/app/`. `src/components/` contains the React collection, site controls, rule lookup and guides; `src/lib/` contains typed data access, metadata and the tool adapter. `npm run typecheck` checks the TypeScript code.
+
+`scripts/prepare-web.mjs` generates `src/generated/catalog.json` and a scoped tool runtime from the shared game sources, then copies local assets and the portable guide into `public/`. The generated files are ignored by Git and regenerated by `dev`, `build` and `typecheck`. React owns the main interface; isolated tool components reuse the existing scoring, timing, setup and practice behavior. One browser runtime retains clocks and drafts across route changes, and existing storage keys are preserved. The root `app.js` and `index.html` remain the interface for the portable offline build.
+
 `data.js` contains the original paired English/Spanish explanations; `dixit.js`, `new-games.js` and `more-games.js` add the remaining guides. `table-guide.js` and `table-guide.css` implement the compact table references and print layout. `app.js` contains the interface and translated labels. `enhancements.js` contains the interactive learning tools. `official.js` contains the real-image registry, the separate in-guide illustration registry, bilingual captions, credits and accessible image viewer; `official.css` styles these additions. `styles.css`, `enhancements.css` and `game-themes.css` control the responsive presentation and game-specific themes. Run `scripts/make-cover-cutouts.ps1` to recreate the transparent product cutouts from the downloaded real photographs.
 
 After editing, run:
@@ -59,7 +83,7 @@ python3 build.py
 # or: node build.mjs
 ```
 
-This regenerates `game-night.html`. There is no build dependency to install. Both builders produce the same output, including with Windows line endings or when invoked from another directory. The export embeds the photographs, card references and decorative illustrations so it works offline. The current export is approximately 42.7 MiB; the source version loads its images separately.
+This regenerates `game-night.html`. `npm run build:offline` runs the same Node builder. `npm run build` also prepares and builds the Next.js website. There is no build dependency to install. Both builders produce the same output, including with Windows line endings or when invoked from another directory. The export embeds the photographs, card references and decorative illustrations so it works offline. The current export is approximately 42.7 MiB; the source version loads its images separately.
 
 `practice.js` contains the ten added games’ teaching scenarios and their interaction state. These are examples for learning; each explanation links to its corresponding full-rules section.
 
@@ -84,6 +108,8 @@ Run the repeatable checks with:
 ```sh
 npm ci
 npx playwright install chromium
+npm run build
+npm run test:web
 npm test
 npm run test:cards
 npm run test:flows
@@ -96,7 +122,7 @@ npm run test:truco
 npm run test:scoreboard-ux
 ```
 
-If using an installed Google Chrome instead, run `CHROME_CHANNEL=chrome npm test`. Python 3 is required to compare the two dependency-free builders. Playwright is used only for development checks; opening or deploying the guide still requires no installation.
+If using an installed Google Chrome instead, run `CHROME_CHANNEL=chrome npm run test:web` and `CHROME_CHANNEL=chrome npm test`. Python 3 is required to compare the two dependency-free offline builders. Playwright is used only for development checks; opening the portable guide requires no installation. Building the hosted website requires the npm dependencies above.
 
 The PR #1 review passed **1,405 checks** in headless Chrome: 1,152 view combinations across all twelve games, three views, both languages, both themes and widths of 320, 390, 768 and 1440px in both HTML entry points, plus build parity with CRLF/from another directory, embedded-script syntax, stale-export detection, image decoding, offline requests, fourteen practice scenarios, keyboard navigation, language persistence, image dialogs, Coup options, Avalon quest exceptions, Poker, Polilla and Dixit helpers, and reference printing. Mobile and desktop practice screenshots were reviewed visually. The suite writes screenshots to a temporary directory and prints its location.
 
@@ -117,3 +143,5 @@ Truco scoreboard checks cover 14→15, 29→30, overshoots, custom targets, targ
 The counter and timer usability review is documented in [docs/counters-review.md](docs/counters-review.md). `npm run test:scoreboard-ux` checks the five active tools in both HTML entry points, English and Spanish, at 320, 390 and 1440px. It also checks storage failure feedback, reload recovery, per-player controls, live previews and undo. Confirmed scores and unfinished fields are stored locally and restored after a reload when browser storage is available. Draft recovery keeps entries unconfirmed until the player saves them. No account or cloud synchronization is involved.
 
 `npm run test:flows` checks the Learn/Play entry points, visible Avalon setup, game rule search and reload recovery for unfinished scoreboard entries and corrections in both offline entry points. Run `BROWSER=webkit npm run test:flows` to repeat in Safari’s engine.
+
+`npm run test:web` starts a temporary local static server and checks the exported Next.js site: all localized routes without JavaScript, game metadata, old bookmark routing, client navigation, lessons, variants, Avalon setup, images, rule search, all six play tools, saved-state recovery, local assets and layouts at 320, 390 and 1440px. Run `BROWSER=webkit npm run test:web` to repeat in Safari’s engine. The existing suites continue to check the portable version and the underlying game models.

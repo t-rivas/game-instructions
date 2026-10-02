@@ -1,0 +1,22 @@
+.site-shell {
+  min-height: 100svh;
+  background: var(--bg);
+  color: var(--text);
+}
+
+@media print {
+  .site-shell[data-game] {
+    --bg: white;
+    --panel: white;
+    --panel2: #f4f4f4;
+    --text: black;
+    --muted: #333;
+    --border: #aaa;
+    --accent: #222;
+    --on-accent: white;
+    --theme-metal: #666;
+    --theme-pattern: none;
+    background: white;
+    color: black;
+  }
+}

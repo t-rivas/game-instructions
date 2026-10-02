@@ -70,6 +70,12 @@ source = source.replace(
 const adapter = `
 const subscribers = new Set();
 let restoreFocus = null;
+try {
+ const saved=JSON.parse(localStorage.getItem('tablefolk-avalon-setup-v1')||'null');
+ if(saved&&Number.isInteger(saved.players)&&Object.hasOwn(AVALON_SETUPS,saved.players)&&['basic','optional'].includes(saved.avalonMode)&&Array.isArray(saved.optional)&&saved.optional.every(id=>AVALON_ROLES.slice(2).some(role=>role.id===id))&&typeof saved.lady==='boolean'){
+  Object.assign(state,{players:saved.players,avalonMode:saved.avalonMode,optional:saved.avalonMode==='basic'?[]:[...new Set(saved.optional)],lady:saved.lady});normalizeAvalon();
+ }
+}catch{}
 function webHTML(html){
  return html.replace(/href="#([^"]+)"/g, (match, hash)=>{
   const [game,tab,section] = hash.split('/');
@@ -79,6 +85,7 @@ function webHTML(html){
  });
 }
 function render(preserve=false){
+ if(state.game==='avalon')try{localStorage.setItem('tablefolk-avalon-setup-v1',JSON.stringify({players:state.players,avalonMode:state.avalonMode,optional:state.optional,lady:state.lady}));}catch{}
  restoreFocus=preserve?{id:document.activeElement?.id,y:window.scrollY}:null;
  subscribers.forEach(notify=>notify());
 }
@@ -98,6 +105,20 @@ return {
  subscribe(notify){subscribers.add(notify);return ()=>subscribers.delete(notify);},
  view(kind){return webHTML(kind==='play'?tableGuide():kind==='setup'?avalonHelper('setup'):kind==='sources'?sources():helper());},
  lessonSteps,
+ savedGames(){
+  const games=[],chess=chessClock.snapshot(),poker=pokerTimer.snapshot(),coup=coupSession.snapshot(),truco=trucoScore.snapshot();
+  if(['running','paused'].includes(chess.phase))games.push({id:'chess',phase:chess.phase,remaining:chess.remaining});
+  if(['running','paused'].includes(poker.phase))games.push({id:'poker',phase:poker.phase,completed:poker.index,goal:poker.schedule.length,remaining:[poker.remaining]});
+  if(coup.started&&!coup.finished)games.push({id:'coup',players:coup.standings.map(player=>({name:player.name,score:player.points})),completed:coup.results.length,goal:coup.planned});
+  if(truco.started&&!truco.finished)games.push({id:'truco',players:truco.names.map((name,i)=>({name,score:truco.totals[i]}))});
+  if(mothScoreGame){const summary=mothGameSummary(mothScoreGame);if(!summary.finished)games.push({id:'moth',players:mothScoreGame.players.map((name,i)=>({name,score:summary.totals[i]})),completed:mothScoreGame.rounds.length,goal:mothScoreGame.players.length});}
+  if(skullScoreGame){const summary=skullGameSummary(skullScoreGame);if(!summary.finished)games.push({id:'skull_king',players:skullScoreGame.setup.players.map((name,i)=>({name,score:summary.totals[i]})),completed:skullScoreGame.rounds.length,goal:10});}
+  return games;
+ },
+ playStatus(){
+  const status=({chess:()=>({active:chessClock.snapshot().phase!=='ready',storage:true}),poker:()=>({active:pokerTimer.snapshot().phase!=='ready',storage:pokerTimerStorageOK}),coup:()=>({active:coupSession.snapshot().started,storage:coupStorageOK}),truco:()=>({active:trucoScore.snapshot().started,storage:trucoStorageOK}),moth:()=>({active:!!mothScoreGame,storage:mothStorageOK}),skull_king:()=>({active:!!skullScoreGame,storage:skullStorageOK})})[state.game]?.()||{active:false,storage:true};
+  return {...status,storage:status.storage&&storageStatus.available};
+ },
  bind(kind){
   if(kind==='play') {bindTableGuide();bindChessClock();bindPokerTimer();bindCoupSession();bindSkullScore();bindMothScore();bindTrucoScore();}
   if(kind==='play'||kind==='helper')bindLearningTools();
@@ -111,6 +132,7 @@ export function createToolRuntime(platform={}) {
  const document=platform.document||{addEventListener(){},getElementById(){return null;}};
  const window=platform.window||{addEventListener(){}};
  const localStorage=platform.localStorage||{getItem(){return null;},setItem(){}};
+ const storageStatus=platform.storageStatus||{available:true};
  const setInterval=platform.setInterval||(()=>null), clearInterval=platform.clearInterval||(()=>{});
  ${source}
  ${adapter}

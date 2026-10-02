@@ -20,6 +20,15 @@ npm run serve
 
 The production build statically generates all 90 game views plus the collection pages into `out/`. `serve` prints a local URL for inspecting that export. The deployed website needs only static file hosting; no application server or database is required. Page titles, descriptions, localized HTML and all rule text are generated before JavaScript runs. Interactive tools load in a separate browser module.
 
+The hosted website also includes:
+
+- Compact game banners on phones, with the game name, player count and a thumbnail.
+- A “Continue playing” section with validated summaries and Resume links for unfinished clocks, tournaments and scoreboards, plus recently opened games.
+- Favorites saved on the device, exact player-count filters and duration filters based on the longest listed time.
+- A sticky rule-search shortcut and `Ctrl/Cmd+K`. Searches survive view changes and Back navigation; result links include the query and highlight matches in the opened rules.
+- A full-screen table view with enlarged clock and score displays, a pinned exit/search toolbar and local-save feedback. Escape exits this view; closing a search first returns to the game. Active chess-clock configuration collapses after starting.
+- Bilingual setup checklists for every game. Completion is saved locally and cleared when the relevant setup changes. Avalon player and role choices also recover after reload. Setup notes retain the detailed rules and exceptions.
+
 ## Open the offline guide
 
 Double-click **game-night.html**. Everything is included in that one file; no installation, account, internet connection, or server is needed. External rulebook links need internet.
@@ -144,4 +153,4 @@ The counter and timer usability review is documented in [docs/counters-review.md
 
 `npm run test:flows` checks the Learn/Play entry points, visible Avalon setup, game rule search and reload recovery for unfinished scoreboard entries and corrections in both offline entry points. Run `BROWSER=webkit npm run test:flows` to repeat in Safari’s engine.
 
-`npm run test:web` starts a temporary local static server and checks the exported Next.js site: all localized routes without JavaScript, game metadata, old bookmark routing, client navigation, lessons, variants, Avalon setup, images, rule search, all six play tools, saved-state recovery, local assets and layouts at 320, 390 and 1440px. Run `BROWSER=webkit npm run test:web` to repeat in Safari’s engine. The existing suites continue to check the portable version and the underlying game models.
+`npm run test:web` starts a temporary local static server and checks the exported Next.js site: all localized routes without JavaScript, game metadata, old bookmark routing, client navigation, lessons, variants, setup checklists, collection filters and favorites, images, shared rule searches and keyboard focus, all six play tools, saved-game shortcuts, recovery, full-screen layouts and unavailable-storage feedback. Layouts are checked at 320, 390 and 1440px. Run `BROWSER=webkit npm run test:web` to repeat in Safari’s engine. The existing suites continue to check the portable version and the underlying game models.

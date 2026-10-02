@@ -20,3 +20,713 @@
     color: black;
   }
 }
+
+/* Shared controls retain the colors and artwork of each game. */
+.site-shell {
+  background-image: var(--theme-pattern, none);
+}
+.collection-filters {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 18px 0 10px;
+}
+.collection-filters label {
+  display: grid;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  flex: 1;
+  min-width: 145px;
+}
+.collection-filters select {
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--text);
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 15px;
+}
+.collection-filters button,
+.find-rule-button,
+.play-toolbar button,
+.checklist-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.collection-filters button[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--on-accent);
+  border-color: var(--accent);
+}
+.collection-filters svg,
+.find-rule-button svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+.collection-results {
+  font-size: 13px;
+  margin: 12px 0 18px;
+}
+.game-grid .game-art {
+  min-height: 175px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  height: 200px;
+  aspect-ratio: auto;
+}
+.game-grid .game-card[data-game] .game-art > img.official-cover {
+  position: static;
+  inset: auto;
+  width: 88%;
+  height: 175px;
+  max-height: 175px;
+  object-fit: contain;
+  padding: 0;
+}
+.favorite-toggle {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--panel);
+  color: var(--muted);
+  cursor: pointer;
+}
+.favorite-toggle svg {
+  width: 20px;
+  height: 20px;
+}
+.favorite-toggle[aria-pressed="true"] {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.favorite-toggle[aria-pressed="true"] svg {
+  fill: var(--accent);
+}
+.game-grid .card-body p {
+  font-size: 14px;
+  line-height: 1.55;
+}
+.card-body .card-bottom {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.card-body .card-bottom a {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  font-size: 12px;
+}
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.section-heading h2 {
+  margin: 0;
+}
+.section-heading .muted {
+  font-size: 13px;
+}
+.continue-playing {
+  padding: 30px 0 20px;
+}
+.resume-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 12px;
+}
+.resume-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--panel);
+  color: var(--text);
+}
+.resume-card > img {
+  width: 60px;
+  height: 80px;
+  object-fit: contain;
+  flex: none;
+}
+.resume-card > div {
+  min-width: 0;
+}
+.resume-card h3 {
+  font-size: 18px;
+  margin: 0 0 6px;
+  color: var(--accent);
+}
+.resume-card p {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.resume-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+}
+.recent-games {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 18px 0 0;
+}
+.recent-games > span {
+  color: var(--muted);
+  font-size: 12px;
+  margin-right: 4px;
+}
+.recent-games a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  border-radius: 24px;
+  font-size: 13px;
+  text-decoration: none;
+  background: var(--panel);
+}
+.continue-playing ~ .hero {
+  padding-top: 24px;
+  padding-bottom: 30px;
+}
+.continue-playing ~ .hero .hero-gallery {
+  height: 220px;
+}
+.continue-playing ~ .hero .gallery-main {
+  height: 190px;
+}
+.detail-controls {
+  gap: 10px;
+}
+.detail-controls .tabs {
+  flex: 1;
+  min-width: 0;
+}
+.find-rule-button {
+  flex: none;
+}
+.rule-dialog {
+  width: min(640px, calc(100% - 28px));
+  max-height: 85dvh;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--panel);
+  color: var(--text);
+  overflow: auto;
+}
+.rule-dialog::backdrop {
+  background: #000a;
+  backdrop-filter: blur(3px);
+}
+.rule-dialog .dialog-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.rule-dialog h2 {
+  margin: 0;
+  font-size: 24px;
+}
+.rule-dialog .dialog-heading button {
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--panel2);
+  color: var(--text);
+  font-size: 26px;
+  cursor: pointer;
+}
+.rule-dialog .rule-search {
+  margin-bottom: 0;
+}
+.rule-body mark {
+  background: var(--accent);
+  color: var(--on-accent);
+  border-radius: 2px;
+}
+.play-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 16px;
+}
+.play-toolbar > div:first-child {
+  min-width: 0;
+}
+.play-toolbar-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.save-status {
+  display: block;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.save-status::before {
+  content: "●";
+  color: var(--accent);
+  font-size: 8px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+.save-unavailable {
+  color: var(--text);
+}
+.save-unavailable::before {
+  content: "!";
+  font-size: 14px;
+}
+.focus-game-name {
+  display: none;
+}
+main[data-active-tool="true"] #chess-clock-settings {
+  display: none;
+}
+.setup-checklist {
+  margin-top: 14px;
+}
+.checklist-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.checklist-heading h3 {
+  margin: 0;
+  font-size: 18px;
+}
+.checklist-heading > span {
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.setup-checklist ol {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0;
+  display: grid;
+  gap: 10px;
+}
+.setup-checklist li {
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel2);
+}
+.setup-checklist label {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1.65;
+}
+.setup-checklist input {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  margin: 2px 0 0;
+  accent-color: var(--accent);
+}
+.setup-step-number {
+  color: var(--accent);
+  font-weight: 700;
+}
+.setup-checklist li.checked {
+  border-color: var(--accent);
+}
+.checklist-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.checklist-actions > a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 12px 18px;
+  text-decoration: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.setup-notes {
+  margin-top: 16px;
+}
+.setup-notes summary {
+  padding: 12px 0;
+  min-height: 44px;
+  font-size: 14px;
+  color: var(--muted);
+  cursor: pointer;
+}
+.setup-notes p {
+  font-size: 14px;
+}
+
+/* Focus mode fills the viewport and keeps the table actions within reach. */
+body:has(main[data-focus="true"]) {
+  overflow: hidden;
+}
+.site-shell:has(main[data-focus="true"]) :is(#header, #footer) {
+  display: none;
+}
+main[data-focus="true"] {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  overflow: auto;
+  overscroll-behavior: contain;
+  background: var(--bg);
+  color: var(--text);
+}
+main[data-focus="true"] > .wrap {
+  max-width: 1200px;
+  padding-top: max(16px, env(safe-area-inset-top));
+  padding-bottom: max(24px, env(safe-area-inset-bottom));
+}
+main[data-focus="true"]
+  :is(.breadcrumb, .detail-hero, .detail-controls, .coup-variants) {
+  display: none !important;
+}
+main[data-focus="true"] .detail-layout {
+  max-width: none;
+}
+main[data-focus="true"] .focus-game-name {
+  display: block;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+main[data-focus="true"] .play-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg);
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+main[data-focus="true"][data-has-play-tool="true"] #table-sheet {
+  display: none;
+}
+main[data-focus="true"]
+  :is(#chess-clock-time-0, #chess-clock-time-1, #poker-timer-time) {
+  font-size: clamp(52px, 10vw, 100px);
+  font-variant-numeric: tabular-nums;
+}
+main[data-focus="true"] .chess-clock-player {
+  min-height: 220px;
+}
+main[data-focus="true"]
+  :is(.truco-total strong, .moth-totals strong, .skull-totals strong) {
+  font-size: clamp(32px, 5vw, 56px);
+  font-variant-numeric: tabular-nums;
+}
+main[data-focus="true"] #coup-standings td:nth-child(2) {
+  font-size: 28px;
+  font-weight: 700;
+}
+main[data-focus="true"]
+  .content
+  :is(input, select, button):not(.chess-clock-player) {
+  min-height: 48px;
+}
+
+@media (max-width: 680px) {
+  .hero {
+    padding-top: 24px;
+    padding-bottom: 24px;
+  }
+  .hero .pill,
+  .hero .hero-note {
+    display: none;
+  }
+  .hero h1 {
+    font-size: clamp(32px, 8vw, 40px);
+    line-height: 1.12;
+    margin: 0 0 12px;
+  }
+  .hero p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .collection-head {
+    gap: 12px;
+  }
+  .collection-filters {
+    gap: 10px;
+  }
+  .collection-filters label {
+    min-width: calc(50% - 10px);
+  }
+  .collection-filters select {
+    font-size: 16px;
+    padding: 10px;
+  }
+  .game-grid .game-art {
+    min-height: 170px;
+    padding: 36px 8px 10px;
+    height: auto;
+  }
+  .game-grid .game-card[data-game] .game-art > img.official-cover {
+    width: 100%;
+    max-height: 190px;
+    height: 160px;
+  }
+  .section-heading {
+    align-items: start;
+  }
+  .section-heading h2 {
+    font-size: 24px;
+  }
+  .resume-card {
+    padding: 14px;
+    gap: 14px;
+  }
+  .resume-card > img {
+    width: 48px;
+    height: 64px;
+  }
+  .detail-hero,
+  .compact-hero .detail-hero {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 68px !important;
+    align-items: center;
+    gap: 12px;
+    padding: 14px !important;
+    margin-bottom: 14px !important;
+    min-height: 0;
+  }
+  .detail-hero .theme-title {
+    display: block !important;
+    order: 0;
+    min-width: 0;
+  }
+  .site-shell .detail-hero .detail-cover {
+    position: relative !important;
+    inset: auto !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    order: 1 !important;
+    width: 68px !important;
+    height: 62px !important;
+    display: flex !important;
+  }
+  .detail-hero .detail-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .detail-hero :is(.theme-seal, .theme-caption, .eyebrow, .theme-title > p) {
+    display: none !important;
+  }
+  .detail-hero h1,
+  .compact-hero .detail-hero h1 {
+    font-size: clamp(23px, 6vw, 30px) !important;
+    line-height: 1.12;
+    margin: 0 0 8px !important;
+  }
+  .detail-hero .meta {
+    display: flex !important;
+    font-size: 11px;
+    gap: 6px 10px;
+  }
+  .detail-controls {
+    flex-wrap: nowrap;
+    gap: 6px;
+    min-height: 64px;
+  }
+  .detail-controls .tabs {
+    justify-content: space-between;
+  }
+  .detail-controls .tabs button {
+    padding: 10px 6px;
+    font-size: 12px;
+  }
+  .detail-controls .find-rule-button {
+    width: 44px;
+    padding: 10px;
+  }
+  .detail-controls .find-rule-button span {
+    display: none;
+  }
+  .goal-box {
+    padding: 16px;
+  }
+  .goal-box p {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .learning-setup {
+    padding: 16px;
+  }
+  .learning-setup [data-tool="setup"] .block > h2 {
+    font-size: 18px;
+    line-height: 1.3;
+    margin: 14px 0 16px;
+  }
+  .learning-setup .settings .field {
+    min-width: 0;
+    flex: 1;
+  }
+  .learning-setup .settings select {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .rule-dialog {
+    padding: 18px;
+  }
+  .play-toolbar {
+    align-items: flex-start;
+  }
+  .play-toolbar > div:first-child {
+    flex: 1;
+  }
+  .play-toolbar-actions {
+    flex: 1;
+    justify-content: flex-end;
+  }
+  .play-toolbar #focus-play {
+    font-size: 12px;
+    padding: 10px;
+    max-width: 170px;
+  }
+  main[data-focus="true"] .play-toolbar {
+    flex-wrap: wrap;
+  }
+  main[data-focus="true"] .play-toolbar > div {
+    flex-basis: 100%;
+  }
+  main[data-focus="true"] .play-toolbar-actions {
+    justify-content: space-between;
+  }
+  main[data-focus="true"] .chess-clock-player {
+    min-height: 180px;
+  }
+  .setup-checklist label {
+    font-size: 14px;
+  }
+  .checklist-actions > a,
+  .checklist-actions > button {
+    flex: 1;
+  }
+}
+@media (max-width: 370px) {
+  main[data-focus="true"] .find-rule-button span {
+    display: none;
+  }
+  .card-body .card-bottom {
+    grid-template-columns: 1fr;
+  }
+  .collection-filters select {
+    font-size: 16px;
+  }
+  .detail-controls .tabs button {
+    padding: 10px 4px;
+    font-size: 11px;
+  }
+  .play-toolbar {
+    flex-wrap: wrap;
+  }
+  .play-toolbar > div:first-child {
+    flex-basis: 100%;
+  }
+  .play-toolbar-actions {
+    justify-content: flex-start;
+  }
+}
+@media print {
+  main[data-focus="true"] {
+    position: static;
+    overflow: visible;
+    background: white;
+    color: black;
+  }
+  body:has(main[data-focus="true"]) {
+    overflow: visible;
+  }
+  .site-shell {
+    background-image: none;
+  }
+  .play-toolbar,
+  .collection-filters,
+  .favorite-toggle,
+  .recent-games,
+  .continue-playing,
+  .rule-dialog,
+  .checklist-actions {
+    display: none !important;
+  }
+  main[data-focus="true"][data-has-play-tool="true"] #table-sheet {
+    display: block;
+  }
+  .setup-checklist input {
+    display: none;
+  }
+  .setup-checklist li {
+    background: white;
+    break-inside: avoid;
+  }
+  .setup-notes {
+    display: block;
+  }
+}

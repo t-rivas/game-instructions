@@ -1,4 +1,5 @@
 import type { ToolRuntime } from "./types";
+import { savedGamesEvent } from "./browser-storage";
 let pending: Promise<ToolRuntime> | undefined;
 export function loadTools(): Promise<ToolRuntime> {
   // One instance keeps clocks and unfinished rounds alive across Next routes.
@@ -8,15 +9,32 @@ export function loadTools(): Promise<ToolRuntime> {
       try {
         storage = window.localStorage;
       } catch {}
+      const storageStatus = { available: !!storage };
       return createToolRuntime({
         document,
         window,
-        localStorage: storage || {
-          getItem() {
-            throw new Error("Storage unavailable");
+        storageStatus,
+        localStorage: {
+          getItem(key: string) {
+            try {
+              if (!storage) throw new Error("Storage unavailable");
+              return storage.getItem(key);
+            } catch (error) {
+              storageStatus.available = false;
+              throw error;
+            }
           },
-          setItem() {
-            throw new Error("Storage unavailable");
+          setItem(key: string, value: string) {
+            try {
+              if (!storage) throw new Error("Storage unavailable");
+              storage.setItem(key, value);
+              storageStatus.available = true;
+              window.dispatchEvent(new Event(savedGamesEvent));
+            } catch (error) {
+              storageStatus.available = false;
+              window.dispatchEvent(new Event(savedGamesEvent));
+              throw error;
+            }
           },
         },
         setInterval: window.setInterval.bind(window),

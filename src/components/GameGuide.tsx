@@ -15,7 +15,6 @@ import type {
   Artwork,
   Game,
   Language,
-  RuleSection,
   ToolKind,
   ToolRuntime,
   ToolState,
@@ -23,6 +22,20 @@ import type {
   View,
 } from "@/lib/types";
 import { Icon } from "./Icon";
+import {
+  HighlightedText,
+  RuleSearch,
+  RuleSearchDialog,
+  useRuleQuery,
+} from "./RuleSearch";
+import { SetupChecklist } from "./SetupChecklist";
+import { setupSteps } from "@/lib/setup-steps";
+import {
+  readStored,
+  writeStored,
+  recentGamesKey,
+  savedGamesEvent,
+} from "@/lib/browser-storage";
 interface GuideProps {
   id: string;
   game: Game;
@@ -265,125 +278,6 @@ function Lesson({
     </section>
   );
 }
-const normalize = (value: string) =>
-  value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
-function RuleSearch({
-  id,
-  lang,
-  sections,
-  icons,
-}: {
-  id: string;
-  lang: Language;
-  sections: RuleSection[];
-  icons: Record<string, string>;
-}) {
-  const [query, setQuery] = useState(""),
-    input = useRef<HTMLInputElement>(null);
-  const tr = (en: string, es: string) => (lang === "es" ? es : en),
-    q = normalize(query.trim());
-  const matches = q
-    ? sections.filter((section) =>
-        [section.title[lang], ...section.paragraphs.map((p) => p[lang])].some(
-          (text) => normalize(text).includes(q),
-        ),
-      )
-    : [];
-  const highlight = (text: string) => {
-    const index = normalize(text).indexOf(q);
-    return index < 0 ? (
-      text
-    ) : (
-      <>
-        {text.slice(0, index)}
-        <mark>{text.slice(index, index + q.length)}</mark>
-        {text.slice(index + q.length)}
-      </>
-    );
-  };
-  return (
-    <section
-      className="rule-search"
-      aria-label={tr("Find a rule", "Buscar una regla")}
-    >
-      <label htmlFor="rule-search">
-        {tr("Search this game’s rules", "Buscar en las reglas de este juego")}
-      </label>
-      <div className="rule-search-controls">
-        <div className="search">
-          <Icon path={icons.search} />
-          <input
-            ref={input}
-            type="search"
-            id="rule-search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder={tr(
-              "Search a word or phrase…",
-              "Busca una palabra o frase…",
-            )}
-            aria-controls="rule-search-results"
-          />
-        </div>
-        <button
-          type="button"
-          id="rule-search-clear"
-          onClick={() => {
-            setQuery("");
-            input.current?.focus();
-          }}
-        >
-          {tr("Clear", "Borrar")}
-        </button>
-      </div>
-      <div id="rule-search-results" hidden={!q}>
-        <p className="muted" role="status" aria-atomic="true" hidden={!q}>
-          {q
-            ? matches.length
-              ? tr(
-                  `${matches.length} matching sections`,
-                  `${matches.length} secciones encontradas`,
-                )
-              : tr(
-                  "No rules found. Try another term.",
-                  "No se encontraron reglas. Prueba otro término.",
-                )
-            : ""}
-        </p>
-        {matches.map((section) => {
-          const text = (section.paragraphs.find((p) =>
-              normalize(p[lang]).includes(q),
-            ) || section.paragraphs[0])[lang],
-            index = Math.max(0, normalize(text).indexOf(q)),
-            start = Math.max(0, index - 60),
-            end = Math.min(
-              text.length,
-              Math.max(start + 220, index + q.length),
-            );
-          return (
-            <Link
-              prefetch={false}
-              key={section.id}
-              className="rule-search-result"
-              href={`/${lang}/${id}/rules/#${section.id}`}
-              onClick={() => setQuery("")}
-            >
-              <strong>{highlight(section.title[lang])}</strong>
-              <span>
-                {start ? "…" : ""}
-                {highlight(text.slice(start, end))}
-                {end < text.length ? "…" : ""}
-              </span>
-            </Link>
-          );
-        })}
-      </div>
-    </section>
-  );
-}
 function Variants({
   id,
   lang,
@@ -500,7 +394,64 @@ export function GameGuide({
     [retry, setRetry] = useState(0),
     panel = useRef<HTMLElement>(null);
   const [compact, setCompact] = useState(view === "play");
+  const [query, onQuery] = useRuleQuery(id, lang),
+    [searchOpen, setSearchOpen] = useState(false),
+    [focusPlay, setFocusPlay] = useState(false),
+    [playStatus, setPlayStatus] = useState<{
+      active: boolean;
+      storage: boolean;
+    } | null>(null);
+  const hasPlayTool = [
+    "chess",
+    "poker",
+    "coup",
+    "truco",
+    "moth",
+    "skull_king",
+  ].includes(id);
   const tr = (en: string, es: string) => (lang === "es" ? es : en);
+  const changeFocus = (enabled: boolean) => {
+    setFocusPlay(enabled);
+    try {
+      sessionStorage.setItem(`tablefolk-focus-play-${id}`, String(enabled));
+    } catch {}
+    requestAnimationFrame(() => document.getElementById("focus-play")?.focus());
+  };
+  useEffect(() => {
+    try {
+      setFocusPlay(
+        view === "play" &&
+          sessionStorage.getItem(`tablefolk-focus-play-${id}`) === "true",
+      );
+    } catch {}
+  }, [id, view]);
+  useEffect(() => {
+    const shortcut = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setSearchOpen(true);
+      }
+      if (
+        event.key === "Escape" &&
+        focusPlay &&
+        !document.querySelector("dialog[open]")
+      )
+        changeFocus(false);
+    };
+    window.addEventListener("keydown", shortcut);
+    return () => window.removeEventListener("keydown", shortcut);
+  }, [focusPlay, id]);
+  useEffect(() => {
+    if (!runtime || view !== "play") return;
+    const refresh = () => setPlayStatus(runtime.playStatus());
+    refresh();
+    window.addEventListener(savedGamesEvent, refresh);
+    const interval = window.setInterval(refresh, 1000);
+    return () => {
+      window.removeEventListener(savedGamesEvent, refresh);
+      clearInterval(interval);
+    };
+  }, [runtime, view]);
   useLayoutEffect(() => {
     if (pendingTabFocus === `/${lang}/${id}/${view}/`) {
       document.getElementById(`tab-${view}`)?.focus();
@@ -541,6 +492,16 @@ export function GameGuide({
           "tablefolk-preferences",
           JSON.stringify({ ...saved, seen: [...seen, id] }),
         );
+      const recent = readStored<unknown>(recentGamesKey, []);
+      writeStored(
+        recentGamesKey,
+        [
+          id,
+          ...(Array.isArray(recent)
+            ? recent.filter((game) => typeof game === "string" && game !== id)
+            : []),
+        ].slice(0, 6),
+      );
     } catch {}
     document.body.classList.toggle("table-mode", view === "play");
     document.body.classList.toggle("centered-guide", view === "learn");
@@ -614,7 +575,14 @@ export function GameGuide({
   ];
   return (
     <EngineContext.Provider value={runtime}>
-      <main id="main" tabIndex={-1} data-route={`/${lang}/${id}/${view}/`}>
+      <main
+        id="main"
+        tabIndex={-1}
+        data-focus={view === "play" && focusPlay}
+        data-active-tool={playStatus?.active || false}
+        data-has-play-tool={hasPlayTool}
+        data-route={`/${lang}/${id}/${view}/`}
+      >
         <div className="wrap">
           <Link
             prefetch={false}
@@ -729,6 +697,23 @@ export function GameGuide({
                 </button>
               ))}
             </div>
+            {!focusPlay ? (
+              <button
+                type="button"
+                className="find-rule-button"
+                id="find-rule"
+                aria-label={tr("Find a rule", "Buscar una regla")}
+                aria-haspopup="dialog"
+                aria-controls="rule-dialog"
+                onClick={(event) => {
+                  event.currentTarget.focus();
+                  setSearchOpen(true);
+                }}
+              >
+                <Icon path={icons.search} />
+                <span>{tr("Find a rule", "Buscar una regla")}</span>
+              </button>
+            ) : null}
             <button
               className="print"
               id="print"
@@ -822,22 +807,47 @@ export function GameGuide({
                         kind="setup"
                         initial={tools.setup || ""}
                       />
-                    ) : (
-                      <>
-                        {setup.paragraphs.map((paragraph, i) => (
-                          <p key={i}>{paragraph[lang]}</p>
-                        ))}
-                        {id === "skull_king" && options.skullExpansion
-                          ? game.expansionSections
-                              ?.find(
-                                (section) => section.id === "expansion-setup",
-                              )
-                              ?.paragraphs.map((paragraph, i) => (
-                                <p key={`exp-${i}`}>{paragraph[lang]}</p>
-                              ))
-                          : null}
-                      </>
-                    )}
+                    ) : null}
+                    <SetupChecklist
+                      id={id}
+                      lang={lang}
+                      ready={!!runtime}
+                      steps={setupSteps(id, options)}
+                      signature={
+                        id === "avalon"
+                          ? JSON.stringify([
+                              options.players,
+                              options.avalonMode,
+                              [...options.optional].sort(),
+                              options.lady,
+                            ])
+                          : id === "coup"
+                            ? `${options.exchange}-${options.reformation}`
+                            : id === "skull_king"
+                              ? String(options.skullExpansion)
+                              : "base"
+                      }
+                    />
+                    <details className="setup-notes" id="setup-notes">
+                      <summary>
+                        {tr(
+                          "Setup notes & exceptions",
+                          "Notas de preparación y excepciones",
+                        )}
+                      </summary>
+                      {setup.paragraphs.map((paragraph, i) => (
+                        <p key={i}>{paragraph[lang]}</p>
+                      ))}
+                      {id === "skull_king" && options.skullExpansion
+                        ? game.expansionSections
+                            ?.find(
+                              (section) => section.id === "expansion-setup",
+                            )
+                            ?.paragraphs.map((paragraph, i) => (
+                              <p key={`exp-${i}`}>{paragraph[lang]}</p>
+                            ))
+                        : null}
+                    </details>
                   </section>
                   <Lesson
                     id={id}
@@ -892,19 +902,92 @@ export function GameGuide({
                 </>
               ) : (
                 <>
-                  <RuleSearch
-                    key={id}
-                    id={id}
-                    lang={lang}
-                    sections={sections}
-                    icons={icons}
-                  />
-                  {view === "play" ? (
-                    <Tool
-                      key={`${id}-${lang}-play`}
-                      kind="play"
-                      initial={tools.play || ""}
+                  {view === "rules" ? (
+                    <RuleSearch
+                      key={id}
+                      id={id}
+                      lang={lang}
+                      sections={sections}
+                      icons={icons}
+                      query={query}
+                      onQuery={onQuery}
                     />
+                  ) : null}
+                  {view === "play" ? (
+                    <>
+                      <div className="play-toolbar">
+                        <div>
+                          <span className="focus-game-name">
+                            {game.name[lang]}
+                          </span>
+                          {hasPlayTool && playStatus ? (
+                            <span
+                              className={`save-status ${playStatus.storage ? "" : "save-unavailable"}`}
+                              role="status"
+                            >
+                              {playStatus.storage
+                                ? tr(
+                                    playStatus.active
+                                      ? "Saved on this device"
+                                      : "Progress saves on this device",
+                                    playStatus.active
+                                      ? "Guardado en este dispositivo"
+                                      : "El progreso se guarda en este dispositivo",
+                                  )
+                                : tr(
+                                    "Saving unavailable · keep this page open",
+                                    "No se puede guardar · mantén esta página abierta",
+                                  )}
+                            </span>
+                          ) : null}
+                        </div>
+                        <div className="play-toolbar-actions">
+                          {focusPlay ? (
+                            <button
+                              type="button"
+                              id="find-rule"
+                              className="find-rule-button"
+                              aria-label={tr("Find a rule", "Buscar una regla")}
+                              aria-haspopup="dialog"
+                              aria-controls="rule-dialog"
+                              onClick={(event) => {
+                                event.currentTarget.focus();
+                                setSearchOpen(true);
+                              }}
+                            >
+                              <Icon path={icons.search} />
+                              <span>
+                                {tr("Find a rule", "Buscar una regla")}
+                              </span>
+                            </button>
+                          ) : null}
+                          <button
+                            type="button"
+                            id="focus-play"
+                            aria-pressed={focusPlay}
+                            onClick={() => changeFocus(!focusPlay)}
+                          >
+                            <span aria-hidden="true">
+                              {focusPlay ? "↙" : "⛶"}
+                            </span>
+                            {focusPlay
+                              ? tr(
+                                  "Exit full-screen",
+                                  "Salir de pantalla completa",
+                                )
+                              : tr(
+                                  "Full-screen play",
+                                  "Jugar en pantalla completa",
+                                )}
+                          </button>
+                        </div>
+                      </div>
+                      <Tool
+                        key={`${id}-${lang}-play`}
+                        kind="play"
+                        initial={tools.play || ""}
+                      />
+                    </>
                   ) : (
                     <>
                       <div className="mobile-jump field">
@@ -977,7 +1060,12 @@ export function GameGuide({
                           <summary>{section.title[lang]}</summary>
                           <div className="rule-body">
                             {section.paragraphs.map((paragraph, i) => (
-                              <p key={i}>{paragraph[lang]}</p>
+                              <p key={i}>
+                                <HighlightedText
+                                  text={paragraph[lang]}
+                                  query={query}
+                                />
+                              </p>
                             ))}
                           </div>
                         </details>
@@ -1001,6 +1089,16 @@ export function GameGuide({
             </article>
           </div>
         </div>
+        <RuleSearchDialog
+          open={searchOpen}
+          onClose={() => setSearchOpen(false)}
+          id={id}
+          lang={lang}
+          sections={sections}
+          icons={icons}
+          query={query}
+          onQuery={onQuery}
+        />
       </main>
     </EngineContext.Provider>
   );

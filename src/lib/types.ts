@@ -60,4 +60,15 @@ export interface ToolRuntime {
   view(kind: ToolKind): string;
   bind(kind: ToolKind): void;
   lessonSteps(): Translation[];
+  savedGames(): SavedGame[];
+  playStatus(): { active: boolean; storage: boolean };
+}
+
+export interface SavedGame {
+  id: string;
+  phase?: string;
+  players?: { name: string; score: number }[];
+  completed?: number;
+  goal?: number;
+  remaining?: number[];
 }

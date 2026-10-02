@@ -39,7 +39,7 @@ Alternatively, open **index.html**, keeping all CSS and JavaScript files and the
 
 Import [t-rivas/game-instructions](https://github.com/t-rivas/game-instructions) from [Vercel's new project page](https://vercel.com/new) and click **Deploy**. Keep the root directory at the repository root.
 
-The included `vercel.json` selects **Next.js**, installs with `npm ci`, runs `npm run build` and publishes `out/`. If the existing Vercel project has dashboard overrides for installation, build or output, remove those overrides so the checked-in configuration takes effect. The hosted collection includes a download link to `/game-night.html`.
+The included `vercel.json` selects **Next.js**, installs with `npm ci` and runs `npm run build`. Vercel's Next.js adapter reads the build from its default `.next/` directory and handles publishing. Do not override Vercel's Output Directory to `out/`: that folder is the local static export and does not contain the Next.js build manifests. The hosted collection includes a download link to `/game-night.html`.
 
 No environment variables are required. Optionally set `NEXT_PUBLIC_SITE_URL` to the production origin to generate absolute canonical URLs, language alternatives and social preview images. Vercel’s `VERCEL_PROJECT_PRODUCTION_URL` is used automatically when available. Local builds leave these absolute links out if no origin is configured.
 

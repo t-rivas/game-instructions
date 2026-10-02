@@ -36,6 +36,22 @@ clock.reset(); check(clock.snapshot().phase==='ready' && clock.snapshot().remain
 clock.start(); now += 3600000;
 check(clock.snapshot().remaining[0]===0 && clock.snapshot().phase==='finished', 'Long suspension catches up without callbacks');
 
+// Restore a running deadline, paused turn, expired game and legacy controls.
+let recoveryNow = 1000;
+const original = sandbox.createChessClock(() => recoveryNow);
+original.configure(3,2); original.start(); recoveryNow += 1500; original.move(0);
+const running = original.snapshot(); recoveryNow += 30000;
+const restored = sandbox.createChessClock(() => recoveryNow);
+check(restored.restore(running) && restored.snapshot().remaining[1] === 150000 && restored.snapshot().active === 1, 'Running recovery subtracts elapsed wall time from the active side');
+restored.pause(); const pauseSave = restored.snapshot(); recoveryNow += 60000;
+const pausedRecovery = sandbox.createChessClock(() => recoveryNow);
+check(pausedRecovery.restore(pauseSave) && pausedRecovery.snapshot().phase === 'paused' && pausedRecovery.snapshot().remaining[1] === 150000, 'Paused recovery preserves remaining time and phase');
+recoveryNow += 200000;
+const expiredRecovery = sandbox.createChessClock(() => recoveryNow);
+check(expiredRecovery.restore(running) && expiredRecovery.snapshot().phase === 'finished' && expiredRecovery.snapshot().remaining[1] === 0, 'Running recovery expires without awarding increment');
+const invalidRecovery = sandbox.createChessClock(() => recoveryNow);
+for (const invalid of [{...running, active:2}, {...running, remaining:[-1,0]}, {...running, deadline:null}, {...running, minutes:0}]) check(!invalidRecovery.restore(invalid), 'Malformed clock recovery is rejected');
+
 (async () => {
   const engine = process.env.BROWSER || 'chromium';
   const browser = await ({chromium,webkit}[engine]).launch({headless:true,
@@ -71,7 +87,7 @@ check(clock.snapshot().remaining[0]===0 && clock.snapshot().phase==='finished', 
       check(await page.locator('#chess-clock-time-1').textContent()==='2:30','Other guide views preserve elapsed time');
       await page.evaluate(()=>{location.hash='#collection';});
       await page.waitForSelector('#game-grid'); await page.clock.fastForward(10000);
-      await page.locator('[data-game="chess"]').click();
+      await page.locator('[data-game="chess"] .card-play').click();
       check(await page.locator('#chess-clock-time-1').textContent()==='2:20','Leaving the game preserves elapsed time');
       page.once('dialog',dialog=>dialog.dismiss()); await page.locator('#chess-clock-reset').click();
       check(await page.locator('#chess-clock-time-1').textContent()==='2:20','Cancelled reset preserves game');
@@ -95,10 +111,19 @@ check(clock.snapshot().remaining[0]===0 && clock.snapshot().phase==='finished', 
       check(await page.evaluate(()=>document.activeElement.id)==='chess-clock-player-0','Tick preserves keyboard focus');
       page.once('dialog',dialog=>dialog.accept()); await page.locator('#chess-clock-reset').click();
       check(await page.locator('#chess-clock-time-0').textContent()==='7:00','Confirmed reset restores base time');
+      await page.clock.setSystemTime(new Date(time.getTime()+400000));
       await page.locator('#chess-clock-toggle').click();
       await page.reload();
       check(await page.locator('#chess-clock-minutes').inputValue()==='7' && await page.locator('#chess-clock-increment').inputValue()==='2','Preferences survive reload');
-      check(await page.evaluate(()=>chessClock.snapshot().phase)==='ready','Reload starts a fresh clock');
+      check(await page.evaluate(()=>chessClock.snapshot().phase)==='running','Reload recovers a running clock');
+      await page.clock.runFor(5000);
+      check(await page.locator('#chess-clock-time-0').textContent()==='6:55','Recovered running clock continues ticking');
+      await page.locator('#chess-clock-toggle').click(); await page.reload();
+      check(await page.evaluate(()=>chessClock.snapshot().phase)==='paused','Reload keeps a paused clock paused');
+      await page.clock.fastForward(60000);
+      check(await page.locator('#chess-clock-time-0').textContent()==='6:55','Paused recovery does not charge elapsed time');
+      page.once('dialog',dialog=>dialog.accept()); await page.locator('#chess-clock-reset').click(); await page.reload();
+      check(await page.evaluate(()=>chessClock.snapshot().phase)==='ready','Reset clears clock progress across reloads');
       for (const width of [320,390,844,1440]) {
         await page.setViewportSize({width,height:width===844?390:900});
         for (const lang of ['es','en']) {

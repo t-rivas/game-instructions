@@ -87,8 +87,20 @@ try {
     mothScoreDraft = mothGameSummary(game).finished ? null : mothRoundDraft();
   }
 } catch { mothStorageOK = false; }
+// Invalid draft storage cannot discard already validated rounds.
+try {
+ const saved=JSON.parse(localStorage.getItem('tablefolk-moth-score-v1')||'null');
+ if(saved?.version===1){
+  if(matchesScoreDraft(saved.setup,{count:0,names:Array(5).fill('')})&&Number.isInteger(saved.setup.count)&&saved.setup.count>=3&&saved.setup.count<=5)mothScoreSetup=saved.setup;
+  if(mothScoreGame){
+   const valid=draft=>matchesScoreDraft(draft,{round:0,out:'',entries:Array.from({length:mothScoreGame.players.length},()=>['','',''])})&&Number.isInteger(draft.round)&&draft.round>=1&&draft.round<=Math.min(mothScoreGame.rounds.length+1,mothScoreGame.players.length);
+   if(valid(saved.draft))mothScoreDraft=saved.draft;
+   if(valid(saved.pending)&&saved.pending.round===mothScoreGame.rounds.length+1)mothScorePending=saved.pending;
+  }
+ }
+}catch{}
 function persistMothScore() {
-  try { localStorage.setItem('tablefolk-moth-score-v1', JSON.stringify({version:1, game:mothScoreGame})); mothStorageOK = true; }
+  try { localStorage.setItem('tablefolk-moth-score-v1', JSON.stringify({version:1, game:mothScoreGame, setup:mothScoreSetup, draft:mothScoreDraft, pending:mothScorePending})); mothStorageOK = true; }
   catch { mothStorageOK = false; }
 }
 
@@ -157,12 +169,13 @@ function mothScoreView() {
       <h3>${tr('Standings · lowest total first', 'Clasificación · menor total primero')}</h3><ol class="moth-standings">${summary.standings.map(row => `<li data-moth-standing="${row.player}"><span>${escapeHTML(game.players[row.player])}</span><strong data-moth-total="${row.player}">${row.total}</strong></li>`).join('')}</ol>
       <details id="moth-players"><summary>${game.locked ? tr('Edit names', 'Editar nombres') : tr('Edit players / names', 'Editar jugadores / nombres')}</summary>${mothPlayerForm()}</details>
       ${mothScoreRoundForm()}${mothScoreHistory()}${game.rounds.length ? `<div class="moth-actions"><button id="moth-undo-round" type="button">${tr('Undo last round', 'Deshacer última ronda')}</button></div>` : ''}` : mothPlayerForm()}
-    ${mothStorageOK ? '' : `<p role="status">${tr('Local saving is unavailable. Keep this page open to retain your scores.', 'No se puede guardar en este dispositivo. Mantén esta página abierta para conservar los puntos.')}</p>`}<p class="moth-hint">${tr('Play one round per player. Membership locks after the first saved round; names stay editable. Scores and drafts stay when switching guides or languages. Confirmed rounds are saved on this device.', 'Jueguen una ronda por participante. Los participantes quedan fijos tras guardar la primera ronda; los nombres se pueden editar. Los puntos y los borradores se conservan al cambiar de guía o idioma. Las rondas confirmadas se guardan en este dispositivo.')}</p></section>`;
+    ${mothStorageOK ? '' : `<p role="status">${tr('Local saving is unavailable. Keep this page open to retain your scores.', 'No se puede guardar en este dispositivo. Mantén esta página abierta para conservar los puntos.')}</p>`}<p class="moth-hint">${tr('Play one round per player. Membership locks after the first saved round; names stay editable. Scores and drafts stay when switching guides or languages. Scores and unfinished entries are restored when you reload on this device.', 'Jueguen una ronda por participante. Los participantes quedan fijos tras guardar la primera ronda; los nombres se pueden editar. Los puntos y los borradores se conservan al cambiar de guía o idioma. Los puntos y los datos sin guardar se recuperan al recargar en este dispositivo.')}</p></section>`;
 }
 
 function bindMothScore() {
   const root = document.getElementById('moth-score');
   if (!root) return;
+  bindScoreRecovery(root, persistMothScore);
   const redraw = (focus = 'moth-round-heading') => {persistMothScore(); refreshScorePanel('moth-score', mothScoreView, bindMothScore, focus);};
   const notice = code => {mothScoreNotice = code; document.getElementById('moth-score-notice').textContent = code ? mothScoreError(code) : '';};
   const count = document.getElementById('moth-player-count');

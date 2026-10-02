@@ -80,7 +80,7 @@ try {
   if (saved?.version === 1) trucoScore = createTrucoScore(saved);
 } catch { trucoStorageOK = false; }
 function persistTrucoScore() {
-  try { localStorage.setItem('tablefolk-truco-score-v1', JSON.stringify({version:1, ...trucoScore.snapshot()})); trucoStorageOK = true; }
+  try { localStorage.setItem('tablefolk-truco-score-v1', JSON.stringify({version:1, ...trucoScore.snapshot(), setupDraft:trucoSetupDraft, awardDraft:trucoAwardDraft, editDraft:trucoEditDraft, renameDraft:trucoRenameDraft})); trucoStorageOK = true; }
   catch { trucoStorageOK = false; }
 }
 let trucoSetupDraft = null;
@@ -88,6 +88,17 @@ let trucoAwardDraft = {label:'', points:['', '']};
 let trucoEditDraft = null;
 let trucoRenameDraft = null;
 let trucoScoreMessage = null;
+try {
+ const saved=JSON.parse(localStorage.getItem('tablefolk-truco-score-v1')||'null'), game=trucoScore.snapshot();
+ const label=value=>['','truco','envido','flor','other'].includes(value);
+ if(saved?.version===1){
+  if(!game.locked&&matchesScoreDraft(saved.setupDraft,{names:['',''],target:''}))trucoSetupDraft=saved.setupDraft;
+  if(matchesScoreDraft(saved.awardDraft,{label:'',points:['','']})&&label(saved.awardDraft.label))trucoAwardDraft=saved.awardDraft;
+  if(matchesScoreDraft(saved.editDraft,{index:0,side:'',points:'',label:''})&&Number.isInteger(saved.editDraft.index)&&saved.editDraft.index>=0&&saved.editDraft.index<game.entries.length&&['0','1'].includes(saved.editDraft.side)&&label(saved.editDraft.label))trucoEditDraft=saved.editDraft;
+  if(matchesScoreDraft(saved.renameDraft,['','']))trucoRenameDraft=saved.renameDraft;
+ }
+}catch{}
+
 
 function trucoLabelOptions(selected) {
   return [['', tr('No label', 'Sin etiqueta')], ['truco', 'Truco'], ['envido', 'Envido'], ['flor', 'Flor'], ['other', tr('Other', 'Otro')]]
@@ -106,7 +117,7 @@ function trucoScoreView() {
       <p class="truco-note">${tr('Default: 30. The target locks after the first award, including after deleting or undoing every entry. Custom targets use total/target only.', 'Por defecto: 30. La meta queda fija tras la primera anotación, incluso si borras o deshaces todas las entradas. Las metas personalizadas muestran solo total/meta.')}</p>
       </fieldset><button type="submit" id="truco-start">${tr('Open scoreboard', 'Abrir marcador')}</button></form>` : trucoActiveScoreView(game)}
     <p id="truco-score-error" role="alert">${trucoScoreMessage ? escapeHTML(tr(...trucoScoreMessage)) : ''}</p>
-    <p class="truco-note">${trucoStorageOK ? tr('Results are saved on this device. Unfinished entries stay while this page is open.', 'Los resultados se guardan en este dispositivo. Los datos sin guardar se conservan mientras esta página siga abierta.') : tr('Local saving is unavailable. Keep this page open to retain your scores.', 'No se puede guardar en este dispositivo. Mantén esta página abierta para conservar los puntos.')}</p>
+    <p class="truco-note">${trucoStorageOK ? tr('Results and unfinished entries are restored when you reload on this device.', 'Los resultados y los datos sin guardar se recuperan al recargar en este dispositivo.') : tr('Local saving is unavailable. Keep this page open to retain your scores.', 'No se puede guardar en este dispositivo. Mantén esta página abierta para conservar los puntos.')}</p>
   </section>`;
 }
 function trucoActiveScoreView(game) {
@@ -149,6 +160,7 @@ function refreshTrucoScore(focusId) {
 function bindTrucoScore() {
   const root = document.getElementById('truco-score');
   if (!root) return;
+  bindScoreRecovery(root, persistTrucoScore);
   const find = id => root.querySelector('#' + id);
   const error = (en, es) => { trucoScoreMessage = [en, es]; find('truco-score-error').textContent = tr(en, es); };
   const changed = focus => { trucoScoreMessage = null; refreshTrucoScore(focus); };

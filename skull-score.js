@@ -65,8 +65,20 @@ try {
     skullScoreDraft = skullGameSummary(game).finished ? null : skullRoundDraft();
   }
 } catch { skullStorageOK = false; }
+// Invalid draft storage cannot discard already validated rounds.
+try {
+ const saved=JSON.parse(localStorage.getItem('tablefolk-skull-score-v1')||'null');
+ if(saved?.version===1){
+  if(matchesScoreDraft(saved.setup,{count:0,names:Array(9).fill('')})&&Number.isInteger(saved.setup.count)&&saved.setup.count>=2&&saved.setup.count<=9)skullScoreSetup=saved.setup;
+  if(skullScoreGame){
+   const valid=draft=>matchesScoreDraft(draft,{round:0,cards:'',entries:Array.from({length:skullScoreGame.setup.players.length},()=>({bid:'',tricks:'',bonus:'',adjustment:'',explanation:''}))})&&Number.isInteger(draft.round)&&draft.round>=1&&draft.round<=Math.min(skullScoreGame.rounds.length+1,10);
+   if(valid(saved.draft))skullScoreDraft=saved.draft;
+   if(valid(saved.pending)&&saved.pending.round===skullScoreGame.rounds.length+1)skullScorePending=saved.pending;
+  }
+ }
+}catch{}
 function persistSkullScore() {
-  try { localStorage.setItem('tablefolk-skull-score-v1', JSON.stringify({version:1, game:skullScoreGame})); skullStorageOK = true; }
+  try { localStorage.setItem('tablefolk-skull-score-v1', JSON.stringify({version:1, game:skullScoreGame, setup:skullScoreSetup, draft:skullScoreDraft, pending:skullScorePending})); skullStorageOK = true; }
   catch { skullStorageOK = false; }
 }
 
@@ -152,7 +164,7 @@ function skullScoreView() {
   return `<section id="skull-score" class="skull-score" aria-labelledby="skull-score-heading"><div class="scoreboard-heading"><h2 id="skull-score-heading" tabindex="-1">${tr('Score sheet · Classic Skull King', 'Planilla de puntos · Skull King clásico')}</h2>${skullScoreGame ? `<button id="skull-new-game" type="button">${tr('Reset · edit players', 'Reiniciar · editar jugadores')}</button>` : ''}</div>
     <p class="skull-hint">${tr('Supports classic scoring only. Rascal and Cannonball scoring are not supported.', 'Solo admite la puntuación clásica. No admite puntuación Rascal ni Cannonball.')}</p>
     <p id="skull-score-notice" role="alert" tabindex="-1">${skullScoreNotice ? skullScoreError(skullScoreNotice) : ''}</p>${body}
-    ${skullStorageOK ? '' : `<p role="status">${tr('Local saving is unavailable. Keep this page open to retain your scores.', 'No se puede guardar en este dispositivo. Mantén esta página abierta para conservar los puntos.')}</p>`}<p class="skull-hint">${tr('Scores and unfinished entries stay when switching views or languages. Saved rounds are restored when you reload.', 'Los puntos y los datos sin guardar se conservan al cambiar de vista o idioma. Las rondas guardadas se recuperan al recargar.')}</p></section>`;
+    ${skullStorageOK ? '' : `<p role="status">${tr('Local saving is unavailable. Keep this page open to retain your scores.', 'No se puede guardar en este dispositivo. Mantén esta página abierta para conservar los puntos.')}</p>`}<p class="skull-hint">${tr('Scores and unfinished entries stay when switching views or languages. Scores and unfinished entries are restored when you reload.', 'Los puntos y los datos sin guardar se conservan al cambiar de vista o idioma. Los puntos y los datos sin guardar se recuperan al recargar.')}</p></section>`;
 }
 
 function skullDraftEntry(entry) {
@@ -179,6 +191,7 @@ function refreshSkullPreview() {
 function bindSkullScore() {
   const root = document.getElementById('skull-score');
   if (!root) return;
+  bindScoreRecovery(root, persistSkullScore);
   const redraw = (focus = 'skull-round-heading') => {persistSkullScore(); refreshScorePanel('skull-score', skullScoreView, bindSkullScore, focus);};
   root.addEventListener('invalid', event => {
     const details = event.target.closest('details');

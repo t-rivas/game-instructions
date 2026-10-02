@@ -42,7 +42,7 @@ async function verifyInteractions(page,file) {
   await page.locator('#lang-en').click();
   await page.locator('#game-search').fill('ajedrez');
   check(await page.locator('.game-card').count()===1,'Spanish search works in English');
-  await page.locator('.game-card').click();
+  await page.locator('.game-card .card-play').click();
   await page.waitForFunction(()=>state.game==='chess');
   check(await page.locator('#tab-reference').getAttribute('aria-selected')==='true','Collection opens table guide');
   await page.locator('#tab-reference').focus();await page.keyboard.press('ArrowRight');

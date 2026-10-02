@@ -18,3 +18,25 @@
 .scenario-choices button:focus-visible,.scenario-practice .demo-actions button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .scenario-practice>.inline-link{margin:12px 20px}.scenario-practice .demo-actions{flex-wrap:wrap}
 @media print{.scenario-practice{display:none!important}}
+
+/* Separate entry points and lookup tools for learning and playing. */
+.card-bottom{gap:8px;flex-wrap:wrap}
+.card-bottom a{display:flex;align-items:center;justify-content:center;flex:1;min-height:44px;padding:8px;border:1px solid var(--border);border-radius:8px;text-decoration:none;font-size:12px;white-space:nowrap}
+.card-bottom .card-learn{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.card-bottom a:hover{filter:brightness(1.12)}
+.rule-search{margin-bottom:24px}
+.rule-search>label{display:block;margin-bottom:8px;font-size:14px;font-weight:600}
+.rule-search-controls{display:flex;gap:10px;align-items:center}
+.rule-search .search{max-width:none}
+.rule-search-controls button{min-height:44px;border:1px solid var(--border);border-radius:8px;padding:8px 12px;background:var(--panel);white-space:nowrap}
+#rule-search-results:not(:empty){margin-top:16px}
+.rule-search-result{display:block;padding:14px;margin-bottom:10px;border:1px solid var(--border);border-radius:10px;text-decoration:none;background:var(--panel);overflow-wrap:anywhere}
+.rule-search-result strong,.rule-search-result span{display:block}
+.rule-search-result span{font-size:14px;margin-top:6px;color:var(--muted)}
+.rule-search mark{background:var(--accent);color:var(--on-accent);border-radius:2px}
+.learning-setup{padding:22px;border:1px solid var(--border);border-radius:14px;background:var(--panel);scroll-margin-top:calc(var(--header-h) + var(--control-h) + 20px)}
+.learning-setup>.eyebrow{color:var(--accent)}
+.learning-setup>h2{margin-top:10px}
+.learning-setup .block:last-child{margin-bottom:0}
+@media(max-width:680px){.rule-search input{font-size:16px}.card-bottom a{flex-basis:100%}.learning-setup{padding:16px}}
+@media print{.rule-search{display:none!important}}

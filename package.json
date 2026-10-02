@@ -12,7 +12,8 @@
     "test:skull": "node tests/skull-score.cjs",
     "test:moth": "node tests/moth-score.cjs",
     "test:scoreboard-ux": "node tests/scoreboard-ux.cjs",
-    "test:truco": "node tests/truco-score.cjs"
+    "test:truco": "node tests/truco-score.cjs",
+    "test:flows": "node tests/game-flows.cjs"
   },
   "devDependencies": {
     "playwright": "1.62.1"

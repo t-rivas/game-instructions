@@ -15,6 +15,8 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium webkit
       - run: npm test
+      - run: npm run test:flows
+      - run: BROWSER=webkit npm run test:flows
       - run: npm run test:cards
       - run: npm run test:scoreboard-ux
       - run: BROWSER=webkit npm run test:scoreboard-ux

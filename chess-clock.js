@@ -30,7 +30,16 @@ function createChessClock(now = () => Date.now()) {
     },
     pause() { sync(); if (phase === 'running') phase = 'paused'; },
     reset() { phase = 'ready'; active = 0; remaining = [minutes * 60000, minutes * 60000]; },
-    snapshot() { sync(); return {phase, active, remaining: [...remaining], minutes, increment}; }
+    restore(saved) {
+      if (!saved || !['ready','running','paused','finished'].includes(saved.phase) ||
+          ![0,1].includes(saved.active) || !Array.isArray(saved.remaining) || saved.remaining.length !== 2 ||
+          !saved.remaining.every(n => Number.isFinite(n) && n >= 0) ||
+          (saved.phase === 'running' && !Number.isFinite(saved.deadline)) ||
+          !this.configure(saved.minutes, saved.increment)) return false;
+      phase = saved.phase; active = saved.active; remaining = [...saved.remaining];
+      deadline = saved.deadline || 0; sync(); return true;
+    },
+    snapshot() { sync(); return {phase, active, remaining: [...remaining], minutes, increment, deadline}; }
   };
 }
 
@@ -38,11 +47,15 @@ const chessClock = createChessClock();
 let chessClockDraft = {minutes: '5', increment: '0'};
 try {
   const preference = JSON.parse(localStorage.getItem('tablefolk-chess-clock') || 'null');
-  if (preference && chessClock.configure(preference.minutes, preference.increment)) {
+  if (preference && (chessClock.restore(preference) || chessClock.configure(preference.minutes, preference.increment))) {
     chessClockDraft = {minutes: String(preference.minutes), increment: String(preference.increment)};
   }
 } catch {}
 let chessClockInterval = null;
+function persistChessClock() {
+  try { localStorage.setItem('tablefolk-chess-clock', JSON.stringify(chessClock.snapshot())); } catch {}
+}
+if (chessClock.snapshot().phase === 'running') chessClockInterval = setInterval(refreshChessClock, 100);
 
 function chessClockView() {
   return `<section class="chess-clock" id="chess-clock" aria-labelledby="chess-clock-heading">
@@ -64,7 +77,7 @@ function chessClockView() {
       <p id="chess-clock-status" role="status" aria-atomic="true"></p>
       <div class="chess-clock-actions"><button type="submit" id="chess-clock-toggle">${tr('Start','Iniciar')}</button><button type="button" id="chess-clock-reset">${tr('Reset','Reiniciar')}</button></div>
     </form>
-    <p class="chess-clock-hint chess-clock-note">${tr('The clock keeps running when you leave this view. Pause it for a break. Reloading starts a fresh clock.','El reloj sigue corriendo al salir de esta vista. Páusalo si haces una pausa. Al recargar la página, el reloj empieza de nuevo.')}</p>
+    <p class="chess-clock-hint chess-clock-note">${tr('The clock keeps running when you leave this view or reload. Pause it for a break. Progress is saved on this device when local storage is available.','El reloj sigue corriendo al salir de esta vista o recargar. Páusalo si haces una pausa. El progreso se guarda en este dispositivo si el almacenamiento local está disponible.')}</p>
   </section>`;
 }
 
@@ -75,6 +88,7 @@ function chessClockTime(milliseconds) {
 
 function refreshChessClock() {
   const clock = chessClock.snapshot();
+  if (clock.phase === 'finished') persistChessClock();
   if (clock.phase !== 'running' && chessClockInterval !== null) {
     clearInterval(chessClockInterval); chessClockInterval = null;
   }
@@ -110,7 +124,7 @@ function bindChessClock() {
   const configure = () => {
     chessClockDraft = {minutes: minutes.value, increment: increment.value};
     if (minutes.validity.valid && increment.validity.valid && chessClock.configure(Number(minutes.value), Number(increment.value))) {
-      try { localStorage.setItem('tablefolk-chess-clock', JSON.stringify({minutes:Number(minutes.value), increment:Number(increment.value)})); } catch {}
+      persistChessClock();
     }
     refreshChessClock();
   };
@@ -128,9 +142,9 @@ function bindChessClock() {
       chessClock.start();
       if (chessClock.snapshot().phase === 'running' && chessClockInterval === null) chessClockInterval = setInterval(refreshChessClock, 100);
     }
-    refreshChessClock();
+    persistChessClock(); refreshChessClock();
   };
-  for (const player of [0,1]) document.getElementById(`chess-clock-player-${player}`).onclick = () => { chessClock.move(player); refreshChessClock(); };
+  for (const player of [0,1]) document.getElementById(`chess-clock-player-${player}`).onclick = () => { chessClock.move(player); persistChessClock(); refreshChessClock(); };
   document.getElementById('chess-clock-reset').onclick = () => {
     const phase = chessClock.snapshot().phase;
     if ((phase === 'running' || phase === 'paused') && !window.confirm(tr('Reset both clocks and clear this game?','¿Reiniciar ambos relojes y borrar esta partida?'))) return;
@@ -139,7 +153,7 @@ function bindChessClock() {
     minutes.value = String(clock.minutes); increment.value = String(clock.increment);
     preset.value = ['3','5','10'].includes(minutes.value)?minutes.value:'custom';
     chessClockDraft = {minutes:minutes.value, increment:increment.value};
-    refreshChessClock();
+    persistChessClock(); refreshChessClock();
   };
   refreshChessClock();
 }

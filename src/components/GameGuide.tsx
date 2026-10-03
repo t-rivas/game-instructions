@@ -1,7 +1,20 @@
 "use client";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { ShareDialog } from "./ShareDialog";
+import { TableControls } from "./TableControls";
 import {
+  canonicalGuideURL,
+  editionParams,
+  editionLabel,
+  editionSections,
+  guideHref,
+  sharedOptions,
+} from "@/lib/guide-link";
+import { useCollectionReturn } from "@/lib/collection-state";
+import { ResponsiveImage } from "./ResponsiveImage";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+  Suspense,
   createContext,
   useContext,
   useEffect,
@@ -35,6 +48,8 @@ import {
   writeStored,
   recentGamesKey,
   savedGamesEvent,
+  markGameActivity,
+  recordGameVisit,
 } from "@/lib/browser-storage";
 interface GuideProps {
   id: string;
@@ -56,11 +71,21 @@ const defaults: ToolState = {
 };
 const EngineContext = createContext<ToolRuntime | null>(null);
 let pendingTabFocus: string | undefined;
+// Only this observer needs query parameters; the guide itself remains prerendered.
+function GuideLocation() {
+  const params = useSearchParams().toString();
+  useEffect(() => {
+    window.dispatchEvent(new Event("tablefolk-guide-location"));
+  }, [params]);
+  return null;
+}
 function Tool({ kind, initial }: { kind: ToolKind; initial: string }) {
   const runtime = useContext(EngineContext),
     router = useRouter();
-  const [html, setHtml] = useState(initial),
-    [prepared, setPrepared] = useState<ToolRuntime | null>(null),
+  const [html, setHtml] = useState(() =>
+      runtime ? runtime.view(kind) : initial,
+    ),
+    [prepared, setPrepared] = useState<ToolRuntime | null>(runtime),
     root = useRef<HTMLDivElement>(null),
     open = useRef<string[]>([]);
   useEffect(() => {
@@ -90,11 +115,45 @@ function Tool({ kind, initial }: { kind: ToolKind; initial: string }) {
     }
     root.current?.setAttribute("data-ready", "true");
   }, [html, runtime, prepared, kind]);
+  useEffect(() => {
+    if (kind !== "play" || !root.current) return;
+    const node = root.current;
+    const fitTime = () => {
+      node
+        .querySelectorAll<HTMLElement>(
+          "#chess-clock-time-0, #chess-clock-time-1, #poker-timer-time",
+        )
+        .forEach((time) => {
+          const length = String(Math.max(1, time.textContent?.length || 4));
+          if (time.style.getPropertyValue("--clock-length") !== length)
+            time.style.setProperty("--clock-length", length);
+        });
+    };
+    fitTime();
+    const observer = new MutationObserver(fitTime);
+    observer.observe(node, {
+      subtree: true,
+      childList: true,
+      characterData: true,
+    });
+    return () => observer.disconnect();
+  }, [kind]);
   return (
     <div
       ref={root}
       data-tool={kind}
+      id={kind === "play" ? "play-tools" : undefined}
+      onInputCapture={() => {
+        if (kind === "play" && runtime)
+          markGameActivity(runtime.state.game as string);
+      }}
       onClickCapture={(event) => {
+        if (
+          kind === "play" &&
+          runtime &&
+          (event.target as Element).closest("button, input, select")
+        )
+          markGameActivity(runtime.state.game as string);
         const link = (event.target as Element).closest("a");
         if (
           !link ||
@@ -109,7 +168,28 @@ function Tool({ kind, initial }: { kind: ToolKind; initial: string }) {
         const href = link.getAttribute("href");
         if (href?.startsWith("/") && !href.startsWith("//")) {
           event.preventDefault();
-          router.push(href);
+          const url = new URL(href, location.origin);
+          const route = url.pathname.match(
+            /^\/(en|es)\/([^/]+)\/(learn|play|rules)\/$/,
+          );
+          if (
+            runtime &&
+            route &&
+            route[2] === runtime.state.game &&
+            new URLSearchParams(location.search).get("shared") === "1"
+          ) {
+            router.push(
+              guideHref(
+                route[1] as Language,
+                route[2],
+                route[3] as View,
+                new URLSearchParams(location.search).get("q") || "",
+                runtime.state,
+                true,
+                url.hash.slice(1),
+              ),
+            );
+          } else router.push(href);
         }
       }}
       dangerouslySetInnerHTML={{ __html: html }}
@@ -178,7 +258,9 @@ function Lesson({
   lang,
   icons,
   options,
+  readyHref,
 }: {
+  readyHref: string;
   id: string;
   game: Game;
   lang: Language;
@@ -254,11 +336,7 @@ function Lesson({
               <Icon path={icons.arrow} />
             </button>
           ) : (
-            <Link
-              prefetch={false}
-              className="accent-button"
-              href={`/${lang}/${id}/play/`}
-            >
+            <Link prefetch={false} className="accent-button" href={readyHref}>
               {tr("Ready to play", "Listo para jugar")}
               <Icon path={icons.check} />
             </Link>
@@ -378,6 +456,131 @@ function Variants({
     </div>
   );
 }
+function AvalonSetup({
+  lang,
+  options,
+  tools,
+  ready,
+  shared = false,
+  readyHref,
+}: {
+  lang: Language;
+  options: ToolState;
+  tools: Partial<Record<ToolKind, string>>;
+  ready: boolean;
+  shared?: boolean;
+  readyHref: string;
+}) {
+  const stepKey = shared
+    ? "tablefolk-shared-avalon-step"
+    : "tablefolk-avalon-step";
+  const [step, setStep] = useState(0),
+    heading = useRef<HTMLHeadingElement>(null),
+    pendingHeadingFocus = useRef(false);
+  const tr = (en: string, es: string) => (lang === "es" ? es : en);
+  useEffect(() => {
+    try {
+      const saved = Number(sessionStorage.getItem(stepKey));
+      if ([0, 1, 2].includes(saved)) setStep(saved);
+    } catch {}
+  }, [stepKey]);
+  const titles = [
+    tr("Choose players and roles", "Elige jugadores y personajes"),
+    tr("Prepare and deal", "Prepara y reparte"),
+    tr("Read the opening script", "Lee el guion inicial"),
+  ];
+  const kinds: ToolKind[] = ["setup-roles", "setup-components", "setup-script"];
+  useLayoutEffect(() => {
+    if (pendingHeadingFocus.current) {
+      pendingHeadingFocus.current = false;
+      heading.current?.focus();
+    }
+  }, [step]);
+  const changeStep = (next: number) => {
+    if (next === step) heading.current?.focus();
+    else {
+      pendingHeadingFocus.current = true;
+      setStep(next);
+    }
+    try {
+      sessionStorage.setItem(stepKey, String(next));
+    } catch {}
+  };
+  const steps = [
+    ...setupSteps("avalon", options),
+    {
+      en: "Confirm the player count, selected roles and Lady of the Lake option.",
+      es: "Confirma la cantidad de jugadores, los personajes y la opción de la Dama del Lago.",
+    },
+  ];
+  return (
+    <div className="avalon-flow">
+      <nav
+        aria-label={tr("Setup steps", "Pasos de preparación")}
+        className="avalon-step-nav"
+      >
+        {titles.map((title, i) => (
+          <button
+            type="button"
+            id={`avalon-step-${i}`}
+            key={i}
+            aria-current={step === i ? "step" : undefined}
+            onClick={() => changeStep(i)}
+          >
+            <span>{i + 1}</span>
+            {title}
+          </button>
+        ))}
+      </nav>
+      <h3 ref={heading} tabIndex={-1} className="avalon-step-title">
+        {step + 1} / 3 · {titles[step]}
+      </h3>
+      <div className="avalon-step-layout">
+        <Tool
+          key={`${lang}-${kinds[step]}`}
+          kind={kinds[step]}
+          initial={tools[kinds[step]] || ""}
+        />
+        <SetupChecklist
+          id="avalon"
+          temporary={shared}
+          readyHref={readyHref}
+          lang={lang}
+          ready={ready}
+          steps={steps}
+          activeIndices={step === 0 ? [3] : step === 1 ? [0, 1] : [2]}
+          showActions={step === 2}
+          signature={JSON.stringify([
+            options.players,
+            options.avalonMode,
+            [...options.optional].sort(),
+            options.lady,
+          ])}
+        />
+      </div>
+      <div className="lesson-buttons">
+        <button
+          type="button"
+          id="avalon-prev"
+          disabled={step === 0}
+          onClick={() => changeStep(step - 1)}
+        >
+          {tr("Previous", "Anterior")}
+        </button>
+        {step < 2 ? (
+          <button
+            type="button"
+            id="avalon-next"
+            className="accent-button"
+            onClick={() => changeStep(step + 1)}
+          >
+            {tr("Next step", "Siguiente")}
+          </button>
+        ) : null}
+      </div>
+    </div>
+  );
+}
 export function GameGuide({
   id,
   game,
@@ -387,12 +590,24 @@ export function GameGuide({
   icons,
   tools,
 }: GuideProps) {
+  const collectionHref = useCollectionReturn(lang);
   const router = useRouter(),
     [runtime, setRuntime] = useState<ToolRuntime | null>(null),
     [options, setOptions] = useState<ToolState>(defaults),
     [loadError, setLoadError] = useState(false),
     [retry, setRetry] = useState(0),
     panel = useRef<HTMLElement>(null);
+  const [shared, setShared] = useState(false),
+    [sharing, setSharing] = useState<string | null | undefined>(),
+    [opponentFacing, setOpponentFacing] = useState(false),
+    [showHelp, setShowHelp] = useState(false);
+  useEffect(() => {
+    try {
+      setOpponentFacing(
+        sessionStorage.getItem("tablefolk-chess-orientation") === "opponent",
+      );
+    } catch {}
+  }, []);
   const [compact, setCompact] = useState(view === "play");
   const [query, onQuery] = useRuleQuery(id, lang),
     [searchOpen, setSearchOpen] = useState(false),
@@ -465,12 +680,55 @@ export function GameGuide({
     loadTools()
       .then((engine) => {
         if (cancelled) return;
-        engine.setRoute(lang, id, view);
+        let previousChoices: string | undefined;
+        const route = () => {
+          const url = new URL(location.href);
+          const patch = sharedOptions(id, url.searchParams);
+          const choicesKey = JSON.stringify(patch);
+          if (choicesKey !== previousChoices) {
+            previousChoices = choicesKey;
+            setShared(patch !== null);
+            engine.setRoute(lang, id, view, patch);
+          }
+          const canonical = canonicalGuideURL(url, id);
+          let hash = "";
+          try {
+            hash = decodeURIComponent(canonical.hash.slice(1));
+          } catch {}
+          const valid = [
+            ...editionSections(id, game, engine.state).map(
+              (section) => section.id,
+            ),
+            "basics",
+            "goal",
+            "helper",
+            "learn-setup",
+            "learning-tools",
+            "chess-clock",
+            "poker-timer",
+            "table-sheet",
+          ];
+          if (canonical.hash && !valid.includes(hash)) canonical.hash = "";
+          if (canonical.href !== location.href)
+            history.replaceState(
+              history.state,
+              "",
+              canonical.pathname + canonical.search + canonical.hash,
+            );
+        };
+        route();
+        window.addEventListener("popstate", route);
+        window.addEventListener("tablefolk-guide-location", route);
         setRuntime(engine);
         const sync = () =>
           setOptions({ ...engine.state, optional: [...engine.state.optional] });
         sync();
-        unsubscribe = engine.subscribe(sync);
+        const stop = engine.subscribe(sync);
+        unsubscribe = () => {
+          stop();
+          window.removeEventListener("popstate", route);
+          window.removeEventListener("tablefolk-guide-location", route);
+        };
       })
       .catch(() => {
         if (!cancelled) setLoadError(true);
@@ -481,13 +739,17 @@ export function GameGuide({
     };
   }, [id, lang, view, retry]);
   useEffect(() => {
+    recordGameVisit(`${id}/${view}`);
     try {
       const saved = JSON.parse(
           localStorage.getItem("tablefolk-preferences") || "{}",
         ),
         seen = Array.isArray(saved.seen) ? saved.seen : [];
       setCompact(view === "play" || seen.includes(id));
-      if (!seen.includes(id))
+      if (
+        !sharedOptions(id, new URLSearchParams(location.search)) &&
+        !seen.includes(id)
+      )
         localStorage.setItem(
           "tablefolk-preferences",
           JSON.stringify({ ...saved, seen: [...seen, id] }),
@@ -516,21 +778,54 @@ export function GameGuide({
     document.body.classList.toggle("compact-hero", compact);
   }, [compact]);
   const sections = useMemo(
-    () => [
-      ...game.sections,
-      ...(id === "skull_king" && options.skullExpansion
-        ? game.expansionSections || []
-        : []),
+    () => (runtime ? editionSections(id, game, options) : game.sections),
+    [
+      game,
+      id,
+      !!runtime,
+      options.skullExpansion,
+      options.exchange,
+      options.reformation,
     ],
-    [game, id, options.skullExpansion],
   );
+  useEffect(() => {
+    if (!runtime || !shared) return;
+    const url = new URL(location.href);
+    // A temporary option change must also be reflected in the address being shared.
+    if (url.searchParams.get("shared") !== "1") return;
+    editionParams(id, options, url.searchParams);
+    if (url.href !== location.href)
+      history.replaceState(
+        history.state,
+        "",
+        url.pathname + url.search + url.hash,
+      );
+  }, [
+    runtime,
+    shared,
+    id,
+    options.exchange,
+    options.reformation,
+    options.skullExpansion,
+    options.players,
+    options.avalonMode,
+    options.optional.join(","),
+    options.lady,
+  ]);
   const [expanded, setExpanded] = useState<Set<string>>(
     () => new Set([game.sections[0].id]),
   );
+  const lastFragment = useRef<string | undefined>(undefined);
   useEffect(() => {
     const jump = () => {
-      const section = decodeURIComponent(location.hash.slice(1));
+      if (lastFragment.current === location.hash) return;
+      let section = "";
+      try {
+        section = decodeURIComponent(location.hash.slice(1));
+      } catch {}
+      if (!section) lastFragment.current = location.hash;
       if (section && panel.current?.querySelector(`#${CSS.escape(section)}`)) {
+        lastFragment.current = location.hash;
         setExpanded((previous) => new Set([...previous, section]));
         requestAnimationFrame(() =>
           document
@@ -541,6 +836,8 @@ export function GameGuide({
     };
     jump();
     window.addEventListener("hashchange", jump);
+    window.addEventListener("popstate", jump);
+    window.addEventListener("tablefolk-guide-location", jump);
     try {
       if (
         view === "rules" &&
@@ -551,23 +848,32 @@ export function GameGuide({
         setTimeout(() => window.print(), 200);
       }
     } catch {}
-    return () => window.removeEventListener("hashchange", jump);
+    return () => {
+      window.removeEventListener("hashchange", jump);
+      window.removeEventListener("popstate", jump);
+      window.removeEventListener("tablefolk-guide-location", jump);
+    };
   }, [id, view, sections]);
   const setup =
     game.sections.find(
       (section) => section.id === "setup" || section.id === "menu",
     ) || game.sections[0];
-  const edition =
-    id === "skull_king"
-      ? tr(
-          options.skullExpansion ? "Base + Expansion Pack" : "Base box",
-          options.skullExpansion
-            ? "Caja base + paquete de expansión"
-            : "Caja base",
-        )
-      : id === "coup"
-        ? `${tr(options.exchange === "inquisitor" ? "Inquisitor" : "Ambassador", options.exchange === "inquisitor" ? "Inquisidor" : "Embajador")}${options.reformation ? " + Reformation" : ""}`
-        : game.edition?.[lang] || game.name[lang];
+  const edition = editionLabel(id, game, options, lang);
+  const navHref = (
+    next: View,
+    section?: string,
+    search = shared ? query : "",
+  ) => guideHref(lang, id, next, search, options, shared, section);
+  const searchHref = (section: string, search: string) =>
+    guideHref(
+      lang,
+      id,
+      "rules",
+      search,
+      options,
+      shared || ["coup", "skull_king", "avalon"].includes(id),
+      section,
+    );
   const tabs: [View, string][] = [
     ["learn", tr("Learn", "Aprender")],
     ["play", tr("While playing", "Al jugar")],
@@ -575,20 +881,22 @@ export function GameGuide({
   ];
   return (
     <EngineContext.Provider value={runtime}>
+      <Suspense fallback={null}>
+        <GuideLocation />
+      </Suspense>
       <main
         id="main"
         tabIndex={-1}
         data-focus={view === "play" && focusPlay}
+        data-help={showHelp}
+        data-clock-facing={opponentFacing ? "opponent" : "same"}
+        data-shared={shared}
         data-active-tool={playStatus?.active || false}
         data-has-play-tool={hasPlayTool}
         data-route={`/${lang}/${id}/${view}/`}
       >
         <div className="wrap">
-          <Link
-            prefetch={false}
-            className="breadcrumb"
-            href={`/${lang}/#collection`}
-          >
+          <Link prefetch={false} className="breadcrumb" href={collectionHref}>
             <Icon path={icons.back} />
             {tr("Back to the collection", "Volver a la colección")}
           </Link>
@@ -628,7 +936,8 @@ export function GameGuide({
                       "Ampliar imagen del juego",
                     )}
                   >
-                    <img
+                    <ResponsiveImage
+                      sizes="(max-width: 680px) 68px, (max-width: 1000px) 35vw, 450px"
                       src={art.src}
                       alt={art.title[lang]}
                       width={art.width}
@@ -638,7 +947,8 @@ export function GameGuide({
                     <span>{tr("View image ↗", "Ver imagen ↗")}</span>
                   </button>
                 ) : (
-                  <img
+                  <ResponsiveImage
+                    sizes="(max-width: 680px) 68px, (max-width: 1000px) 35vw, 450px"
                     className="guide-artwork"
                     src={art.src}
                     alt={tr(
@@ -669,7 +979,7 @@ export function GameGuide({
                   tabIndex={view === key ? 0 : -1}
                   onClick={() => {
                     pendingTabFocus = undefined;
-                    router.push(`/${lang}/${id}/${key}/`);
+                    router.push(navHref(key));
                   }}
                   onKeyDown={(event) => {
                     if (
@@ -689,7 +999,7 @@ export function GameGuide({
                       document.getElementById(`tab-${view}`)?.focus();
                     } else {
                       pendingTabFocus = `/${lang}/${id}/${tabs[next][0]}/`;
-                      router.push(pendingTabFocus);
+                      router.push(navHref(tabs[next][0]));
                     }
                   }}
                 >
@@ -697,6 +1007,19 @@ export function GameGuide({
                 </button>
               ))}
             </div>
+            <button
+              type="button"
+              id="share-guide"
+              className="share-button"
+              aria-haspopup="dialog"
+              aria-controls="share-dialog"
+              onClick={(event) => {
+                event.currentTarget.focus();
+                setSharing(null);
+              }}
+            >
+              {tr("Share guide", "Compartir guía")}
+            </button>
             {!focusPlay ? (
               <button
                 type="button"
@@ -725,7 +1048,7 @@ export function GameGuide({
                   try {
                     sessionStorage.setItem("tablefolk-print", id);
                   } catch {}
-                  router.push(`/${lang}/${id}/rules/`);
+                  router.push(navHref("rules"));
                 }
               }}
             >
@@ -770,6 +1093,18 @@ export function GameGuide({
               role="tabpanel"
               aria-labelledby={`tab-${view}`}
             >
+              {shared ? (
+                <p className="shared-edition" role="status">
+                  <strong>
+                    {tr("Shared edition", "Edición compartida")}: {edition}
+                  </strong>
+                  <br />
+                  {tr(
+                    "These guide choices are temporary. Your saved setup and games are unchanged.",
+                    "Estas opciones de la guía son temporales. Tu preparación y tus partidas guardadas siguen iguales.",
+                  )}
+                </p>
+              ) : null}
               {loadError ? (
                 <p role="alert">
                   {tr(
@@ -802,32 +1137,38 @@ export function GameGuide({
                       {tr("Set up the game", "Prepara la partida")}
                     </h2>
                     {id === "avalon" ? (
-                      <Tool
-                        key={`${id}-${lang}-setup`}
-                        kind="setup"
-                        initial={tools.setup || ""}
+                      <AvalonSetup
+                        lang={lang}
+                        options={options}
+                        tools={tools}
+                        ready={!!runtime}
+                        shared={shared}
+                        readyHref={navHref("play")}
                       />
-                    ) : null}
-                    <SetupChecklist
-                      id={id}
-                      lang={lang}
-                      ready={!!runtime}
-                      steps={setupSteps(id, options)}
-                      signature={
-                        id === "avalon"
-                          ? JSON.stringify([
-                              options.players,
-                              options.avalonMode,
-                              [...options.optional].sort(),
-                              options.lady,
-                            ])
-                          : id === "coup"
-                            ? `${options.exchange}-${options.reformation}`
-                            : id === "skull_king"
-                              ? String(options.skullExpansion)
-                              : "base"
-                      }
-                    />
+                    ) : (
+                      <SetupChecklist
+                        id={id}
+                        lang={lang}
+                        ready={!!runtime}
+                        temporary={shared}
+                        readyHref={navHref("play")}
+                        steps={setupSteps(id, options)}
+                        signature={
+                          id === "avalon"
+                            ? JSON.stringify([
+                                options.players,
+                                options.avalonMode,
+                                [...options.optional].sort(),
+                                options.lady,
+                              ])
+                            : id === "coup"
+                              ? `${options.exchange}-${options.reformation}`
+                              : id === "skull_king"
+                                ? String(options.skullExpansion)
+                                : "base"
+                        }
+                      />
+                    )}
                     <details className="setup-notes" id="setup-notes">
                       <summary>
                         {tr(
@@ -850,6 +1191,7 @@ export function GameGuide({
                     </details>
                   </section>
                   <Lesson
+                    readyHref={navHref("play")}
                     id={id}
                     game={game}
                     lang={lang}
@@ -891,7 +1233,7 @@ export function GameGuide({
                   <Link
                     prefetch={false}
                     className="inline-link"
-                    href={`/${lang}/${id}/rules/`}
+                    href={navHref("rules")}
                   >
                     {tr(
                       "Read the full rules & exceptions",
@@ -908,6 +1250,14 @@ export function GameGuide({
                       id={id}
                       lang={lang}
                       sections={sections}
+                      options={options}
+                      hrefFor={searchHref}
+                      onSelect={(section) => {
+                        if (section)
+                          setExpanded(
+                            (previous) => new Set([...previous, section]),
+                          );
+                      }}
                       icons={icons}
                       query={query}
                       onQuery={onQuery}
@@ -961,6 +1311,20 @@ export function GameGuide({
                               </span>
                             </button>
                           ) : null}
+                          {focusPlay ? (
+                            <button
+                              type="button"
+                              id="share-table-guide"
+                              aria-haspopup="dialog"
+                              aria-controls="share-dialog"
+                              onClick={(event) => {
+                                event.currentTarget.focus();
+                                setSharing(null);
+                              }}
+                            >
+                              {tr("Share", "Compartir")}
+                            </button>
+                          ) : null}
                           <button
                             type="button"
                             id="focus-play"
@@ -982,6 +1346,24 @@ export function GameGuide({
                           </button>
                         </div>
                       </div>
+                      {focusPlay ? (
+                        <TableControls
+                          lang={lang}
+                          chess={id === "chess"}
+                          orientation={opponentFacing}
+                          onOrientation={(value) => {
+                            setOpponentFacing(value);
+                            try {
+                              sessionStorage.setItem(
+                                "tablefolk-chess-orientation",
+                                value ? "opponent" : "same",
+                              );
+                            } catch {}
+                          }}
+                          help={showHelp}
+                          onHelp={setShowHelp}
+                        />
+                      ) : null}
                       <Tool
                         key={`${id}-${lang}-play`}
                         kind="play"
@@ -1059,10 +1441,25 @@ export function GameGuide({
                         >
                           <summary>{section.title[lang]}</summary>
                           <div className="rule-body">
+                            <button
+                              type="button"
+                              className="share-rule"
+                              aria-label={`${tr("Share rule", "Compartir regla")}: ${section.title[lang]}`}
+                              aria-haspopup="dialog"
+                              aria-controls="share-dialog"
+                              onClick={(event) => {
+                                event.currentTarget.focus();
+                                setSharing(section.id);
+                              }}
+                            >
+                              {tr("Share this rule", "Compartir esta regla")}
+                            </button>
                             {section.paragraphs.map((paragraph, i) => (
                               <p key={i}>
                                 <HighlightedText
                                   text={paragraph[lang]}
+                                  id={id}
+                                  lang={lang}
                                   query={query}
                                 />
                               </p>
@@ -1089,12 +1486,45 @@ export function GameGuide({
             </article>
           </div>
         </div>
+        <ShareDialog
+          open={sharing !== undefined}
+          onClose={() => setSharing(undefined)}
+          href={guideHref(
+            lang,
+            id,
+            view,
+            query,
+            options,
+            true,
+            typeof sharing === "string"
+              ? sharing
+              : typeof window !== "undefined" &&
+                  sections.some((section) => "#" + section.id === location.hash)
+                ? location.hash.slice(1)
+                : undefined,
+          )}
+          title={
+            typeof sharing === "string"
+              ? sections.find((section) => section.id === sharing)?.title[
+                  lang
+                ] || game.name[lang]
+              : game.name[lang]
+          }
+          edition={edition}
+          lang={lang}
+        />
         <RuleSearchDialog
+          onSelect={(section) => {
+            if (section)
+              setExpanded((previous) => new Set([...previous, section]));
+          }}
           open={searchOpen}
           onClose={() => setSearchOpen(false)}
           id={id}
           lang={lang}
           sections={sections}
+          options={options}
+          hrefFor={searchHref}
           icons={icons}
           query={query}
           onQuery={onQuery}

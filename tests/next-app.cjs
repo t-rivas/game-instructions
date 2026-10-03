@@ -123,7 +123,10 @@ const origin = new Promise((resolve, reject) => {
       await page.waitForFunction(
         () =>
           document.querySelector("main")?.dataset.route === location.pathname &&
-          document.querySelector("[data-tool=sources][data-ready=true]"),
+          document.querySelector("[data-tool=sources][data-ready=true]") &&
+          [...document.querySelectorAll("[data-tool]")].every(
+            (node) => node.dataset.ready === "true",
+          ),
       );
     };
     const clickRoute = async (selector, path) => {
@@ -159,10 +162,12 @@ const origin = new Promise((resolve, reject) => {
           .querySelector(".game-card[data-game=coup] .favorite-toggle")
           ?.getAttribute("aria-pressed") === "true",
     );
-    await page.locator("#filter-favorites").click();
     check(
-      (await page.locator(".game-card").count()) === 1,
-      "Favorite selection survives reload",
+      (await page.locator(".game-card").count()) === 1 &&
+        (await page
+          .locator("#filter-favorites")
+          .getAttribute("aria-pressed")) === "true",
+      "Favorite selection and URL filter survive reload",
     );
     await page.locator("#clear-filters").click();
     await page.locator("#game-search").fill("ajedrez");
@@ -204,27 +209,29 @@ const origin = new Promise((resolve, reject) => {
     );
     await page.locator("#players").selectOption("5");
     await page.locator("#avalon-mode").selectOption("optional");
+    await page.locator("#avalon-step-1").click();
+    await page.locator("#avalon-roster > summary").click();
     check(
       (await page.locator("#roster").innerText()).includes(
         "Percival, Morgana, 1 Loyal Servant",
       ),
       "Avalon setup still computes the roster",
     );
+    await page.locator("#avalon-step-0").click();
     check(
       await page.locator("#role-mordred").isDisabled(),
       "Role capacity still enforced",
     );
+    await page.locator("#avalon-step-1").click();
     await page.locator("#setup-check-0").check();
     await page.locator("#setup-check-1").check();
     await clickRoute(
       "#lang-es",
       page.url().replace(base, "").replace("/en/", "/es/"),
     );
+    await page.locator("#avalon-roster > summary").click();
     check(
-      (await page.locator("#players").inputValue()) === "5" &&
-        (await page.locator("#roster").innerText()).includes(
-          "Percival, Morgana",
-        ),
+      (await page.locator("#roster").innerText()).includes("Percival, Morgana"),
       "Language switch preserves Avalon setup",
     );
     check(
@@ -235,9 +242,14 @@ const origin = new Promise((resolve, reject) => {
     await page.reload();
     await ready();
     check(
-      (await page.locator("#players").inputValue()) === "5" &&
-        (await page.locator("#setup-check-0").isChecked()),
+      (await page.locator("#avalon-step-1").getAttribute("aria-current")) ===
+        "step" && (await page.locator("#setup-check-0").isChecked()),
       "Avalon configuration and checklist recover after reload",
+    );
+    await page.locator("#avalon-step-0").click();
+    check(
+      (await page.locator("#players").inputValue()) === "5",
+      "Saved Avalon player count recovers",
     );
     await page.locator("#players").selectOption("6");
     await page.waitForFunction(
@@ -638,6 +650,12 @@ const origin = new Promise((resolve, reject) => {
     );
 
     await page.goto(base + "/en/");
+    await page.waitForSelector("#view-saved-games");
+    check(
+      (await page.locator(".resume-card").count()) === 1,
+      "One Resume card initially",
+    );
+    await page.locator("#view-saved-games").click();
     await page.waitForSelector(".resume-card[data-game=truco]");
     check(
       (
@@ -658,6 +676,8 @@ const origin = new Promise((resolve, reject) => {
       "Resume restores an unfinished award",
     );
     await page.goto(base + "/es/");
+    await page.waitForSelector("#view-saved-games");
+    await page.locator("#view-saved-games").click();
     await page.waitForSelector(".resume-card[data-game=chess]");
     check(
       (
@@ -666,6 +686,12 @@ const origin = new Promise((resolve, reject) => {
       "Resume summaries follow the selected language",
     );
     await page.reload();
+    await page.waitForSelector("#view-saved-games");
+    check(
+      (await page.locator(".resume-card").count()) === 1,
+      "One Resume card initially",
+    );
+    await page.locator("#view-saved-games").click();
     await page.waitForSelector(".resume-card[data-game=truco]");
     check(
       (

@@ -9,12 +9,20 @@ export function SetupChecklist({
   steps,
   signature,
   ready,
+  activeIndices,
+  showActions = true,
+  temporary = false,
+  readyHref,
 }: {
   id: string;
   lang: Language;
   steps: Translation[];
   signature: string;
   ready: boolean;
+  activeIndices?: number[];
+  showActions?: boolean;
+  temporary?: boolean;
+  readyHref?: string;
 }) {
   const [checked, setChecked] = useState<boolean[]>(steps.map(() => false)),
     [saveError, setSaveError] = useState(false);
@@ -22,6 +30,10 @@ export function SetupChecklist({
     key = `tablefolk-setup-checklist-${id}`;
   useEffect(() => {
     if (!ready) return;
+    if (temporary) {
+      setChecked(steps.map(() => false));
+      return;
+    }
     const saved = readStored<{ signature?: string; checked?: unknown }>(
       key,
       {},
@@ -29,19 +41,21 @@ export function SetupChecklist({
     setChecked(
       saved.signature === signature &&
         Array.isArray(saved.checked) &&
-        saved.checked.length === steps.length &&
+        (saved.checked.length === steps.length ||
+          (id === "avalon" && saved.checked.length === steps.length - 1)) &&
         saved.checked.every((value) => typeof value === "boolean")
-        ? saved.checked
+        ? steps.map((_, i) => (saved.checked as boolean[])[i] || false)
         : steps.map(() => false),
     );
     if (saved.signature && saved.signature !== signature)
       setSaveError(
         !writeStored(key, { signature, checked: steps.map(() => false) }),
       );
-  }, [key, signature, steps.length, ready]);
+  }, [key, signature, steps.length, ready, temporary]);
   const save = (next: boolean[]) => {
     setChecked(next);
-    setSaveError(!writeStored(key, { signature, checked: next }));
+    if (!temporary)
+      setSaveError(!writeStored(key, { signature, checked: next }));
   };
   const done = checked.filter(Boolean).length;
   return (
@@ -54,7 +68,11 @@ export function SetupChecklist({
       </div>
       <ol>
         {steps.map((step, i) => (
-          <li key={i} className={checked[i] ? "checked" : ""}>
+          <li
+            key={i}
+            hidden={activeIndices ? !activeIndices.includes(i) : false}
+            className={checked[i] ? "checked" : ""}
+          >
             <label>
               <input
                 type="checkbox"
@@ -87,24 +105,26 @@ export function SetupChecklist({
           )}
         </p>
       ) : null}
-      <div className="checklist-actions">
-        <Link
-          prefetch={false}
-          id="setup-ready"
-          className="accent-button"
-          href={`/${lang}/${id}/play/`}
-        >
-          {tr("Ready to play", "Listo para jugar")}{" "}
-          <span aria-hidden="true">→</span>
-        </Link>
-        <button
-          type="button"
-          disabled={!ready}
-          onClick={() => save(steps.map(() => false))}
-        >
-          {tr("Clear checklist", "Limpiar lista")}
-        </button>
-      </div>
+      {showActions ? (
+        <div className="checklist-actions">
+          <Link
+            prefetch={false}
+            id="setup-ready"
+            className="accent-button"
+            href={readyHref || `/${lang}/${id}/play/`}
+          >
+            {tr("Ready to play", "Listo para jugar")}{" "}
+            <span aria-hidden="true">→</span>
+          </Link>
+          <button
+            type="button"
+            disabled={!ready}
+            onClick={() => save(steps.map(() => false))}
+          >
+            {tr("Clear checklist", "Limpiar lista")}
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }

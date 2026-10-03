@@ -1,4 +1,8 @@
 "use client";
+import {
+  rememberCollection,
+  useCollectionReturn,
+} from "@/lib/collection-state";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -18,6 +22,7 @@ export function SiteChrome({
     router = useRouter();
   const parts = pathname.split("/").filter(Boolean);
   const lang: Language = parts[0] === "en" ? "en" : "es";
+  const collectionHref = useCollectionReturn(lang);
   const [theme, setTheme] = useState<"light" | "dark">("dark");
   const tr = (en: string, es: string) => (lang === "es" ? es : en);
   useEffect(() => {
@@ -41,6 +46,7 @@ export function SiteChrome({
     document.documentElement.dataset.game = parts[1] || "library";
   }, [theme, lang, pathname]);
   const save = (patch: object) => {
+    if (new URLSearchParams(location.search).get("shared") === "1") return;
     try {
       const saved = JSON.parse(
         localStorage.getItem("tablefolk-preferences") || "{}",
@@ -79,7 +85,7 @@ export function SiteChrome({
             <Link
               prefetch={false}
               className="library-link"
-              href={`/${lang}/#collection`}
+              href={collectionHref}
             >
               <Icon path={icons.grid} />
               {tr("The collection", "La colección")}
@@ -96,7 +102,11 @@ export function SiteChrome({
                   aria-pressed={lang === next}
                   onClick={() => {
                     save({ lang: next });
-                    router.push(languagePath(next) + location.hash);
+                    rememberCollection();
+                    router.push(
+                      languagePath(next) + location.search + location.hash,
+                      { scroll: false },
+                    );
                   }}
                 >
                   {next.toUpperCase()}

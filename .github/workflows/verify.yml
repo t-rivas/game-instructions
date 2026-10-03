@@ -15,6 +15,11 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium webkit
       - run: npm run build
+      - run: node tests/image-assets.mjs
+      - run: npm run test:experience
+      - run: BROWSER=webkit npm run test:experience
+      - run: npm run test:rules-table
+      - run: BROWSER=webkit npm run test:rules-table
       - run: npm run test:web
       - run: BROWSER=webkit npm run test:web
       - run: npm test

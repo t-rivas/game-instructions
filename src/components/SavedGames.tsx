@@ -1,4 +1,5 @@
 "use client";
+import { ResponsiveImage } from "./ResponsiveImage";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { loadTools } from "@/lib/tool-client";
@@ -7,6 +8,7 @@ import {
   readStored,
   recentGamesKey,
   savedGamesEvent,
+  gameActivity,
 } from "@/lib/browser-storage";
 import type { GameCardData, Language, SavedGame } from "@/lib/types";
 const time = (ms: number) => {
@@ -32,10 +34,13 @@ function summary(session: SavedGame, lang: Language) {
 export function SavedGames({
   cards,
   lang,
+  onReady,
 }: {
   cards: GameCardData[];
   lang: Language;
+  onReady: () => void;
 }) {
+  const [expanded, setExpanded] = useState(false);
   const [saved, setSaved] = useState<SavedGame[]>([]),
     [recent, setRecent] = useState<string[]>([]);
   const tr = (en: string, es: string) => (lang === "es" ? es : en);
@@ -54,11 +59,27 @@ export function SavedGames({
     try {
       hasSaved = gameStorageKeys.some((key) => localStorage.getItem(key));
     } catch {}
+    if (!hasSaved) onReady();
     if (hasSaved)
       loadTools()
         .then((engine) => {
           if (cancelled) return;
-          const refresh = () => setSaved(engine.savedGames());
+          const refresh = () => {
+            const activity = gameActivity();
+            const order = Array.isArray(recent) ? recent : [];
+            const rank = (id: string) =>
+              order.includes(id) ? order.indexOf(id) : order.length;
+            setSaved(
+              engine
+                .savedGames()
+                .sort(
+                  (a, b) =>
+                    (activity[b.id] || 0) - (activity[a.id] || 0) ||
+                    rank(a.id) - rank(b.id),
+                ),
+            );
+            onReady();
+          };
           refresh();
           window.addEventListener(savedGamesEvent, refresh);
           const interval = window.setInterval(refresh, 1000);
@@ -67,7 +88,7 @@ export function SavedGames({
             clearInterval(interval);
           };
         })
-        .catch(() => {});
+        .catch(() => onReady());
     return () => {
       cancelled = true;
       cleanup();
@@ -88,8 +109,8 @@ export function SavedGames({
               {tr("On this device", "En este dispositivo")}
             </span>
           </div>
-          <div className="resume-grid">
-            {saved.map((session) => {
+          <div className="resume-grid" id="saved-games">
+            {(expanded ? saved : saved.slice(0, 1)).map((session) => {
               const card = cards.find((card) => card.id === session.id);
               if (!card) return null;
               return (
@@ -98,7 +119,8 @@ export function SavedGames({
                   key={session.id}
                   data-game={session.id}
                 >
-                  <img
+                  <ResponsiveImage
+                    sizes="60px"
                     src={card.cover.src}
                     alt=""
                     width={card.cover.width}
@@ -124,6 +146,25 @@ export function SavedGames({
               );
             })}
           </div>
+          {saved.length > 1 ? (
+            <button
+              type="button"
+              id="view-saved-games"
+              aria-expanded={expanded}
+              aria-controls="saved-games"
+              onClick={() => setExpanded(!expanded)}
+            >
+              {expanded
+                ? tr(
+                    "Show fewer saved games",
+                    "Mostrar menos partidas guardadas",
+                  )
+                : tr(
+                    `View all saved games (${saved.length})`,
+                    `Ver todas las partidas guardadas (${saved.length})`,
+                  )}
+            </button>
+          ) : null}
         </section>
       ) : null}
       {recent.length > 0 ? (

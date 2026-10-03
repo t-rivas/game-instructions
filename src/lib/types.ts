@@ -42,8 +42,16 @@ export interface GameCardData {
   >;
   cover: Artwork;
 }
-export type ToolKind = "play" | "helper" | "setup" | "sources";
+export type ToolKind =
+  | "play"
+  | "helper"
+  | "setup"
+  | "sources"
+  | "setup-roles"
+  | "setup-components"
+  | "setup-script";
 export interface ToolState {
+  game?: string;
   exchange: "ambassador" | "inquisitor";
   reformation: boolean;
   skullExpansion: boolean;
@@ -54,7 +62,7 @@ export interface ToolState {
 }
 export interface ToolRuntime {
   state: ToolState;
-  setRoute(lang: Language, game: string, view: View): void;
+  setRoute(lang: Language, game: string, view: View, choices?: Partial<ToolState> | null): void;
   update(patch: Partial<ToolState>): void;
   subscribe(notify: () => void): () => void;
   view(kind: ToolKind): string;

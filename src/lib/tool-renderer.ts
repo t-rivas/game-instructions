@@ -1,4 +1,5 @@
 import "server-only";
+import images from "@/generated/images.json";
 import { createToolRuntime } from "@/generated/tool-runtime";
 import type { Language, ToolKind, ToolRuntime, View } from "./types";
 export function renderTools(
@@ -7,7 +8,7 @@ export function renderTools(
   view: View,
 ): Partial<Record<ToolKind, string>> {
   // A fresh runtime with no browser storage makes SSR deterministic.
-  const runtime = createToolRuntime() as unknown as ToolRuntime;
+  const runtime = createToolRuntime({ images }) as unknown as ToolRuntime;
   runtime.setRoute(lang, game, view);
   return {
     sources: runtime.view("sources"),
@@ -16,7 +17,11 @@ export function renderTools(
       : {
           helper: runtime.view("helper"),
           ...(view === "learn" && game === "avalon"
-            ? { setup: runtime.view("setup") }
+            ? {
+                "setup-roles": runtime.view("setup-roles"),
+                "setup-components": runtime.view("setup-components"),
+                "setup-script": runtime.view("setup-script"),
+              }
             : {}),
         }),
   };

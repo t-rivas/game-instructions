@@ -730,3 +730,412 @@ main[data-focus="true"]
     display: block;
   }
 }
+
+.returning-hero {
+  display: block;
+  padding: 22px 0 !important;
+}
+.returning-hero .pill,
+.returning-hero p,
+.returning-hero .hero-note,
+.returning-hero .hero-gallery {
+  display: none;
+}
+.returning-hero h1 {
+  font-size: 28px;
+  margin: 0;
+}
+.returning-hero h1 br {
+  display: none;
+}
+.returning-hero h1 em {
+  margin-left: 0.3em;
+}
+#view-saved-games {
+  min-height: 44px;
+  margin-top: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+.hero-gallery picture,
+.guide-art-cover picture {
+  display: contents;
+}
+.avalon-step-nav {
+  display: flex;
+  gap: 8px;
+  margin: 18px 0;
+}
+.avalon-step-nav button {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px;
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+.avalon-step-nav button span {
+  display: block;
+  font-weight: bold;
+}
+.avalon-step-nav button[aria-current="step"] {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.avalon-step-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+.avalon-flow .setup-checklist {
+  margin: 0;
+  min-width: 0;
+}
+.avalon-flow [hidden] {
+  display: none !important;
+}
+.avalon-flow .block {
+  margin: 0 0 20px;
+}
+.avalon-flow .script {
+  font-size: 17px;
+  line-height: 1.8;
+}
+.avalon-flow .script li {
+  margin-bottom: 22px;
+}
+.avalon-flow .setup-stats {
+  gap: 8px;
+}
+.avalon-flow .setup-stat {
+  min-width: 0;
+  padding: 14px;
+}
+.avalon-flow .settings .field {
+  min-width: min(140px, 100%);
+}
+.avalon-flow .check-label {
+  flex-wrap: wrap;
+}
+.avalon-flow .quest-track {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+.avalon-flow .quest {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.avalon-flow .quest small {
+  line-height: 1.5;
+}
+.avalon-flow .setup-notes {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 1000px) {
+  .avalon-step-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 370px) {
+  .avalon-step-nav {
+    flex-direction: column;
+  }
+  .avalon-step-nav button span {
+    display: inline;
+    margin-right: 8px;
+  }
+  .avalon-flow .settings {
+    padding: 12px;
+  }
+}
+.avalon-flow .setup-step-number {
+  display: none;
+}
+
+/* Guide sharing stays local; the code image is generated only on request. */
+.share-dialog {
+  width: min(620px, calc(100% - 32px));
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--bg);
+  color: var(--text);
+}
+.share-dialog::backdrop {
+  background: #0009;
+}
+.share-dialog .dialog-heading {
+  align-items: flex-start;
+}
+.share-dialog h2 {
+  font-size: 22px;
+  overflow-wrap: anywhere;
+}
+.share-dialog label {
+  display: block;
+  margin: 12px 0 8px;
+}
+.share-dialog textarea {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  overflow-wrap: anywhere;
+  resize: vertical;
+}
+.share-actions,
+.table-control-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.share-actions {
+  margin-top: 16px;
+}
+:is(.share-actions, .table-controls) button,
+.share-rule,
+#share-guide,
+#share-table-guide {
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+.share-dialog .dialog-heading button {
+  min-width: 44px;
+  min-height: 44px;
+}
+.share-qr {
+  display: block;
+  width: min(320px, 100%);
+  height: auto;
+  margin: 16px auto 0;
+  background: white;
+}
+.share-rule {
+  margin-bottom: 12px;
+  font-size: 13px;
+}
+.shared-edition {
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+}
+.common-questions {
+  margin-top: 14px;
+}
+.common-questions summary {
+  cursor: pointer;
+  min-height: 44px;
+  padding: 10px 0;
+}
+.common-questions ul {
+  padding-left: 22px;
+}
+.common-questions a {
+  display: inline-block;
+  padding: 10px 0;
+}
+.rule-search-result small {
+  color: var(--muted);
+}
+.table-controls {
+  margin-bottom: 16px;
+}
+.table-controls button {
+  min-height: 48px;
+  font-size: 13px;
+}
+.table-controls button[aria-pressed="true"] {
+  color: var(--on-accent);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.table-controls button:disabled {
+  cursor: default;
+  opacity: 0.65;
+}
+#wake-status {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 8px;
+}
+#wake-status[data-status="active"] {
+  color: var(--accent);
+}
+main[data-focus="true"] .chess-clock-player {
+  container-type: inline-size;
+}
+main[data-focus="true"] :is(#chess-clock-time-0, #chess-clock-time-1) {
+  font-size: clamp(20px, calc(160cqi / var(--clock-length, 4)), 100px);
+}
+main[data-focus="true"][data-clock-facing="opponent"] #chess-clock-player-1 {
+  transform: rotate(180deg);
+}
+main[data-focus="true"][data-help="false"]
+  :is(
+    .chess-clock-hint,
+    .poker-timer-hint:not([id]),
+    [data-tool="sources"],
+    .shared-edition
+  ) {
+  display: none;
+}
+main[data-focus="true"][data-help="true"][data-has-play-tool="true"]
+  #table-sheet {
+  display: block;
+}
+.play-toolbar-actions {
+  flex-wrap: wrap;
+}
+@media (orientation: portrait) {
+  main[data-focus="true"][data-clock-facing="opponent"] .chess-clock-panels {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  main[data-focus="true"][data-clock-facing="opponent"] #chess-clock-player-1 {
+    order: -1;
+  }
+}
+@media (max-width: 370px) {
+  .share-dialog {
+    padding: 16px;
+  }
+  .share-actions button {
+    flex: 1 1 100%;
+  }
+  .table-control-buttons button {
+    flex: 1 1 100%;
+  }
+}
+@media print {
+  .share-dialog,
+  .share-rule,
+  #share-guide,
+  .table-controls,
+  .common-questions {
+    display: none !important;
+  }
+}
+
+.poker-timer-display {
+  container-type: inline-size;
+}
+main[data-focus="true"] #poker-timer-time {
+  font-size: clamp(20px, calc(140cqi / var(--clock-length, 4)), 100px);
+}
+
+.share-dialog .dialog-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.share-dialog .dialog-heading h2 {
+  margin: 0;
+}
+.share-dialog .dialog-heading button {
+  flex: 0 0 44px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--panel);
+  color: var(--text);
+  font-size: 24px;
+  cursor: pointer;
+}
+main[data-focus="true"] .play-toolbar {
+  margin-bottom: 8px;
+  padding: 6px 0;
+}
+main[data-focus="true"] .table-controls {
+  margin-bottom: 8px;
+}
+main[data-focus="true"] .chess-clock {
+  padding: 12px;
+  margin-bottom: 0;
+}
+main[data-focus="true"] .chess-clock-player {
+  padding: 8px;
+  gap: 4px;
+}
+main[data-focus="true"] .chess-clock-player-state {
+  min-height: 1.5em;
+}
+main[data-focus="true"][data-help="false"] #chess-clock-heading {
+  display: none;
+}
+@media (max-width: 680px) {
+  main[data-focus="true"] .play-toolbar-actions {
+    flex-wrap: nowrap;
+  }
+  main[data-focus="true"] .play-toolbar-actions button {
+    padding: 8px;
+    font-size: 12px;
+  }
+  main[data-focus="true"] .play-toolbar #focus-play {
+    flex: 1;
+    min-width: 0;
+    max-width: none;
+  }
+  main[data-focus="true"] .table-control-buttons button {
+    flex: 1 1 calc(50% - 8px);
+    font-size: 12px;
+    padding: 8px;
+  }
+  main[data-focus="true"] .chess-clock-player {
+    min-height: 140px;
+  }
+}
+@media (orientation: landscape) and (max-height: 500px) {
+  main[data-focus="true"] > .wrap {
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+  main[data-focus="true"] .chess-clock-player {
+    min-height: 120px;
+  }
+  main[data-focus="true"] :is(#chess-clock-time-0, #chess-clock-time-1) {
+    font-size: clamp(20px, calc(160cqi / var(--clock-length, 4)), 56px);
+  }
+}
+
+.share-code {
+  margin: 16px 0 0;
+  text-align: center;
+}
+.share-code figcaption {
+  font-size: 13px;
+  margin-top: 8px;
+  overflow-wrap: anywhere;
+}
+
+.share-dialog .dialog-heading {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 8px 0;
+  background: var(--bg);
+}

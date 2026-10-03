@@ -19,20 +19,27 @@
     "test:truco": "node tests/truco-score.cjs",
     "test:flows": "node tests/game-flows.cjs",
     "serve": "node scripts/serve-export.mjs",
-    "test:web": "node tests/next-app.cjs"
+    "test:web": "node tests/next-app.cjs",
+    "test:experience": "node tests/experience.cjs",
+    "test:images": "node tests/image-assets.mjs && node tests/image-transfer.cjs",
+    "test:rules-table": "node tests/search-share-table.cjs"
   },
   "devDependencies": {
     "@types/node": "26.6.4",
+    "@types/qrcode": "1.5.6",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
+    "jsqr": "1.4.0",
     "playwright": "1.62.1",
     "typescript": "7.0.2"
   },
   "dependencies": {
     "next": "16.3.8",
+    "qrcode": "1.5.4",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "server-only": "0.0.1"
+    "server-only": "0.0.1",
+    "sharp": "0.35.5"
   },
   "engines": {
     "node": ">=20.9.0"

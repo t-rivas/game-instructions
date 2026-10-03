@@ -1,10 +1,22 @@
 "use client";
+import {
+  emptyFilters,
+  rememberCollection,
+  useCollectionFilters,
+} from "@/lib/collection-state";
+import { ResponsiveImage } from "./ResponsiveImage";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { GameCardData, Language } from "@/lib/types";
 import { Icon } from "./Icon";
 import { SavedGames } from "./SavedGames";
-import { readStored, writeStored } from "@/lib/browser-storage";
+import {
+  readStored,
+  writeStored,
+  recordGameVisit,
+} from "@/lib/browser-storage";
+// Keep the first-visit introduction stable during this browsing session.
+let returningVisitor: boolean | undefined;
 const star =
   '<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z"/>';
 function supportsPlayers(value: string, count: number) {
@@ -32,13 +44,25 @@ export function Collection({
   lang: Language;
   icons: Record<string, string>;
 }) {
-  const [query, setQuery] = useState("");
-  const [players, setPlayers] = useState(""),
-    [duration, setDuration] = useState(""),
-    [favoritesOnly, setFavoritesOnly] = useState(false),
-    [favorites, setFavorites] = useState<string[]>([]),
+  const [savedReady, setSavedReady] = useState(false),
+    [returning, setReturning] = useState(false);
+  const [{ query, players, duration, favoritesOnly }, updateFilters] =
+    useCollectionFilters(lang, savedReady);
+  const [favorites, setFavorites] = useState<string[]>([]),
     [favoriteError, setFavoriteError] = useState(false),
     [expansion, setExpansion] = useState(false);
+  useEffect(() => {
+    recordGameVisit("collection");
+    const preferences = readStored<{ seen?: unknown; visited?: boolean }>(
+      "tablefolk-preferences",
+      {},
+    );
+    returningVisitor ??=
+      preferences.visited === true ||
+      (Array.isArray(preferences.seen) && preferences.seen.length > 0);
+    setReturning(returningVisitor);
+    writeStored("tablefolk-preferences", { ...preferences, visited: true });
+  }, []);
   useEffect(() => {
     const saved = readStored<unknown>("tablefolk-favorites", []);
     setFavorites(
@@ -77,8 +101,12 @@ export function Collection({
   return (
     <main id="main" tabIndex={-1}>
       <div className="wrap">
-        <SavedGames cards={cards} lang={lang} />
-        <section className="hero">
+        <SavedGames
+          cards={cards}
+          lang={lang}
+          onReady={() => setSavedReady(true)}
+        />
+        <section className={`hero${returning ? " returning-hero" : ""}`}>
           <div>
             <span className="pill">
               {tr("YOUR GAME NIGHT COMPANION", "TU COMPAÑERO DE JUEGOS")}
@@ -104,13 +132,34 @@ export function Collection({
           </div>
           <div className="hero-gallery" aria-hidden="true">
             <div className="gallery-main">
-              <img src="/assets/avalon.jpg" alt="" width="1200" height="800" />
+              <ResponsiveImage
+                desktopOnly
+                sizes="450px"
+                src="/assets/avalon.jpg"
+                alt=""
+                width="1200"
+                height="800"
+              />
             </div>
             <div className="gallery-small">
-              <img src="/assets/coup.jpg" alt="" width="1200" height="800" />
+              <ResponsiveImage
+                desktopOnly
+                sizes="220px"
+                src="/assets/coup.jpg"
+                alt=""
+                width="1200"
+                height="800"
+              />
             </div>
             <div className="gallery-tiny">
-              <img src="/assets/poker.jpg" alt="" width="1200" height="800" />
+              <ResponsiveImage
+                desktopOnly
+                sizes="160px"
+                src="/assets/poker.jpg"
+                alt=""
+                width="1200"
+                height="800"
+              />
             </div>
             <span className="gallery-note">
               {tr(
@@ -137,7 +186,9 @@ export function Collection({
                 id="game-search"
                 type="search"
                 value={query}
-                onChange={(event) => setQuery(event.target.value)}
+                onChange={(event) =>
+                  updateFilters({ query: event.target.value })
+                }
                 placeholder={tr("Find a game…", "Busca un juego…")}
                 aria-label={tr(
                   "Search the collection",
@@ -155,7 +206,9 @@ export function Collection({
               <select
                 id="filter-players"
                 value={players}
-                onChange={(event) => setPlayers(event.target.value)}
+                onChange={(event) =>
+                  updateFilters({ players: event.target.value })
+                }
               >
                 <option value="">
                   {tr("Any group size", "Cualquier grupo")}
@@ -172,7 +225,9 @@ export function Collection({
               <select
                 id="filter-duration"
                 value={duration}
-                onChange={(event) => setDuration(event.target.value)}
+                onChange={(event) =>
+                  updateFilters({ duration: event.target.value })
+                }
               >
                 <option value="">
                   {tr("Any duration", "Cualquier duración")}
@@ -191,7 +246,7 @@ export function Collection({
               type="button"
               id="filter-favorites"
               aria-pressed={favoritesOnly}
-              onClick={() => setFavoritesOnly(!favoritesOnly)}
+              onClick={() => updateFilters({ favoritesOnly: !favoritesOnly })}
             >
               <Icon path={star} />
               {tr("Favorites", "Favoritos")}
@@ -202,10 +257,7 @@ export function Collection({
                 className="clear-filters"
                 id="clear-filters"
                 onClick={() => {
-                  setQuery("");
-                  setPlayers("");
-                  setDuration("");
-                  setFavoritesOnly(false);
+                  updateFilters(emptyFilters);
                 }}
               >
                 {tr("Clear filters", "Limpiar filtros")}
@@ -268,7 +320,7 @@ export function Collection({
                     ) : id === "poker" ? (
                       <span className="art-tag">Texas Hold’em</span>
                     ) : null}
-                    <img
+                    <ResponsiveImage
                       className="official-cover"
                       src={cover.src}
                       alt={cover.title[lang]}
@@ -295,6 +347,7 @@ export function Collection({
                     <div className="card-bottom">
                       <Link
                         prefetch={false}
+                        onClick={rememberCollection}
                         className="card-learn"
                         href={`/${lang}/${id}/learn/`}
                         aria-label={tr(
@@ -306,6 +359,7 @@ export function Collection({
                       </Link>
                       <Link
                         prefetch={false}
+                        onClick={rememberCollection}
                         className="card-play"
                         href={`/${lang}/${id}/play/`}
                         aria-label={tr(

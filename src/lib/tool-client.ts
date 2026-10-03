@@ -1,3 +1,4 @@
+import images from "@/generated/images.json";
 import type { ToolRuntime } from "./types";
 import { savedGamesEvent } from "./browser-storage";
 let pending: Promise<ToolRuntime> | undefined;
@@ -12,6 +13,7 @@ export function loadTools(): Promise<ToolRuntime> {
       const storageStatus = { available: !!storage };
       return createToolRuntime({
         document,
+        images,
         window,
         storageStatus,
         localStorage: {

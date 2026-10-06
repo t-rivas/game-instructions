@@ -2339,3 +2339,230 @@ main[data-view="learn"] .detail-hero .detail-cover { height: 90px; }
   .site-shell .collection-page .game-card:hover,
   .site-shell .collection-page .game-card .game-art > img.official-cover { transform: none; }
 }
+
+/* Phone reading flow. Shared by lessons, rule lookup and table tools. */
+@media screen {
+  .site-shell { --reading-inset: clamp(1rem, 3vw, 1.75rem); }
+  html { scroll-padding-top: var(--guide-inset, 96px); }
+  .site-shell main[data-focus="true"] { scroll-padding-top: var(--sticky-inset, 160px); }
+  .site-shell main[data-focus="true"] .active-table-tool > .sheet-heading { display: none; }
+  .site-shell main .content :is(input, select, textarea, h3, a, button, summary) { scroll-margin-top: var(--sticky-inset, 96px); }
+  .site-shell .tab-phone-label, .site-shell .guide-more-icon { display: none; }
+  .site-shell .responsive-disclosure { min-width: 0; margin-block: 0 1rem; }
+  .site-shell .responsive-disclosure > summary {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    min-height: 48px; padding: 12px 14px; list-style: none; cursor: pointer;
+    border: 1px solid var(--border-soft); border-radius: 12px;
+    background: var(--surface-reading); font-size: .9375rem; line-height: 1.5;
+  }
+  .site-shell .responsive-disclosure > summary::-webkit-details-marker { display: none; }
+  .site-shell .responsive-disclosure > summary > span:first-child { min-width: 0; }
+  .site-shell .responsive-disclosure small { font-size: inherit; color: var(--muted); }
+  .site-shell .disclosure-chevron { flex: none; font-size: 1.25rem; }
+  .site-shell .responsive-disclosure[open] .disclosure-chevron { transform: rotate(180deg); }
+  .site-shell .disclosure-body { padding-top: 14px; }
+  .site-shell .game-card { position: relative; }
+  .site-shell .collection-page .card-bottom { display: grid; grid-template-columns: 1fr 1fr; padding: 0 20px 20px; }
+  .site-shell .learning-sequence .lesson-copy h3 { font-size: clamp(1.5rem, 1.2rem + 1vw, 1.875rem); }
+  .site-shell .learning-sequence .lesson-copy { padding-bottom: 12px; }
+  .site-shell .learning-sequence .lesson-cards { padding-top: 12px; }
+  .site-shell .learning-sequence .lesson-buttons { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); }
+  .site-shell .learning-sequence .lesson-buttons > * { min-width: 0; display: flex; align-items: center; justify-content: center; }
+  .site-shell .example-intro, .site-shell .example-extras, .site-shell .watch-history { margin-block: 12px; }
+  .site-shell :is(.example-intro, .example-extras, .watch-history) > summary { min-height: 48px; padding: 12px 0; color: var(--muted); cursor: pointer; }
+  .site-shell .example-intro > :not(summary) { margin-inline: 0; }
+  .site-shell .watch-history li { margin-bottom: 16px; }
+  .site-shell .watch-history p { margin-top: 8px; }
+  .site-shell .watch-heading { margin-bottom: 12px; padding-top: 0; }
+  .site-shell .watch-heading > strong { font-size: clamp(1.25rem, 1rem + 1vw, 1.5rem); }
+  .site-shell .watch-caption { border-radius: 12px; margin-block: 12px; }
+  .site-shell .watch-caption p { margin-bottom: 8px; }
+  .site-shell .watch-skull-seats { gap: 6px; }
+  .site-shell .watch-skull-seats > div { flex-direction: row; flex-wrap: wrap; justify-content: center; padding: 8px 4px; }
+  .site-shell .watch-skull-seats small { flex-basis: 100%; min-height: 0; }
+  .site-shell .watch-avatar { width: 28px; min-height: 28px; }
+  .site-shell .watch-controls { margin: 12px 0 0; }
+  .site-shell .watch-history-toggle { display: none; }
+  .site-shell .watch-legal summary { font-size: .9375rem; padding: 12px 0; }
+  .site-shell .comparison-body { padding: 0 var(--reading-inset) 20px; }
+  .site-shell .comparison-situation { border-radius: 14px; }
+  .site-shell .comparison-situation h5 { font-size: 1.125rem; line-height: 1.4; }
+  .site-shell .comparison-difference { border-radius: 10px; padding: 12px; }
+  .site-shell .comparison-marker { line-height: 1.4; }
+  .site-shell .comparison-outcome { border-radius: 8px; }
+  .site-shell .rule-search-result { padding: 16px; border-radius: 12px; }
+  .site-shell .rule-search-result > span { font-size: 1rem; line-height: 1.6; }
+  .site-shell :is(.rule-dialog, .share-dialog) { overscroll-behavior: contain; scroll-padding-block: 90px 24px; }
+  .site-shell .collection-page .hero h1 { font-size: clamp(2rem, 1.6rem + 2vw, 3.5rem); }
+  .site-shell .collection-page .hero-gallery { height: 260px; }
+  .site-shell .guide-option-disclosure .guide-setup-context { margin: 0; }
+}
+@media screen and (min-width: 48rem) {
+  .site-shell .responsive-disclosure > summary { display: none; }
+  .site-shell .responsive-disclosure .disclosure-body { padding-top: 0; }
+  .site-shell main[data-view="learn"] .detail-layout { max-width: 960px; margin-inline: auto; }
+  .site-shell .learning-sequence .lesson-card { align-items: center; }
+}
+@media screen and (max-width: 47.999rem) {
+  html { scroll-padding-top: 90px; }
+  html:has(.site-shell dialog[open]) { overflow: hidden; }
+  .site-shell #header { position: relative; }
+  .site-shell .wrap { padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right)); }
+  .site-shell .header-inner { min-height: 64px; padding-block: max(6px, env(safe-area-inset-top)) 6px; }
+  .site-shell .header-inner { flex-wrap: wrap; gap: 8px; }
+  .site-shell .brand { font-size: 1.125rem; gap: 7px; }
+  .site-shell .brand-mark { width: 26px; height: 30px; }
+  .site-shell .header-actions { gap: 6px; margin-left: auto; }
+  .site-shell .header-actions .library-link { display: none; }
+  .site-shell .language { padding: 2px; gap: 0; }
+  .site-shell .language button { min-width: 44px; min-height: 44px; }
+  .site-shell .collection-page .hero { display: block; padding-block: 20px 16px; }
+  .site-shell .collection-page .hero h1 { font-size: clamp(1.5rem, 1rem + 2.5vw, 2rem); line-height: 1.2; margin-bottom: 8px; }
+  .site-shell .collection-page .hero h1 br { display: none; }
+  .site-shell .collection-page .hero h1 em::before { content: ' '; }
+  .site-shell .collection-page .hero p { max-width: 40ch; font-size: .9375rem; line-height: 1.5; }
+  .site-shell .collection-page .hero-gallery { display: none; }
+  .site-shell .collection-page .collection-head { flex-direction: column; align-items: stretch; padding-top: 16px; gap: 12px; margin-bottom: 12px; }
+  .site-shell .collection-page .collection-head h2 { font-size: 1.375rem; }
+  .site-shell .collection-page .search { width: 100%; max-width: none; }
+  .site-shell .collection-page .search input { min-height: 52px; }
+  .site-shell .collection-filter-options { margin-bottom: 8px; }
+  .site-shell .collection-filter-options > summary { min-height: 44px; padding-block: 10px; }
+  .site-shell .collection-page .collection-filters label { flex: 1 1 12rem; }
+  .site-shell .collection-page .collection-results { margin-block: 8px 12px; font-size: .875rem; }
+  .site-shell .collection-page .game-grid { grid-template-columns: 1fr; gap: 12px; }
+  .site-shell .collection-page .game-card { display: grid; grid-template-columns: minmax(72px, 26%) minmax(0, 1fr); gap: 0; overflow: visible; container-type: inline-size; }
+  .site-shell .collection-page .game-art { width: auto; height: auto; padding: 16px 8px; border: 0; border-radius: 15px 0 0 0; align-items: center; }
+  .site-shell .collection-page .game-card .game-art > img.official-cover { height: auto; max-height: 140px; width: 100%; object-fit: contain; }
+  .site-shell .collection-page .card-body { min-width: 0; padding: 16px 14px 12px; }
+  .site-shell .collection-page .card-body h3 { font-size: 1.25rem; margin-bottom: 8px; overflow-wrap: anywhere; }
+  .site-shell .collection-page .meta { gap: 4px 10px; font-size: .8125rem; line-height: 1.4; }
+  .site-shell .collection-page .card-description { font-size: .875rem; line-height: 1.5; margin-block: 8px 0; }
+  .site-shell .collection-page .card-bottom { grid-column: 1 / -1; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 44px; padding: 12px; gap: 8px; border-top: 1px solid var(--border-soft); }
+  .site-shell .collection-page .card-bottom a { min-height: 48px; padding: 10px 6px; font-size: .9375rem; }
+  .site-shell .collection-page .favorite-toggle { position: static; width: 44px; min-height: 48px; height: auto; border-radius: 10px; }
+  .site-shell .collection-page .continue-playing { margin-top: 16px; }
+  .site-shell .collection-page .resume-card { padding: 14px; }
+  .site-shell .collection-page .recent-games { gap: 6px; }
+  .site-shell .breadcrumb { margin-block: 8px; padding-block: 8px; min-height: 44px; }
+  .site-shell .detail-hero { margin-bottom: 8px !important; }
+  .site-shell .detail-controls {
+    position: sticky; top: 0; z-index: 12; display: flex; flex-wrap: nowrap;
+    gap: 4px; padding-block: 8px; margin-bottom: 16px; min-height: 64px;
+    background: var(--surface-page); border-bottom: 1px solid var(--border-soft);
+  }
+  .site-shell .detail-controls .tabs { width: auto; flex: 1 1 0; flex-wrap: nowrap; gap: 2px; }
+  .site-shell .detail-controls .tabs button { flex: 1 1 0; padding: 10px 2px; min-width: 0; font-size: .875rem; line-height: 1.4; overflow-wrap: anywhere; }
+  .site-shell .detail-controls .tabs #tab-learn { flex-grow: 1.3; }
+  .site-shell .tab-full-label, .site-shell .guide-more-label { display: none; }
+  .site-shell .tab-phone-label, .site-shell .guide-more-icon { display: inline; }
+  .site-shell .detail-controls .find-rule-button { flex: 0 0 44px; width: 44px; margin: 0; padding: 10px; }
+  .site-shell .detail-controls .find-rule-button span { display: none; }
+  .site-shell .detail-controls .guide-actions { margin: 0; }
+  .site-shell .guide-actions > summary { display: grid; place-items: center; padding: 10px; width: 44px; min-height: 48px; list-style: none; border: 1px solid var(--border-soft); border-radius: 10px; }
+  .site-shell .guide-actions > summary::-webkit-details-marker { display: none; }
+  .site-shell .guide-actions > div { width: min(260px, 85vw); }
+  .site-shell :is(.lesson-copy h3, .rule-section, #active-table-tool, #active-table-tool-heading) { scroll-margin-top: 90px; }
+  .site-shell .learning-sequence .lesson-heading { flex-wrap: nowrap; gap: 8px; margin-bottom: 8px; }
+  .site-shell .learning-sequence .lesson-counter { flex: 1; font-size: .8125rem; }
+  .site-shell .learning-sequence .lesson-overview > summary { padding: 10px 12px; min-height: 48px; }
+  .site-shell .learning-sequence .lesson-overview[open] > nav { max-height: min(65dvh, var(--visible-height, 65dvh)); overscroll-behavior: contain; padding: 12px; }
+  .site-shell .lesson-setup-choice > summary { padding: 8px 12px; font-size: .875rem; }
+  .site-shell .learning-sequence .lesson-card { flex-direction: column; gap: 16px; }
+  .site-shell .learning-sequence .lesson-card .lesson-card-art { align-self: center; width: min(184px, 75%); }
+  .site-shell .learning-sequence .lesson-copy > .lesson-card-art { margin-inline: auto; }
+  .site-shell .learning-sequence .lesson-buttons { padding: 12px 16px; }
+  .site-shell .learning-sequence #lesson-next { min-width: 0; }
+  .site-shell :is(.skull-trick-lesson, .coup-lesson, .avalon-lesson) { padding: 16px; border: 0; margin-top: 0; }
+  .site-shell :is(.skull-trick-lesson, .coup-lesson, .avalon-lesson) > h2 { font-size: 1.375rem; }
+  .site-shell .side-nav { display: block; position: static; padding: 0; border: 0; }
+  .site-shell .side-nav .edition { margin-top: 12px; }
+  .site-shell .side-nav a { min-height: 44px; display: flex; align-items: center; padding: 10px 12px; }
+  .site-shell .side-nav .eyebrow { display: none; }
+  .site-shell :is(.trick-example, .coup-scene, .avalon-scene) { padding: 12px; }
+  .site-shell .trick-example > h3 { font-size: 1.25rem; }
+  .site-shell .watch-turn { margin-block: 12px; }
+  .site-shell .watch-skull-seats strong { font-size: .875rem; }
+  .site-shell .watch-skull-seats .watch-avatar { display: none; }
+  .site-shell .watch-turn .watch-skull-table { grid-template-columns: minmax(0, 1fr); gap: 8px; padding: 12px; border-radius: 16px; }
+  .site-shell .watch-history-toggle { display: block; width: 100%; margin-bottom: 8px; background: transparent; border-color: var(--border-soft); }
+  .site-shell .watch-skull-table[data-history="false"] .trick-play:not([data-current="true"]) { display: none; }
+  .site-shell .watch-turn .trick-play { display: grid; grid-template-columns: minmax(0, 1fr) 68px; align-items: center; padding: 8px; gap: 8px; text-align: left; border-radius: 12px; }
+  .site-shell .watch-turn .trick-player { margin: 0; font-size: .9375rem; }
+  .site-shell .watch-turn .trick-player { grid-column: 1; grid-row: 1; }
+  .site-shell .watch-turn :is(.watch-played-card, .watch-card-back) { grid-column: 2; grid-row: 1; }
+  .site-shell .watch-turn .watch-played-card { flex-direction: column; justify-content: center; gap: 4px; }
+  .site-shell .watch-turn .trick-play :is(.lesson-card-art, .trick-schematic, .trick-card-name, .trick-declaration) { grid-column: auto; grid-row: auto; }
+  .site-shell .watch-turn .trick-play .lesson-card-art, .site-shell .watch-turn .trick-schematic, .site-shell .watch-card-back { width: 68px; min-height: 68px; padding: 4px; }
+  .site-shell .watch-turn .trick-schematic { display: flex; flex-direction: column; justify-content: center; }
+  .site-shell .watch-turn .trick-schematic b { font-size: 1.75rem; }
+  .site-shell .watch-turn .trick-schematic small { font-size: .625rem; }
+  .site-shell .watch-turn .trick-card-name { font-size: .8125rem; line-height: 1.4; }
+  .site-shell .watch-turn .trick-play[data-current="true"] { grid-template-columns: minmax(0, 1fr) minmax(100px, 48%); background: var(--surface-accent); border-color: var(--accent); }
+  .site-shell .watch-turn .trick-play[data-current="true"] :is(.lesson-card-art, .trick-schematic, .watch-card-back) { width: 112px; min-height: 120px; }
+  .site-shell .watch-turn .trick-play[data-current="true"] .trick-schematic b { font-size: 2.5rem; }
+  .site-shell .watch-turn .trick-play[data-winner="true"] { transform: none; box-shadow: 0 0 0 2px var(--surface-accent); }
+  .site-shell .watch-badge { grid-column: 1 / -1; font-size: .9375rem; }
+  .site-shell .watch-caption { padding: 12px; }
+  .site-shell .watch-legal { padding: 12px; }
+  .site-shell .watch-controls { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+  .site-shell .watch-controls [data-watch-next] { grid-column: 2; grid-row: 1; }
+  .site-shell .watch-controls [data-watch-replay] { grid-column: 1 / -1; grid-row: 2; border-color: transparent; }
+  .site-shell .watch-turn .coup-public-table { grid-template-columns: minmax(0, 1fr); padding: 8px; }
+  .site-shell .watch-turn .coup-public-table > li { padding: 12px; }
+  .site-shell .coup-choices { grid-template-columns: minmax(0, 1fr); }
+  .site-shell .watch-turn .avalon-public-team { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .site-shell .avalon-stages { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .site-shell .avalon-stages li { display: none; }
+  .site-shell .avalon-stages [aria-current="step"] { display: block; }
+  .site-shell .comparison-pair { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .site-shell .comparison-situation { padding: 12px; }
+  .site-shell .comparison-controls { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .site-shell .comparison-controls button { width: 100%; }
+  .site-shell :is(.rule-dialog, .share-dialog, #image-viewer) {
+    position: fixed; inset: var(--visible-top, 0px) 0 auto; margin: 0;
+    width: 100%; max-width: 100%; height: var(--visible-height, 100dvh); max-height: var(--visible-height, 100dvh);
+    border: 0; border-radius: 0; padding: 16px;
+    padding-bottom: max(24px, env(safe-area-inset-bottom));
+  }
+  .site-shell :is(.rule-dialog, .share-dialog) .dialog-heading {
+    position: sticky; top: -16px; z-index: 4; align-items: center;
+    margin: -16px -16px 16px; padding: max(12px, env(safe-area-inset-top)) 16px 12px;
+    background: var(--surface-reading); border-bottom: 1px solid var(--border-soft);
+  }
+  .site-shell :is(.rule-dialog, .share-dialog) .dialog-heading h2 { font-size: 1.375rem; }
+  .site-shell .rule-dialog .dialog-heading button { flex: 0 0 auto; width: auto; }
+  .site-shell #image-viewer { padding: 0 0 max(16px, env(safe-area-inset-bottom)); }
+  .site-shell .image-dialog-head { padding-top: max(12px, env(safe-area-inset-top)); }
+  .site-shell .image-stage img { max-height: 65dvh; }
+  .site-shell .share-actions { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .site-shell .share-qr { width: min(100%, 320px); height: auto; }
+  .site-shell main[data-focus="true"] .play-toolbar { position: sticky; top: 0; padding-top: max(8px, env(safe-area-inset-top)); }
+  .site-shell main[data-focus="true"] { inset: var(--visible-top, 0px) 0 auto; height: var(--visible-height, 100dvh); }
+  .site-shell main[data-focus="true"] .guide-option-disclosure { display: none; }
+  .site-shell main[data-focus="true"] .focus-game-name { font-size: 1.125rem; margin: 0; }
+  .site-shell main[data-focus="true"] .save-status { font-size: .8125rem; }
+  .site-shell main[data-focus="true"] .chess-clock-panels { grid-template-columns: minmax(0, 1fr); }
+  .site-shell main[data-focus="true"] .chess-clock-player { min-height: 150px; }
+  .site-shell main[data-focus="true"] { padding-bottom: env(safe-area-inset-bottom); }
+  .site-shell :is(input, select, textarea) { scroll-margin-block: 90px 40px; }
+}
+@media screen {
+  .site-shell .glossary-term .glossary-trigger { padding: 4px 2px; border: 0; border-bottom: 1px dotted currentColor; border-radius: 0; background: transparent; color: inherit; font: inherit; }
+}
+/* At large text sizes, card controls reflow according to their own text space. */
+@container (max-width: 16em) {
+  .site-shell .collection-page .game-card .game-art { grid-column: 1 / -1; border-radius: 15px 15px 0 0; }
+  .site-shell .collection-page .game-card .game-art > img.official-cover { width: min(120px, 100%); }
+  .site-shell .collection-page .game-card .card-body { grid-column: 1 / -1; }
+  .site-shell .collection-page .game-card .card-bottom { grid-template-columns: minmax(0, 1fr) 44px; }
+  .site-shell .collection-page .game-card .card-learn { grid-column: 1; grid-row: 1; }
+  .site-shell .collection-page .game-card .card-play { grid-column: 1; grid-row: 2; }
+  .site-shell .collection-page .game-card .favorite-toggle { grid-column: 2; grid-row: 1 / span 2; }
+}
+@media screen and (orientation: landscape) and (max-height: 500px) {
+  .site-shell .detail-controls { position: relative; }
+  .site-shell main[data-focus="true"] .play-toolbar { position: relative; }
+  .site-shell .chess-clock-panels, .site-shell main[data-focus="true"] .chess-clock-panels { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .site-shell .chess-clock-player, .site-shell main[data-focus="true"] .chess-clock-player { min-height: 130px; }
+}

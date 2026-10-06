@@ -21,4 +21,9 @@ async function learningSetupOptions(page) {
   if (await options.count() && !await options.evaluate(node => node.open))
     await options.locator(':scope > summary').click();
 }
-module.exports = {learningContents, learningStage, learningLesson, learningExample, learningSetupOptions};
+async function openDisclosure(page, selector) {
+  const panel = page.locator(selector);
+  if (await panel.count() && !await panel.evaluate(node => node.open))
+    await panel.locator(':scope > summary').click();
+}
+module.exports = {learningContents, learningStage, learningLesson, learningExample, learningSetupOptions, openDisclosure};

@@ -26,6 +26,22 @@ export function SiteChrome({
   const [theme, setTheme] = useState<"light" | "dark">("dark");
   const tr = (en: string, es: string) => (lang === "es" ? es : en);
   useEffect(() => {
+    // The visual viewport follows the software keyboard without remounting tools.
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+    const sync = () => {
+      document.documentElement.style.setProperty("--visible-height", `${viewport.height}px`);
+      document.documentElement.style.setProperty("--visible-top", `${viewport.offsetTop}px`);
+    };
+    sync();
+    viewport.addEventListener("resize", sync);
+    viewport.addEventListener("scroll", sync);
+    return () => {
+      viewport.removeEventListener("resize", sync);
+      viewport.removeEventListener("scroll", sync);
+    };
+  }, []);
+  useEffect(() => {
     try {
       const saved = JSON.parse(
         localStorage.getItem("tablefolk-preferences") || "{}",

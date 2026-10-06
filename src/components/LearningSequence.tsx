@@ -112,6 +112,9 @@ export function LearningSequence({ id, game, lang, options, steps: basics, tempo
       }}>
         <summary>{tr("Contents", "Contenido")}</summary>
         <nav aria-label={tr("Lesson contents", "Contenido de las lecciones")}>
+          <div className="learning-shortcuts">
+            <button id="already-set-up" type="button" onClick={() => choose(id === "chess" ? "piece-king" : turn)}>{tr("Already set up?", "¿Ya está todo preparado?")} →</button>
+          </div>
           {(Object.keys(stageLabels) as LearningStage[]).map(stage => <div className="contents-stage" key={stage}>
             <h3>{stageLabels[stage][lang]}</h3>
             <ol className="learning-overview">{steps.filter(step => step.stage === stage).map((step, i) => <li key={step.id}>
@@ -123,9 +126,6 @@ export function LearningSequence({ id, game, lang, options, steps: basics, tempo
       </details>
     </div>
     {setupChoice?.(() => choose(firstSetup))}
-    <div className="learning-shortcuts">
-      <button id="already-set-up" type="button" onClick={() => choose(id === "chess" ? "piece-king" : turn)}>{tr("Already set up?", "¿Ya está todo preparado?")} →</button>
-    </div>
     <div ref={lesson} className="lesson" data-learning-step={current.id} data-current-stage={current.stage}>
       <div className="lesson-copy">
         <h3 ref={heading} tabIndex={-1}>{current.title[lang]}</h3>

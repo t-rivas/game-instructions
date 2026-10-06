@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import type { GameCardData, Language } from "@/lib/types";
 import { Icon } from "./Icon";
 import { SavedGames } from "./SavedGames";
+import { ResponsiveDisclosure } from "./ResponsiveDisclosure";
 import {
   canWriteStored,
   readStored,
@@ -211,6 +212,7 @@ export function Collection({
               />
             </div>
           </div>
+          <ResponsiveDisclosure id="collection-filter-options" storageKey="tablefolk-collection-filter-panel-v1" className="collection-filter-options" label={<span>{tr("Filter games", "Filtrar juegos")}{players || duration || favoritesOnly ? <small> · {[players ? `${players} ${tr("players", "jugadores")}` : "", duration ? duration === "long" ? "120+ min" : `≤ ${duration} min` : "", favoritesOnly ? tr("Favorites", "Favoritos") : ""].filter(Boolean).join(" · ")}</small> : null}</span>}>
           <div
             className="collection-filters"
             aria-label={tr("Filter games", "Filtrar juegos")}
@@ -278,6 +280,7 @@ export function Collection({
               </button>
             ) : null}
           </div>
+          </ResponsiveDisclosure>
           <p
             className="collection-results muted"
             role="status"
@@ -308,29 +311,10 @@ export function Collection({
                   data-game={id}
                 >
                   <div className="game-art">
-                    <button
-                      type="button"
-                      className="favorite-toggle"
-                      aria-pressed={favorites.includes(id)}
-                      aria-label={
-                        favorites.includes(id)
-                          ? tr(
-                              `Remove ${game.name[lang]} from favorites`,
-                              `Quitar ${game.name[lang]} de favoritos`,
-                            )
-                          : tr(
-                              `Favorite ${game.name[lang]}`,
-                              `Marcar ${game.name[lang]} como favorito`,
-                            )
-                      }
-                      onClick={() => toggleFavorite(id)}
-                    >
-                      <Icon path={star} />
-                    </button>
                     <ResponsiveImage
                       className="official-cover"
                       src={cover.src}
-                      sizes="(max-width: 600px) 112px, (max-width: 1000px) 240px, 280px"
+                      sizes="(max-width: 767px) 26vw, (max-width: 1000px) 240px, 280px"
                       alt={cover.title[lang]}
                       width={cover.width}
                       height={cover.height}
@@ -356,7 +340,8 @@ export function Collection({
                         ? `Texas Hold’em. ${game.description[lang]}`
                         : game.description[lang]}
                     </p>
-                    <div className="card-bottom">
+                  </div>
+                  <div className="card-bottom">
                       <Link
                         prefetch={false}
                         onClick={rememberCollection}
@@ -381,7 +366,25 @@ export function Collection({
                       >
                         {tr("Play now", "Jugar ahora")}
                       </Link>
-                    </div>
+                    <button
+                      type="button"
+                      className="favorite-toggle"
+                      aria-pressed={favorites.includes(id)}
+                      aria-label={
+                        favorites.includes(id)
+                          ? tr(
+                              `Remove ${game.name[lang]} from favorites`,
+                              `Quitar ${game.name[lang]} de favoritos`,
+                            )
+                          : tr(
+                              `Favorite ${game.name[lang]}`,
+                              `Marcar ${game.name[lang]} como favorito`,
+                            )
+                      }
+                      onClick={() => toggleFavorite(id)}
+                    >
+                      <Icon path={star} />
+                    </button>
                   </div>
                 </article>
               ))

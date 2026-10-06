@@ -1,4 +1,4 @@
-const {learningStage, learningLesson} = require("./learning-navigation.cjs");
+const {learningStage, learningLesson, openDisclosure} = require("./learning-navigation.cjs");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -70,9 +70,11 @@ const server = spawn(process.execPath, ["scripts/serve-export.mjs"], {
         !new URL(page.url()).searchParams.has("favorites"),
       "Canonical URL discards invalid filter values",
     );
+    await openDisclosure(page, "#collection-filter-options");
     await page.locator("#clear-filters").click();
     check(new URL(page.url()).search === "", "Clear filters clears URL");
     await page.locator(".game-card[data-game=avalon] .favorite-toggle").click();
+    await openDisclosure(page, "#collection-filter-options");
     await page.locator("#filter-players").selectOption("7");
     await page.locator("#filter-duration").selectOption("60");
     await page.locator("#filter-favorites").click();
@@ -139,6 +141,7 @@ const server = spawn(process.execPath, ["scripts/serve-export.mjs"], {
           .getAttribute("aria-pressed")) === "true",
       "Reload preserves favorites and all filters",
     );
+    await openDisclosure(page, "#collection-filter-options");
     await page.locator("#clear-filters").click();
     await page.goBack();
     await page.waitForFunction(

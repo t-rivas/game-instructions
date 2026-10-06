@@ -1,6 +1,6 @@
 "use client";
 import { GlossaryText } from "./GlossaryText";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLearningState } from "@/lib/learning-state";
 import type { Language, SkullTrickTeaching } from "@/lib/types";
 import { LessonCardArt } from "./LessonCardArt";
@@ -16,6 +16,7 @@ export function SkullTrickLesson({ data, lang, expansion, ruleHref, temporary = 
   const setPowers = (powers: boolean) => setContext(old => ({...old,powers}));
   const [answers, setAnswers] = useLearningState<Record<string, { guess?: number; revealed?: boolean }>>("skull_king", "tricks", {}, temporary);
   const [positions, setPositions] = useLearningState<Record<string, number>>("skull_king", "watch-turn", {}, temporary);
+  const [history, setHistory] = useState(false);
   useEffect(() => {
     const revisit = (event: Event) => {
       const detail = (event as CustomEvent).detail;
@@ -62,7 +63,9 @@ export function SkullTrickLesson({ data, lang, expansion, ruleHref, temporary = 
   return <section id="skull-trick-lesson" className="block skull-trick-lesson" aria-labelledby="skull-trick-title">
     <p className="eyebrow">{t("practice")}</p>
     <h2 id="skull-trick-title">{t("title")}</h2>
-    <p>{<GlossaryText game="skull_king" text={t("intro")} lang={lang} explain={true} />}</p><p className="trick-order">{t("order")}</p>
+    <details className="example-intro"><summary>{lang === "es" ? "Cómo seguir el ejemplo" : "How to follow the example"}</summary>
+      <p>{<GlossaryText game="skull_king" text={t("intro")} lang={lang} explain={true} />}</p><p className="trick-order">{t("order")}</p>
+    </details>
     <details className="trick-options"><summary>{t("options")} / {t("powers")}</summary>
       <label><input type="checkbox" checked={baseOptions} onChange={e => {setBaseOptions(e.target.checked);setSelected("follow-suit");}} />{t("optionsToggle")}</label>
       <label><input type="checkbox" checked={powers} onChange={e => {setPowers(e.target.checked);setSelected("follow-suit");}} />{t("powersToggle")}</label>
@@ -83,8 +86,11 @@ export function SkullTrickLesson({ data, lang, expansion, ruleHref, temporary = 
             <small>{beat === 5 && scenario.next === i ? t("nextLead") : i === 0 ? t("leader") : ""}</small>
           </div>)}
         </div>
-        <ol className="trick-table watch-skull-table" aria-label={t("sequence")}>
-          {scenario.plays.map((id, i) => <li className="trick-play" key={`${scenario.id}-${i}`} data-player={i} data-played={beat > i} data-winner={beat >= 4 && scenario.winner === i}>
+        <button type="button" className="watch-history-toggle" aria-expanded={history} aria-controls="skull-watch-table" onClick={() => setHistory(value => !value)}>
+          {history ? (lang === "es" ? "Volver a la carta actual" : "Back to the current card") : (lang === "es" ? "Ver todas las cartas y el orden" : "See all cards & play order")}
+        </button>
+        <ol id="skull-watch-table" className="trick-table watch-skull-table" data-history={history} aria-label={t("sequence")}>
+          {scenario.plays.map((id, i) => <li className="trick-play" key={`${scenario.id}-${i}`} data-player={i} data-played={beat > i} data-current={beat === 0 ? i === 0 : beat <= 3 ? i === beat - 1 : scenario.winner === null ? i === 2 : i === scenario.winner} data-winner={beat >= 4 && scenario.winner === i}>
             <p className="trick-player">{i + 1}. {players[i]}</p>
             {beat > i ? <div className="watch-played-card">{card(id)}</div> : <div className="watch-card-back"><span aria-hidden="true">✦</span><small>{w.hidden}</small></div>}
             {beat >= 4 && scenario.winner === i ? <strong className="watch-badge">✓ {t("winner")}</strong> : null}
@@ -98,9 +104,12 @@ export function SkullTrickLesson({ data, lang, expansion, ruleHref, temporary = 
           {beat === 4 ? <><p><strong>{t("winner")}: {name(scenario.winner)}.</strong></p><ul>{scenario.reasons.map((reason, i) => <li key={i}>{players[i]}: {reason[lang]}</li>)}</ul></> : null}
           {beat === 5 ? <><p><strong>{t("nextLead")}: {name(scenario.next)}.</strong></p><p>{scenario.after[lang]}</p></> : null}
         </div>
-        {beat === 2 ? <div className="watch-legal"><strong>{t("hand")}</strong>{scenario.hand.map(choice => <p key={choice.card}>{choice.legal ? "✓" : "×"} <strong>{data.cards[choice.card].name[lang]} · {t(choice.legal ? "legal" : "illegal")}</strong> — {choice.why[lang]}</p>)}</div> : null}
+        {beat === 2 ? <div className="watch-legal"><strong>{t("hand")}</strong>{scenario.hand.map(choice => <details key={choice.card}>
+          <summary>{choice.legal ? "✓" : "×"} <strong>{data.cards[choice.card].name[lang]} · {t(choice.legal ? "legal" : "illegal")}</strong></summary><p>{choice.why[lang]}</p>
+        </details>)}</div> : null}
         <WatchControls lang={lang} previous={beat ? () => advance(-1) : undefined} next={beat < 5 ? () => advance(1) : undefined} replay={replay} />
       </WatchTurn>
+      <details className="example-extras"><summary>{lang === "es" ? "Mano, predicción y otros ejemplos" : "Hand, prediction & other examples"}</summary>
       <details className="watch-reference"><summary>{lang === "es" ? "Consultar la mano y las jugadas permitidas" : "Review the hand and legal choices"}</summary>
       <p><strong>{t("lead")}: </strong>{<GlossaryText game="skull_king" text={scenario.lead[lang]} lang={lang} explain={false} />}</p>
       <h4>{t("hand")}</h4>
@@ -133,6 +142,7 @@ export function SkullTrickLesson({ data, lang, expansion, ruleHref, temporary = 
       </nav>
       <details className="trick-source"><summary>{t("source")}</summary><p><a href={scenario.sourceUrl}>{scenario.source}</a></p></details>
       <a className="trick-rule" href={ruleHref(scenario.rule)}>{t("fullRule")} →</a>
+      </details>
     </div>
     <p className="image-note">{t("artNote")}</p>
   </section>;

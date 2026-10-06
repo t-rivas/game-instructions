@@ -17,7 +17,7 @@ const server=spawn(process.execPath,['scripts/serve-export.mjs'],{stdio:['ignore
    await page.goto(`${base}/${lang}/${id}/learn/`);await ready();
    assert.equal(await page.locator('[data-learning-stage]').count(),5);
    if(id==='sushi_go_party') {await learningSetupOptions(page);await page.locator('#guide-player-count').selectOption('4');await page.locator('#guide-setup-options > summary').click();}
-   await page.locator('#already-set-up').click();
+   await learningContents(page);await page.locator('#already-set-up').click();
    assert.equal(await page.locator('[data-learning-step]').getAttribute('data-current-stage'),id==='chess'?'components':'turn');
    assert.ok(await page.locator('.lesson-copy h3').evaluate(el=>el===document.activeElement));
    await learningStage(page, 'setup');
@@ -59,7 +59,7 @@ const server=spawn(process.execPath,['scripts/serve-export.mjs'],{stdio:['ignore
   await page.evaluate(()=>sessionStorage.setItem('tablefolk-lesson-chess','1'));await page.reload();await ready();
   await page.waitForSelector('[data-learning-step=basic-move]');
   assert.equal(await page.evaluate(()=>sessionStorage.getItem('tablefolk-lesson-chess')),'basic-move');
-  await page.locator('#already-set-up').click();
+  await learningContents(page);await page.locator('#already-set-up').click();
   for(const piece of ['king','queen','rook','bishop','knight','pawn']) {
    assert.equal(await page.locator('[data-learning-step]').getAttribute('data-learning-step'),`piece-${piece}`);
    assert.ok(await page.locator(`.lesson-copy [data-art=chess-${piece}]`).isVisible());
@@ -99,7 +99,7 @@ const server=spawn(process.execPath,['scripts/serve-export.mjs'],{stdio:['ignore
   await page.locator('#lang-es').click();await page.waitForURL('**/es/sushi_go_party/learn/');await ready();
   await page.waitForSelector('[data-learning-step=basic-deal]');
   assert.match(await page.locator('.lesson-explanation').innerText(),/5, 3 (?:and|y) 2/);
-  await page.locator('#already-set-up').click();
+  await learningContents(page);await page.locator('#already-set-up').click();
   assert.equal(await page.locator('[data-learning-step]').getAttribute('data-learning-step'),'basic-draft');
   // A removed optional card keeps its ID so restoring the variant restores context.
   await page.goto(`${base}/en/coup/learn/`);await ready();

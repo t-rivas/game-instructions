@@ -1,5 +1,7 @@
 "use client";
 import { GuideSetupContext } from "./GuideSetupContext";
+import { useReadingInsets } from "@/lib/use-reading-insets";
+import { ResponsiveDisclosure } from "./ResponsiveDisclosure";
 import { contextualBasics } from "@/generated/setup-context";
 import { focusRequestedRule } from "@/lib/rule-focus";
 import { ShareDialog } from "./ShareDialog";
@@ -399,6 +401,7 @@ export function GameGuide({
     "skull_king",
   ].includes(id);
   const tr = (en: string, es: string) => (lang === "es" ? es : en);
+  useReadingInsets(`${lang}/${id}/${view}`, view === "play" && focusPlay);
   const changeFocus = (enabled: boolean) => {
     setFocusPlay(enabled);
     if (enabled) setShowHelp(false);
@@ -803,6 +806,7 @@ export function GameGuide({
                   key={key}
                   id={`tab-${key}`}
                   role="tab"
+                  aria-label={label}
                   aria-controls="guide-panel"
                   aria-selected={view === key}
                   tabIndex={view === key ? 0 : -1}
@@ -832,7 +836,8 @@ export function GameGuide({
                     }
                   }}
                 >
-                  {label}
+                  <span className="tab-full-label">{label}</span>
+                  <span className="tab-phone-label">{key === "rules" ? tr("Rules", "Reglas") : key === "play" ? tr("Play", "Al jugar") : label}</span>
                 </button>
               ))}
             </div>
@@ -853,14 +858,15 @@ export function GameGuide({
                 <span>{tr("Find a rule", "Buscar una regla")}</span>
               </button>
             ) : null}
-            {view === "learn" ? <details className="guide-actions" id="guide-actions">
-              <summary>{tr("More", "Más")}</summary>
+            <details className="guide-actions" id="guide-actions">
+              <summary aria-label={tr("More guide actions", "Más opciones de la guía")}><span className="guide-more-label">{tr("More", "Más")}</span><span className="guide-more-icon" aria-hidden="true">•••</span></summary>
               <div>{guideActions}</div>
-            </details> : guideActions}
+            </details>
           </div>
           <div className="detail-layout">
             {view === "rules" ? (
               <aside className="side-nav">
+                <ResponsiveDisclosure id="rule-contents" label={tr("Contents", "Contenido")}>
                 <p className="eyebrow">{tr("IN THIS GUIDE", "EN ESTA GUÍA")}</p>
                 {sections.map((section) => (
                   <a
@@ -886,6 +892,7 @@ export function GameGuide({
                     )}
                   </p>
                 </div>
+                </ResponsiveDisclosure>
               </aside>
             ) : null}
             <article
@@ -918,10 +925,10 @@ export function GameGuide({
                   </button>
                 </p>
               ) : null}
-              {view !== "learn" ? <>
+              {view !== "learn" && ["coup", "skull_king", "sushi_go_party"].includes(id) ? <ResponsiveDisclosure id="guide-option-disclosure" className="guide-option-disclosure" label={<span>{tr("Your setup", "Tu preparación")}: {edition}</span>}>
                 <Variants id={id} lang={lang} options={options} />
                 <GuideSetupContext id={id} game={game} lang={lang} options={options} ready={!!runtime} onChange={(guidePlayers) => runtime?.update({guidePlayers})} />
-              </> : null}
+              </ResponsiveDisclosure> : null}
               {view === "learn" ? (
                 <>
                   <LearningSequence

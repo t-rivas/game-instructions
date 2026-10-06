@@ -49,10 +49,12 @@ export function CoupLesson({ data, cards, lang, exchange, reformation, ruleHref,
 
   return <section id="coup-lesson" className="block coup-lesson" aria-labelledby="coup-lesson-title">
     <h2 id="coup-lesson-title">{t("title")}</h2>
+    <details className="example-intro"><summary>{lang === "es" ? "Cómo seguir el ejemplo" : "How to follow the example"}</summary>
     <p>{<GlossaryText game="coup" text={t("intro")} lang={lang} explain={true} />}</p>
     <p>{t("distinction")}</p>
     <p className="coup-order">{t("order")}</p>
     <p className="image-note">{t("fiction")}</p>
+    </details>
     <div className="coup-example-picker" role="group" aria-label={t("examples")}>
       {data.scenarios.map(s => <button key={s.id} type="button" data-coup-example={s.id}
         aria-pressed={selected === s.id} onClick={() => {setSelected(s.id); focusStep();}}>{t(s.id)}</button>)}
@@ -95,6 +97,9 @@ export function CoupLesson({ data, cards, lang, exchange, reformation, ruleHref,
         <button type="button" data-coup-back disabled={!path.length} onClick={() => {setPaths(old => ({...old,[selected]:historyFor(old).slice(0,-1)}));focusStep();}}>{w.previous}</button>
         <button type="button" data-coup-replay onClick={() => move([])}>{w.replay}</button>
       </nav>
+      {path.length ? <details className="watch-history"><summary>{lang === "es" ? "Jugadas anteriores" : "Earlier actions"} · {path.length}</summary>
+        <ol>{[scenario.start, ...path.slice(0, -1)].map((node, i) => <li key={`${node}-${i}`}><strong>{data.nodes[node].title[lang]}</strong><p>{data.nodes[node].explanation[lang]}</p></li>)}</ol>
+      </details> : null}
       </WatchTurn>
     </div>
     <p>{t("limit")}</p>

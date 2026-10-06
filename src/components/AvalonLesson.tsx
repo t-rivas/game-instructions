@@ -62,6 +62,7 @@ export function AvalonLesson({data, cards, lang, options, script, ruleHref, temp
   const rejected = stage === 1 && votes && !vote.approved;
   return <section id="avalon-lesson" className="block avalon-lesson" aria-labelledby="avalon-lesson-title">
     <h2 id="avalon-lesson-title">{t("title")}</h2>
+    <details className="example-intro"><summary>{lang === "es" ? "Personajes y quién reconoce a quién" : "Roles & who recognizes whom"}</summary>
     <p className="callout">{t("fiction")}</p>
     <h3>{t("roles")}</h3><p>{t("roleIntro")}</p>
     <div className="avalon-teaching-roles">
@@ -85,6 +86,7 @@ export function AvalonLesson({data, cards, lang, options, script, ruleHref, temp
       </li>)}
     </ol>
     <details className="avalon-opening-script"><summary>{t("script")}</summary><div dangerouslySetInnerHTML={{__html:script}} /></details>
+    </details>
     <h3>{t("sequence")}</h3>
     <label htmlFor="avalon-example-quest">{t("quest")}</label>
     <select id="avalon-example-quest" value={quest} onChange={event => changeQuest(+event.target.value)}>

@@ -1,4 +1,4 @@
-const {learningStage, learningExample, learningSetupOptions} = require("./learning-navigation.cjs");
+const {learningStage, learningExample, learningSetupOptions, openDisclosure} = require("./learning-navigation.cjs");
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
@@ -44,6 +44,7 @@ const origin=new Promise((resolve,reject)=>{server.stdout.once('data',d=>resolve
    else{await page.goto(`${base}/en/skull_king/learn/`);await page.waitForFunction(()=>document.querySelector('[data-tool=sources][data-ready=true]'));await learningExample(page);}
    const scoreBefore=await page.evaluate(()=>localStorage.getItem('tablefolk-skull-score-v1'));
    assert.equal(await page.locator('#trick-example option').count(),10);
+   await openDisclosure(page, '.example-extras');
    await page.locator('.trick-options summary').click();
    await page.locator('.trick-options input').nth(0).check();await page.locator('.trick-options input').nth(1).check();
    assert.equal(await page.locator('#trick-example option').count(),14);
@@ -71,6 +72,7 @@ const origin=new Promise((resolve,reject)=>{server.stdout.once('data',d=>resolve
    assert.equal(await page.locator('#trick-example option').count(),10);
    await page.selectOption('#trick-example','three-characters');
    if(!portable) for(let beat=0;beat<3;beat++) await page.locator('[data-watch-next]').click();
+   if(await page.locator('.watch-history-toggle').isVisible())await page.locator('.watch-history-toggle').click();
    const image=page.locator('.trick-play [data-art]').first();await image.focus();await page.keyboard.press('Enter');
    assert.equal(await page.locator('#image-viewer[open]').count(),1);await page.keyboard.press('Escape');
    assert.ok(await image.evaluate(el=>el===document.activeElement),'Zoom focus returns');
@@ -83,11 +85,12 @@ const origin=new Promise((resolve,reject)=>{server.stdout.once('data',d=>resolve
    if(!portable){
     for(const lang of ['en','es']){
      if(lang==='es'){await page.goto(`${base}/es/skull_king/learn/`);await page.waitForFunction(()=>document.querySelector('[data-tool=sources][data-ready=true]'));await learningExample(page);}
-     await page.selectOption('#trick-example','three-characters');await page.locator('[data-trick-reveal]').click();
+     await openDisclosure(page, '.example-extras');await page.selectOption('#trick-example','three-characters');await page.locator('[data-trick-reveal]').click();
      for(const theme of ['dark','light']){
       if(await page.locator('html').getAttribute('data-theme')!==theme)await page.locator('#theme').click();
       for(const width of [320,390,768,1440]){
        await page.setViewportSize({width,height:900});
+       if(await page.locator('.watch-history-toggle').isVisible() && await page.locator('.watch-history-toggle').getAttribute('aria-expanded') === 'false')await page.locator('.watch-history-toggle').click();
        const overflow=await page.locator('#skull-trick-lesson').evaluate(root=>[root,...root.querySelectorAll('*')].filter(el=>el.clientWidth>0&&el.scrollWidth>el.clientWidth+2).map(el=>el.className));
        assert.deepEqual(overflow,[],`${lang}/${theme}/${width}: internal clipping`);
        for(const button of await page.locator('.trick-controls button,[data-trick-reveal],.trick-play [data-art]').all())assert.ok((await button.boundingBox()).height>=44);
@@ -107,7 +110,7 @@ const origin=new Promise((resolve,reject)=>{server.stdout.once('data',d=>resolve
   }
   const broken=await browser.newPage();await broken.route('**/assets/images/**',r=>r.abort());await broken.goto(`${base}/en/skull_king/learn/`);
   await broken.waitForSelector('[data-tool=sources][data-ready=true]');await learningExample(broken);
-  await broken.selectOption('#trick-example','three-characters');await broken.locator('[data-trick-reveal]').click();
+  await openDisclosure(broken, '.example-extras');await broken.selectOption('#trick-example','three-characters');await broken.locator('[data-trick-reveal]').click();
   assert.match(await broken.locator('.trick-result').innerText(),/Mermaid wins/);assert.equal(await broken.locator('.trick-card-name').count(),3);await broken.close();
   console.log(`PASS: 15 independently specified scenarios, hosted/portable, legal hands, predictions, variant isolation, no score writes, keyboard, zoom, no-JS, image failures and responsive layouts. Screenshots: ${output}`);
  }finally{await browser.close();server.kill();}

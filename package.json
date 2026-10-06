@@ -26,6 +26,8 @@
     "test:surfaces": "node tests/surfaces.cjs",
     "test:typography": "node tests/typography.cjs",
     "test:mobile": "node tests/mobile-header.cjs",
+    "test:phone": "node tests/phone-experience.cjs",
+    "review:mobile": "node tests/mobile-review.cjs",
     "test:chess": "node tests/chess-clock.cjs",
     "test:coup": "node tests/coup-session.cjs",
     "test:poker": "node tests/poker-timer.cjs",

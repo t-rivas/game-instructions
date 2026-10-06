@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import type { Language } from "@/lib/types";
+import { ResponsiveDisclosure } from "./ResponsiveDisclosure";
 type WakeState =
   "off" | "requesting" | "active" | "released" | "denied" | "unsupported";
 export function TableControls({
@@ -114,6 +115,7 @@ export function TableControls({
   };
   return (
     <div className="table-controls">
+      <ResponsiveDisclosure id="table-display-options" label={tr("Table display options", "Opciones de pantalla para la mesa")}>
       <div className="table-control-buttons">
         {chess ? (
           <button
@@ -155,6 +157,7 @@ export function TableControls({
       >
         {messages[status]}
       </span>
+      </ResponsiveDisclosure>
     </div>
   );
 }

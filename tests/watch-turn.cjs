@@ -52,6 +52,7 @@ fs.mkdirSync(output, {recursive:true});
       assert.equal(await page.locator('[data-watch-beat]').getAttribute('data-watch-beat'), '5', 'Rapid clicks clamp to final state');
       await shot('skull-exception');
       await page.locator('[data-watch-previous]').click(); await shot('skull-exception-winner');
+      if(await page.locator('.watch-history-toggle').isVisible())await page.locator('.watch-history-toggle').click();
       await page.locator('.trick-play [data-art]').first().focus(); await page.keyboard.press('Enter');
       assert.equal(await page.locator('#image-viewer[open]').count(),1);
       await page.keyboard.press('Escape');

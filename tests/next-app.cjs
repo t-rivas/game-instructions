@@ -1,4 +1,4 @@
-const {learningStage, learningLesson} = require("./learning-navigation.cjs");
+const {learningStage, learningLesson, openDisclosure} = require("./learning-navigation.cjs");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -178,6 +178,7 @@ const origin = new Promise((resolve, reject) => {
     check((await page.locator("#coup-name-0").inputValue()) === "Ana",
       "Switching between reference and tool preserves an unfinished draft");
     await page.goto(base + "/en/");
+    await openDisclosure(page, "#collection-filter-options");
     await page.locator("#filter-players").selectOption("3");
     check(
       (await page.locator(".game-card[data-game=truco]").count()) === 0 &&
@@ -191,6 +192,7 @@ const origin = new Promise((resolve, reject) => {
       "Time filter uses the full listed duration",
     );
     await page.locator(".game-card[data-game=coup] .favorite-toggle").click();
+    await openDisclosure(page, "#collection-filter-options");
     await page.locator("#clear-filters").click();
     await page.locator("#filter-favorites").click();
     check((await page.locator(".game-card").count()) === 1, "Favorites filter");
@@ -208,6 +210,7 @@ const origin = new Promise((resolve, reject) => {
           .getAttribute("aria-pressed")) === "true",
       "Favorite selection and URL filter survive reload",
     );
+    await openDisclosure(page, "#collection-filter-options");
     await page.locator("#clear-filters").click();
     await page.locator("#game-search").fill("ajedrez");
     check(
@@ -404,6 +407,7 @@ const origin = new Promise((resolve, reject) => {
     await visit("coup");
     await page.locator("#theme").click();
     const theme = await page.locator("html").getAttribute("data-theme");
+    await openDisclosure(page, "#guide-option-disclosure");
     await page.locator("#reformation-toggle").click();
     check(
       (await page.evaluate(
@@ -421,11 +425,13 @@ const origin = new Promise((resolve, reject) => {
         .getAttribute("aria-checked")) === "true",
       "Variant follows view navigation",
     );
+    await openDisclosure(page, "#rule-contents");
     check(
       (await page.locator(".edition").innerText()).includes("Reformation"),
       "Edition follows variant",
     );
     await visit("skull_king");
+    await openDisclosure(page, "#guide-option-disclosure");
     await page.locator("#skull-expansion-toggle").click();
     await clickRoute(
       "#tab-rules",
@@ -440,6 +446,7 @@ const origin = new Promise((resolve, reject) => {
       (await page.locator(".rule-search-result").count()) > 0,
       "Expansion rules are searchable",
     );
+    await openDisclosure(page, "#guide-option-disclosure");
     await page.locator("#skull-expansion-toggle").click();
 
     // A clock survives client navigation, locale changes and page reloads.

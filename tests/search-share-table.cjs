@@ -1,4 +1,4 @@
-const {learningStage, learningLesson} = require("./learning-navigation.cjs");
+const {learningStage, learningLesson, openDisclosure} = require("./learning-navigation.cjs");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const os = require("node:os");
@@ -192,6 +192,7 @@ const server = spawn(process.execPath, ["scripts/serve-export.mjs"], {
       ),
       "Base edition excludes expansion question",
     );
+    await openDisclosure(page, "#guide-option-disclosure");
     await page.locator("#skull-expansion-toggle").click();
     await page.waitForFunction(
       () => new URLSearchParams(location.search).get("expansion") === "1",
@@ -221,6 +222,7 @@ const server = spawn(process.execPath, ["scripts/serve-export.mjs"], {
         (await page.locator("#inquisitor").count()) === 0,
       "Coup search respects character and expansion",
     );
+    await openDisclosure(page, "#guide-option-disclosure");
     await page.locator("#reformation-toggle").click();
     await page.waitForFunction(
       () => new URLSearchParams(location.search).get("reformation") === "1",
@@ -683,6 +685,7 @@ const server = spawn(process.execPath, ["scripts/serve-export.mjs"], {
     await table.locator("#chess-clock-toggle").click();
     await table.clock.setFixedTime(new Date("2026-10-03T12:00:02.500Z"));
     await table.waitForTimeout(150);
+    await openDisclosure(table, "#table-display-options");
     await table.locator("#clock-orientation").click();
     check(
       (await table
@@ -733,11 +736,13 @@ const server = spawn(process.execPath, ["scripts/serve-export.mjs"], {
         )) === JSON.stringify(snapshot),
         label,
       );
+    await openDisclosure(table, "#table-display-options");
     await table.locator("#table-help").click();
     check(
       await table.locator(".chess-clock-note").isVisible(),
       "Help remains available",
     );
+    await openDisclosure(table, "#table-display-options");
     await table.locator("#table-help").click();
     check(
       !(await table.locator(".chess-clock-note").isVisible()),
@@ -828,6 +833,7 @@ const server = spawn(process.execPath, ["scripts/serve-export.mjs"], {
           document.querySelector("#wake-status")?.dataset.status === value,
         status,
       );
+    await openDisclosure(table, "#table-display-options");
     await table.locator("#keep-awake").click();
     await wakeStatus("active");
     check(
@@ -848,6 +854,7 @@ const server = spawn(process.execPath, ["scripts/serve-export.mjs"], {
       (await table.evaluate(() => window.wakeRequests)) === 2,
       "Visibility restores a requested lock",
     );
+    await openDisclosure(table, "#table-display-options");
     await table.locator("#keep-awake").click();
     await wakeStatus("off");
     check(
@@ -859,18 +866,22 @@ const server = spawn(process.execPath, ["scripts/serve-export.mjs"], {
     await table.evaluate(() => {
       window.wakeMode = "denied";
     });
+    await openDisclosure(table, "#table-display-options");
     await table.locator("#keep-awake").click();
     await wakeStatus("denied");
     check(
       (await table.locator("#wake-status").innerText()).length > 0,
       "Rejected request is announced",
     );
+    await openDisclosure(table, "#table-display-options");
     await table.locator("#keep-awake").click();
     await table.evaluate(() => {
       window.wakeMode = "pending";
     });
+    await openDisclosure(table, "#table-display-options");
     await table.locator("#keep-awake").click();
     await wakeStatus("requesting");
+    await openDisclosure(table, "#table-display-options");
     await table.locator("#keep-awake").click();
     await table.evaluate(() => window.finishWake());
     await wakeStatus("off");
@@ -886,6 +897,7 @@ const server = spawn(process.execPath, ["scripts/serve-export.mjs"], {
     await table.evaluate(() => {
       window.wakeMode = "ok";
     });
+    await openDisclosure(table, "#table-display-options");
     await table.locator("#keep-awake").click();
     await wakeStatus("active");
     await table.locator("#focus-play").click();
@@ -904,6 +916,7 @@ const server = spawn(process.execPath, ["scripts/serve-export.mjs"], {
         "false",
       "Returning to table does not silently enable wake lock",
     );
+    await openDisclosure(table, "#table-display-options");
     await table.locator("#keep-awake").click();
     await wakeStatus("active");
     await table.evaluate(() => window.dispatchEvent(new Event("pagehide")));

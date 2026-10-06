@@ -17,6 +17,8 @@ for (const id of Object.keys(catalog.games)) {
     checks++;
     assert.deepEqual(split.avalonTeaching, id === "avalon" ? baseline.avalonTeaching : {}, `${id}: Avalon teaching stays with Avalon`);
     checks++;
+    assert.deepEqual(split.lessonComparisons, baseline.lessonComparisons[id] ? {[id]:baseline.lessonComparisons[id]} : {}, `${id}: comparisons stay with their game`);
+    checks++;
     if (baseline.skullTricks) {
       assert.deepEqual(
         split.skullTricks,

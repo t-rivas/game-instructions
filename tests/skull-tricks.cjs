@@ -1,4 +1,4 @@
-const {learningStage, learningExample} = require("./learning-navigation.cjs");
+const {learningStage, learningExample, learningSetupOptions} = require("./learning-navigation.cjs");
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
@@ -47,7 +47,7 @@ const origin=new Promise((resolve,reject)=>{server.stdout.once('data',d=>resolve
    await page.locator('.trick-options summary').click();
    await page.locator('.trick-options input').nth(0).check();await page.locator('.trick-options input').nth(1).check();
    assert.equal(await page.locator('#trick-example option').count(),14);
-   await page.locator('#skull-expansion-toggle').click();assert.equal(await page.locator('#trick-example option').count(),15);
+   await learningSetupOptions(page);await page.locator('#skull-expansion-toggle').click();assert.equal(await page.locator('#trick-example option').count(),15);
    for(const [id,[winner,next,legal]] of Object.entries(expected)){
     await page.selectOption('#trick-example',id);
     assert.equal(await page.locator('.trick-result').innerText(),'');
@@ -70,6 +70,7 @@ const origin=new Promise((resolve,reject)=>{server.stdout.once('data',d=>resolve
    await page.locator('.trick-options input').nth(0).uncheck();await page.locator('.trick-options input').nth(1).uncheck();
    assert.equal(await page.locator('#trick-example option').count(),10);
    await page.selectOption('#trick-example','three-characters');
+   if(!portable) for(let beat=0;beat<3;beat++) await page.locator('[data-watch-next]').click();
    const image=page.locator('.trick-play [data-art]').first();await image.focus();await page.keyboard.press('Enter');
    assert.equal(await page.locator('#image-viewer[open]').count(),1);await page.keyboard.press('Escape');
    assert.ok(await image.evaluate(el=>el===document.activeElement),'Zoom focus returns');

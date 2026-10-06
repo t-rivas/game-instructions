@@ -231,6 +231,7 @@ export function prepareGameRuntimes({
       SKULL_TRICKS: id === "skull_king" ? catalog.skullTricks || {} : {},
       SCORING_EXAMPLES: catalog.scoringExamples?.[id] ? { [id]: catalog.scoringExamples[id] } : {},
       COUP_LESSON: id === "coup" ? catalog.coupLesson || {} : {},
+      LESSON_COMPARISONS: catalog.lessonComparisons[id] ? {[id]:catalog.lessonComparisons[id]} : {},
       // Concurrent lesson-card work shares the catalog; keep only this game's
       // examples in its client runtime while retaining the complete server data.
       LESSON_CARD_STEPS: catalog.lessonCardSteps?.[id]

@@ -1,3 +1,4 @@
+const {learningLesson} = require("./learning-navigation.cjs");
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const {spawn} = require('node:child_process');
@@ -25,15 +26,11 @@ const server = spawn(process.execPath,['scripts/serve-export.mjs'],{stdio:['igno
   const page=await browser.newPage({viewport:{width:390,height:900},reducedMotion:'reduce'}),errors=[];page.on('pageerror',error=>errors.push(error.message));
   const ready=async()=>{try{await page.waitForFunction(()=>document.querySelector('main')?.dataset.route===location.pathname&&document.querySelector('[data-tool=sources][data-ready=true]'));}catch(error){console.error('Recovery failure',page.url(),errors,await page.locator('main').innerText());throw error;}};
   const visit=async(game,lang='en',query='')=>{await page.goto(`${base}/${lang}/${game}/learn/${query}`);await ready();};
-  const select=async step=>{
-   await page.locator('#lesson-overview > summary').click();
-   // The picker and overview both use semantic lesson identities.
-   await page.locator('.learning-overview button').evaluateAll((nodes,step)=>{
-        // Stored selection restores any stage, including setup/end, without text matching.
-    const game=location.pathname.split('/')[2];sessionStorage.setItem(`tablefolk-${location.search.includes('shared=1')?'shared-':''}lesson-${game}`,step);
-   },step);
-   await page.reload();await ready();await page.waitForSelector(`[data-learning-step="${step}"]`);
+  const openPractice=async()=>{
+   for(const summary of await page.locator('.optional-practice > summary').all())
+    if(await summary.isVisible() && !await summary.evaluate(node=>node.parentElement.open)) await summary.click();
   };
+  const select=async step=>{await learningLesson(page,step);await openPractice();};
   for(const [game,answers] of Object.entries(expected)){
    await visit(game);
    const before=await page.evaluate(()=>Object.fromEntries(Object.keys(localStorage).filter(k=>/score|clock|session|tournament/.test(k)).map(k=>[k,localStorage.getItem(k)])));
@@ -48,11 +45,11 @@ const server = spawn(process.execPath,['scripts/serve-export.mjs'],{stdio:['igno
     assert.ok((await practice.locator('[role=status]').innerText()).includes(decision.feedback[decision.optionIds.indexOf(wrong)].en));
     await practice.locator(`[data-practice-option="${answers[i]}"]`).focus();await page.keyboard.press('Enter');
     assert.match(await practice.locator('[role=status]').innerText(),/^Correct\./);
-    await page.locator('#lang-es').click();await page.waitForURL('**/es/**');await ready();await page.waitForSelector(`[data-learning-step="${decision.lessons[0]}"]`);
+    await page.locator('#lang-es').click();await page.waitForURL('**/es/**');await ready();await page.waitForSelector(`[data-learning-step="${decision.lessons[0]}"]`);await openPractice();
     assert.equal(await practice.locator(`[data-practice-option="${answers[i]}"]`).getAttribute('aria-pressed'),'true',`${game}: answer survives translation`);
     assert.match(await practice.locator('[role=status]').innerText(),/Correcto/);
     await page.locator('#tab-play').click();await page.waitForURL('**/play/');await ready();await page.locator('#tab-learn').click();await page.waitForURL('**/learn/');await ready();
-    await page.waitForSelector(`[data-learning-step="${decision.lessons[0]}"]`);
+    await page.waitForSelector(`[data-learning-step="${decision.lessons[0]}"]`);await openPractice();
     assert.equal(await practice.locator(`[data-practice-option="${answers[i]}"]`).getAttribute('aria-pressed'),'true',`${game}: answer survives view change`);
     await practice.locator('[data-practice-retry]').click();
     assert.equal(await practice.locator('[aria-pressed=true]').count(),0);
@@ -82,7 +79,7 @@ const server = spawn(process.execPath,['scripts/serve-export.mjs'],{stdio:['igno
    assert.ok(await page.locator('#scoring-example').isVisible());
    assert.equal(await page.locator('#scoring-fact').inputValue(),['skull_king','dixit'].includes(game)?'1':'0');
   }
-  await visit('coup');await page.locator('[data-coup-choice=tax-challenge]').click();await page.locator('[data-coup-choice=tax-proof]').click();
+  await visit('coup');await select('example');await page.locator('[data-coup-choice=tax-challenge]').click();await page.locator('[data-coup-choice=tax-proof]').click();
   await page.locator('#lang-es').click();await page.waitForURL('**/es/**');await ready();await page.waitForSelector('[data-coup-node=tax-proof]');
   await page.locator('#tab-rules').click();await page.waitForURL('**/rules/');await ready();await page.locator('#tab-learn').click();await page.waitForURL('**/learn/');await ready();await page.waitForSelector('[data-coup-node=tax-proof]');
   await visit('catan');await select('basic-produce');await page.locator('[data-practice-option=five]').click();
@@ -98,9 +95,9 @@ const server = spawn(process.execPath,['scripts/serve-export.mjs'],{stdio:['igno
   }
   for(const [game,step,control] of [['poker','basic-streets','#street-2'],['moth','basic-discard','#guess-3']]){
    await visit(game);await select(step);assert.ok(await page.locator('[data-tool=practice-helper]').isVisible());
-   await page.locator(control).click();await page.locator('#lang-es').click();await page.waitForURL('**/es/**');await ready();
+   await page.locator(control).click();await page.locator('#lang-es').click();await page.waitForURL('**/es/**');await ready();await openPractice();
    assert.equal(await page.locator(control).getAttribute('aria-pressed'),'true');
-   await page.locator('#tab-play').click();await page.waitForURL('**/play/');await ready();await page.locator('#tab-learn').click();await page.waitForURL('**/learn/');await ready();
+   await page.locator('#tab-play').click();await page.waitForURL('**/play/');await ready();await page.locator('#tab-learn').click();await page.waitForURL('**/learn/');await ready();await openPractice();
    assert.equal(await page.locator(control).getAttribute('aria-pressed'),'true');
    await page.locator('#practice-helper-retry').click();
    assert.equal(await page.locator(game==='poker'?'#street-0':'#guess-3').getAttribute('aria-pressed'),game==='poker'?'true':'false');

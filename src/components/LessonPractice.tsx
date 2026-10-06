@@ -2,6 +2,7 @@
 import { useRef } from "react";
 import Link from "next/link";
 import type { Language, LessonCard, PracticeDecision } from "@/lib/types";
+import { useChangeMotion } from "@/lib/use-change-motion";
 import { useLearningState } from "@/lib/learning-state";
 import { LessonCardArt } from "./LessonCardArt";
 
@@ -14,6 +15,8 @@ export function LessonPractice({ game, decision, lang, temporary, cards, onConti
   const first = useRef<HTMLButtonElement>(null);
   const tr = (en: string, es: string) => lang === "es" ? es : en;
   const selected = decision.optionIds.indexOf(answers[decision.id]);
+  const outcome = useRef<HTMLDivElement>(null);
+  useChangeMotion(outcome, `${decision.id}:${selected}`);
   const heading = `practice-${decision.id}-heading`, feedback = `practice-${decision.id}-feedback`;
   return <section className="lesson-practice" data-lesson-practice={decision.id} aria-labelledby={heading}>
     <p className="eyebrow">{tr("Optional · try this decision", "Opcional · prueba esta decisión")}</p>
@@ -26,7 +29,7 @@ export function LessonPractice({ game, decision, lang, temporary, cards, onConti
         data-practice-option={decision.optionIds[i]} aria-pressed={selected === i} aria-describedby={feedback}
         onClick={() => setAnswers(old => ({...old, [decision.id]:decision.optionIds[i]}))}>{choice[lang]}</button>)}
     </div>
-    <div className="practice-feedback" id={feedback} role="status" aria-atomic="true">
+    <div ref={outcome} className="practice-feedback" id={feedback} role="status" aria-atomic="true">
       {selected < 0 ? <p>{tr("Choose an answer to see why. You can also skip and continue.", "Elige una respuesta para ver por qué. También puedes saltar la práctica y seguir.")}</p> : <>
         <p><strong>{selected === decision.answer ? tr("Correct.", "Correcto.") : tr("Not quite.", "Todavía no.")}</strong> {decision.feedback[selected][lang]}</p>
         <p>{decision.explanation[lang]}</p>

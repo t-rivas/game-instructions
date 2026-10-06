@@ -100,13 +100,17 @@ export function learningSteps(id: string, game: Game, basics: Translation[], opt
   const old = basics.map((text, basic): LearningStep => ({id:`basic-${basicIds[id][basic]}`, stage: basic === 0 || (id === "sushi_go_party" && basic === 1) ? "setup" : endBasics[id]?.includes(basic) ? "end" : "turn", title:titles[basic], text, basic}));
   const pieces: LearningStep[] = id === "chess" ? chessPieces.map(([piece,title,text]) => ({id:`piece-${piece}`,stage:"components",title,text,art:`chess-${piece}`,rule:"pieces"})) : [];
   return [
-    {id:"objective",stage:"objective",title:L("Know what you’re aiming for", "Conoce el objetivo"),text:game.goal},
+    {id:"objective",stage:"objective",title:L("Your goal", "Tu objetivo"),text:game.goal},
     {id:"components",stage:"components",title:L("Recognize what is on the table", "Reconoce lo que hay en la mesa"),text:componentNames[id]},
     ...pieces,
     ...old.filter(s=>s.stage === "setup"),
+    ...(id === "avalon" ? [
+      {id:"avalon-prepare",stage:"setup" as const,title:L("Prepare and deal", "Prepara y reparte")},
+      {id:"avalon-opening",stage:"setup" as const,title:L("Read the opening script", "Lee el guion inicial")},
+    ] : []),
     ...old.filter(s=>s.stage === "turn"),
     ...(["coup","avalon","skull_king"].includes(id) ? [{id:"example",stage:"turn" as const,title:L("See what happens and why", "Mira qué pasa y por qué")}] : []),
     ...old.filter(s=>s.stage === "end"),
-    {id:"finish",stage:"end",title:L("Check the result", "Comprueba el resultado"),text:game.goal},
+    {id:"finish",stage:"end",title:L("At the table", "En la mesa"),text:game.reminder},
   ];
 }

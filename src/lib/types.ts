@@ -71,6 +71,8 @@ export interface ScoringTeaching {
   }[];
 }
 export interface LessonCardTeaching {
+  comparisons?: LessonComparison[];
+  comparisonArtwork?: Record<string, Artwork>;
   setupArtwork?: Record<string, Artwork>;
   practice: PracticeDecision[];
   scoring?: ScoringTeaching;
@@ -82,6 +84,19 @@ export interface LessonCardTeaching {
   coup?: CoupTeaching;
   steps: string[][];
   cards: Record<string, LessonCard>;
+}
+export interface LessonComparison {
+  id: string; lessons: string[]; basic: number; rule: string;
+  question: Translation; context: Translation; difference: Translation; exception: Translation;
+  source: {url: string; section: Translation};
+  situations: {
+    label: Translation; fact: Translation; result: string; outcome: Translation; explanation: Translation;
+    groups: {
+      label: Translation; quantity?: Translation; after?: boolean;
+      items: {label?: Translation; name: Translation; art?: string; rank?: number; suit?: Translation;
+        symbol?: string; symbolLabel?: Translation; changed?: boolean; compact?: boolean; note?: Translation}[];
+    }[];
+  }[];
 }
 export interface PracticeDecision {
   id: string; lessons: string[]; optionIds: string[]; cards?: string[];

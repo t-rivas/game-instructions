@@ -1,7 +1,8 @@
 "use client";
+import { trapDialogTab } from "@/lib/dialog-focus";
 import Link from "next/link";
 import { requestRuleFocus, focusRequestedRule } from "@/lib/rule-focus";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { cleanQuery } from "@/lib/guide-link";
 import {
   commonQuestions,
@@ -165,7 +166,7 @@ export function RuleSearch({
       aria-label={tr("Find a rule", "Buscar una regla")}
     >
       <label htmlFor={inputId}>
-        {tr("Search this game’s rules", "Buscar en las reglas de este juego")}
+        {tr("Search rules", "Buscar reglas")}
       </label>
       <div className="rule-search-controls">
         <div className="search">
@@ -178,8 +179,8 @@ export function RuleSearch({
             value={query}
             onChange={(event) => onQuery(event.target.value)}
             placeholder={tr(
-              "Search a word or phrase…",
-              "Busca una palabra o frase…",
+              "Word or phrase…",
+              "Palabra o frase…",
             )}
             aria-controls={resultsId}
           />
@@ -187,6 +188,7 @@ export function RuleSearch({
         <button
           type="button"
           id={`rule-search-clear${prefix}`}
+          disabled={!query}
           onClick={() => {
             onQuery("");
             input.current?.focus();
@@ -315,12 +317,15 @@ export function RuleSearchDialog({
 }) {
   const dialog = useRef<HTMLDialogElement>(null),
     selectedRule = useRef(false),
+    handledCloses = useRef(0),
     returnFocus = useRef<HTMLElement | null>(null),
     resultFocus = useRef<HTMLElement | null>(null),
     resultScroll = useRef(0),
+    inputFocusPending = useRef(false),
     heading = useRef<HTMLHeadingElement>(null),
     tr = (en: string, es: string) => (props.lang === "es" ? es : en);
   const [selected, setSelected] = useState<string>();
+  const [keepContent, setKeepContent] = useState(false);
   const section = props.sections.find((item) => item.id === selected);
   const related = section ? relatedRuleCards(section.id, cards, props.options) : [];
   const href = section
@@ -337,8 +342,11 @@ export function RuleSearchDialog({
           ? document.getElementById("find-rule")
           : (document.activeElement as HTMLElement);
       node.showModal();
-      node.querySelector<HTMLInputElement>("input")?.focus();
+      inputFocusPending.current = !!heading.current;
+      if (!inputFocusPending.current) node.querySelector<HTMLInputElement>("input")?.focus();
     } else if (node.open) {
+      inputFocusPending.current = false;
+      handledCloses.current++;
       node.close();
       if (!selectedRule.current) returnFocus.current?.focus({ preventScroll: true });
     }
@@ -348,17 +356,38 @@ export function RuleSearchDialog({
       if (open && event.key === "Escape" && document.activeElement?.closest("dialog") === node) {
         event.preventDefault();
         event.stopPropagation();
+        handledCloses.current++;
+        node.inert = true;
         node.close();
         onClose();
-        requestAnimationFrame(() => returnFocus.current?.focus({ preventScroll: true }));
+        requestAnimationFrame(() => { if (!node.open && (document.activeElement === document.body || node.contains(document.activeElement))) returnFocus.current?.focus({ preventScroll: true }); });
       }
     };
     document.addEventListener("keydown", escape, true);
     return () => {
       document.removeEventListener("keydown", escape, true);
-      if (node.open) node.close();
+      if (node.open) { handledCloses.current++; node.close(); }
     };
   }, [open]);
+  useEffect(() => {
+    if (open) { setKeepContent(true); return; }
+    const node = dialog.current;
+    const exiting = node?.getAnimations().filter(animation => animation.playState === "running") || [];
+    if (!exiting.length) { setKeepContent(false); return; }
+    let current = true;
+    // Native close already released focus and interaction. Retain only the exit paint.
+    Promise.allSettled(exiting.map(animation => animation.finished)).then(() => {
+      if (current && !node?.open) setKeepContent(false);
+    });
+    return () => { current = false; };
+  }, [open]);
+  useLayoutEffect(() => {
+    // Reopening from a preview first reveals the search body, then focuses its input.
+    if (open && !section && inputFocusPending.current && dialog.current?.open) {
+      inputFocusPending.current = false;
+      dialog.current.querySelector<HTMLInputElement>("input")?.focus();
+    }
+  }, [open, section?.id]);
   useEffect(() => {
     if (section) {
       heading.current?.focus({ preventScroll: true });
@@ -368,6 +397,8 @@ export function RuleSearchDialog({
   const back = () => {
     setSelected(undefined);
     requestAnimationFrame(() => {
+      const activeDialog = document.activeElement?.closest("dialog");
+      if (!dialog.current?.open || heading.current || (activeDialog && activeDialog !== dialog.current)) return;
       resultFocus.current?.focus({ preventScroll: true });
       if (dialog.current) dialog.current.scrollTop = resultScroll.current;
     });
@@ -375,13 +406,24 @@ export function RuleSearchDialog({
   return (
     <dialog
       ref={dialog}
+      inert={!open}
+      onKeyDown={(event) => trapDialogTab(event.currentTarget, event)}
       id="rule-dialog"
       className="rule-dialog"
       aria-labelledby="rule-dialog-title"
-      onCancel={onClose}
-      onClose={() => {
+      onCancel={(event) => {
+        event.preventDefault();
+        handledCloses.current++;
+        event.currentTarget.inert = true;
+        event.currentTarget.close();
         onClose();
-        if (!selectedRule.current) returnFocus.current?.focus({ preventScroll: true });
+        returnFocus.current?.focus({ preventScroll: true });
+      }}
+      onClose={(event) => {
+        if (handledCloses.current) { handledCloses.current--; return; }
+        if (event.currentTarget.open) return;
+        onClose();
+        if (!selectedRule.current && (document.activeElement === document.body || event.currentTarget.contains(document.activeElement))) returnFocus.current?.focus({ preventScroll: true });
       }}
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
@@ -393,11 +435,14 @@ export function RuleSearchDialog({
           type="button"
           onClick={onClose}
           aria-label={tr("Close rule search", "Cerrar búsqueda de reglas")}
+          className="dialog-close"
         >
-          ×
+          <span aria-hidden="true">×</span>
+          <span>{tr("Close", "Cerrar")}</span>
         </button>
       </div>
-      {open ? (
+      {/* Keep only the exit paint; native close makes it inert immediately. */}
+      {open || keepContent ? (
         <>
           <div className="rule-preview-navigation">
             {section ? <button type="button" onClick={back}>{tr("Back to results", "Volver a los resultados")}</button> : null}
@@ -438,7 +483,7 @@ export function RuleSearchDialog({
                 </section>
               ) : null}
               <div className="rule-preview-actions">
-                <Link prefetch={false} href={href} onClick={(event) => {
+                <Link prefetch={false} className="accent-button" href={href} onClick={(event) => {
                   if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
                   selectedRule.current = true;
                   requestRuleFocus(new URL(event.currentTarget.href).pathname, section.id);

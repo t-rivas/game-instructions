@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tablefolk typography — Before / after</title>
+<style>
+:root{color-scheme:light dark;font-family:system-ui,sans-serif}body{margin:0;padding:24px;background:light-dark(#f6f5ef,#171b18);color:light-dark(#20271f,#f1f1e8)}h1{font-size:28px;margin:0 0 12px}p{max-width:70ch;line-height:1.6}form{display:flex;gap:20px;flex-wrap:wrap;margin:24px 0}label{display:grid;gap:8px;font-weight:600}select{font:inherit;padding:10px;border:1px solid #888;border-radius:6px}main{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}figure{margin:0;min-width:0}figcaption{font-size:18px;font-weight:650;margin:0 0 12px}img{width:100%;height:auto;border:1px solid #888;display:block}a{color:inherit}@media(max-width:650px){body{padding:16px}main{grid-template-columns:1fr}}
+</style>
+<h1>Tablefolk typography</h1><p>Spanish production screens captured before and after the reading-layout changes. Choose a screen, theme, and viewport width. Both images link to the original PNG.</p>
+<form><label>Screen<select id="screen"><option value="collection">Collection</option><option value="card-lesson">Coup card lesson</option><option value="full-rules">Burako full rules</option><option value="active-tool">Running chess clock</option><option value="rule-preview">Coup rule preview</option></select></label><label>Theme<select id="theme"><option>light</option><option>dark</option></select></label><label>Viewport<select id="width"><option>390</option><option>1440</option></select></label></form>
+<main><figure><figcaption>Before</figcaption><a id="before-link"><img id="before" alt="Before typography changes"></a></figure><figure><figcaption>After</figcaption><a id="after-link"><img id="after" alt="After typography changes"></a></figure></main><p><a href="README.md">All screenshot links, 320/768px captures, 200% text, and verification notes</a></p>
+<script>
+function update(){const screen=document.getElementById('screen').value,theme=document.getElementById('theme').value,width=document.getElementById('width').value;for(const phase of ['before','after']){const src=`${phase}/${screen}-${theme}-${width}.png`;document.getElementById(phase).src=src;document.getElementById(phase+'-link').href=src;}}document.querySelector('form').addEventListener('change',update);update();
+</script></html>

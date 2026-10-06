@@ -1,3 +1,4 @@
+const {learningStage, learningSetupOptions} = require("./learning-navigation.cjs");
 const assert=require('node:assert/strict');
 const fs=require('node:fs');const os=require('node:os');const path=require('node:path');const vm=require('node:vm');
 const {spawn}=require('node:child_process');const {pathToFileURL}=require('node:url');const {chromium}=require('playwright');
@@ -46,7 +47,7 @@ const scores=page=>page.evaluate(()=>Object.fromEntries(Object.entries(localStor
    if(portable)await context.setOffline(true);
    for(const game of Object.keys(expected)){
     if(portable){await page.goto(pathToFileURL(path.join(root,'game-night.html')).href+'#'+game+'/learn');await page.locator('#lang-en').click();}
-    else{await page.goto(`${base}/en/${game}/learn/`);await page.waitForSelector('[data-tool=sources][data-ready=true]');await page.locator('[data-learning-stage=end]').click();}
+    else{await page.goto(`${base}/en/${game}/learn/`);await page.waitForSelector('[data-tool=sources][data-ready=true]');await learningStage(page,'end');}
     const before=await scores(page);
     assert.ok(before['tablefolk-skull-score-v1'],'An existing game with scores and an unfinished draft is present');
     for(const [i,s] of data[game].scenarios.entries()){
@@ -61,7 +62,7 @@ const scores=page=>page.evaluate(()=>Object.fromEntries(Object.entries(localStor
      assert.ok(await page.locator('#scoring-heading').evaluate(el=>el===document.activeElement),'Replay returns focus');
     }
     if(game==='skull_king'){
-     await page.selectOption('#scoring-scenario','2');await page.selectOption('#scoring-fact','1');await page.locator('#skull-expansion-toggle').click();
+     await page.selectOption('#scoring-scenario','2');await page.selectOption('#scoring-fact','1');await learningSetupOptions(page);await page.locator('#skull-expansion-toggle').click();
      assert.deepEqual(await totals(page),[-10],'Guide expansion cannot change base-box example');
     }
     if(!(await page.locator('#scoring-example [data-art]').count()))await page.selectOption('#scoring-scenario','0');
@@ -71,10 +72,10 @@ const scores=page=>page.evaluate(()=>Object.fromEntries(Object.entries(localStor
     if(!portable){
      // Keep worked state while switching learning stages.
      await page.selectOption('#scoring-scenario','0');await page.selectOption('#scoring-fact','1');
-     await page.locator('[data-learning-stage=turn]').click();await page.locator('[data-learning-stage=end]').click();
+     await learningStage(page,'turn');await learningStage(page,'end');
      assert.deepEqual(await totals(page),expected[game][data[game].scenarios[0].id][1],'Learning-stage navigation keeps example state');
      for(const lang of ['en','es']){
-      if(lang==='es'){await page.goto(`${base}/es/${game}/learn/`);await page.waitForSelector('[data-tool=sources][data-ready=true]');await page.locator('[data-learning-stage=end]').click();}
+      if(lang==='es'){await page.goto(`${base}/es/${game}/learn/`);await page.waitForSelector('[data-tool=sources][data-ready=true]');await learningStage(page,'end');}
       await page.selectOption('#scoring-scenario',game==='skull_king'?'2':game==='dixit'?'1':'0');await page.selectOption('#scoring-fact','1');
       for(const theme of ['dark','light']){
        if(await page.locator('html').getAttribute('data-theme')!==theme)await page.locator('#theme').click();

@@ -1,3 +1,4 @@
+const {learningStage, learningLesson} = require("./learning-navigation.cjs");
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
@@ -25,16 +26,16 @@ const server=spawn(process.execPath,['scripts/serve-export.mjs'],{stdio:['ignore
   const ready=()=>page.waitForSelector('[data-tool=sources][data-ready=true]');
   for(const lang of ['en','es'])for(const game of ['skull_king','coup','avalon','truco','catan']) {
    await page.goto(`${base}/${lang}/${game}/learn/`);await ready();
-   await page.locator('[data-learning-stage=setup]').click();
+   await learningStage(page,'setup');
    if(game==='truco') {
     for(const term of ['muestra','mano'])assert.ok(await page.locator(`.setup-checklist [data-glossary-term=${term}] .glossary-definition`).isVisible());
    }
    if(game==='catan')assert.ok((await page.locator('.setup-checklist').innerText()).includes(lang==='es'?'Camino más largo':'Longest Road'));
-   await page.locator('[data-learning-stage=turn]').click();
-   if(game==='skull_king')await page.locator('#learning-step').selectOption('basic-trick');
-   if(game==='coup')await page.locator('#learning-step').selectOption('basic-challenge');
+   await learningStage(page,'turn');
+   if(game==='skull_king')await learningLesson(page,'basic-trick');
+   if(game==='coup')await learningLesson(page,'basic-challenge');
    const term=game==='skull_king'?'trick':game==='coup'?'influence':null;
-   if(term)assert.ok(await page.locator(`.lesson-copy [data-glossary-term=${term}] .glossary-definition`).isVisible());
+   if(term) {await page.locator(`.lesson-copy [data-glossary-term=${term}] .glossary-trigger`).click();assert.ok(await page.locator(`.lesson-copy [data-glossary-term=${term}] .glossary-definition`).isVisible());}
    // One representative lesson for every game/language/size/theme.
    for(const width of [320,390,768,1440])for(const theme of ['light','dark']) {
     await page.setViewportSize({width,height:900});await page.evaluate(theme=>document.documentElement.setAttribute('data-theme',theme),theme);
@@ -43,7 +44,7 @@ const server=spawn(process.execPath,['scripts/serve-export.mjs'],{stdio:['ignore
    }
   }
   await page.goto(`${base}/es/coup/learn/`);await ready();
-  await page.locator('[data-learning-stage=turn]').click();await page.locator('#learning-step').selectOption('basic-action');
+  await learningStage(page,'turn');await learningLesson(page,'basic-action');
   const trigger=page.locator('.lesson-cards .glossary-trigger').first();
   await trigger.focus();await page.keyboard.press('Enter');assert.equal(await trigger.getAttribute('aria-expanded'),'true');
   await page.keyboard.press('Escape');assert.equal(await trigger.getAttribute('aria-expanded'),'false');assert.ok(await trigger.evaluate(el=>el===document.activeElement));

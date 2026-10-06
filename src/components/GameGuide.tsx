@@ -331,133 +331,28 @@ function Variants({
     </div>
   );
 }
-function AvalonSetup({
-  onContinue,
-  lang,
-  options,
-  tools,
-  ready,
-  shared = false,
-  readyHref,
-}: {
-  lang: Language;
-  options: ToolState;
-  tools: Partial<Record<ToolKind, string>>;
-  ready: boolean;
-  shared?: boolean;
-  readyHref: string;
-  onContinue: () => void;
+function AvalonSetup({lesson, lang, options, tools, ready, shared = false, readyHref}: {
+  lesson: string; lang: Language; options: ToolState; tools: Partial<Record<ToolKind, string>>;
+  ready: boolean; shared?: boolean; readyHref: string;
 }) {
-  const stepKey = shared
-    ? "tablefolk-shared-avalon-step"
-    : "tablefolk-avalon-step";
-  const [step, setStep] = useState(0),
-    heading = useRef<HTMLHeadingElement>(null),
-    pendingHeadingFocus = useRef(false);
-  const tr = (en: string, es: string) => (lang === "es" ? es : en);
-  useEffect(() => {
-    try {
-      const saved = Number(sessionStorage.getItem(stepKey));
-      if ([0, 1, 2].includes(saved)) setStep(saved);
-    } catch {}
-  }, [stepKey]);
-  const titles = [
-    tr("Choose players and roles", "Elige jugadores y personajes"),
-    tr("Prepare and deal", "Prepara y reparte"),
-    tr("Read the opening script", "Lee el guion inicial"),
-  ];
+  const step = lesson === "avalon-prepare" ? 1 : lesson === "avalon-opening" ? 2 : 0;
   const kinds: ToolKind[] = ["setup-roles", "setup-components", "setup-script"];
-  useLayoutEffect(() => {
-    if (pendingHeadingFocus.current) {
-      pendingHeadingFocus.current = false;
-      heading.current?.focus();
-    }
-  }, [step]);
-  const changeStep = (next: number) => {
-    if (next === step) heading.current?.focus();
-    else {
-      pendingHeadingFocus.current = true;
-      setStep(next);
-    }
-    try {
-      sessionStorage.setItem(stepKey, String(next));
-    } catch {}
-  };
-  const steps = [
-    ...setupSteps("avalon", options),
-    {
-      en: "Confirm the player count, selected roles and Lady of the Lake option.",
-      es: "Confirma la cantidad de jugadores, los personajes y la opción de la Dama del Lago.",
-    },
-  ];
-  return (
-    <div className="avalon-flow">
-      <nav
-        aria-label={tr("Setup steps", "Pasos de preparación")}
-        className="avalon-step-nav"
-      >
-        {titles.map((title, i) => (
-          <button
-            type="button"
-            id={`avalon-step-${i}`}
-            key={i}
-            aria-current={step === i ? "step" : undefined}
-            onClick={() => changeStep(i)}
-          >
-            <span>{i + 1}</span>
-            {title}
-          </button>
-        ))}
-      </nav>
-      <h3 ref={heading} tabIndex={-1} className="avalon-step-title">
-        {step + 1} / 3 · {titles[step]}
-      </h3>
-      <div className="avalon-step-layout">
-        <Tool
-          key={`${lang}-${kinds[step]}`}
-          kind={kinds[step]}
-          initial={tools[kinds[step]] || ""}
-        />
-        <SetupChecklist
-          id="avalon"
-          temporary={shared}
-          readyHref={readyHref}
-          onContinue={onContinue}
-          lang={lang}
-          ready={ready}
-          steps={steps}
-          activeIndices={step === 0 ? [3] : step === 1 ? [0, 1] : [2]}
-          showActions={step === 2}
-          signature={JSON.stringify([
-            options.players,
-            options.avalonMode,
-            [...options.optional].sort(),
-            options.lady,
-          ])}
-        />
-      </div>
-      <div className="lesson-buttons">
-        <button
-          type="button"
-          id="avalon-prev"
-          disabled={step === 0}
-          onClick={() => changeStep(step - 1)}
-        >
-          {tr("Previous", "Anterior")}
-        </button>
-        {step < 2 ? (
-          <button
-            type="button"
-            id="avalon-next"
-            className="accent-button"
-            onClick={() => changeStep(step + 1)}
-          >
-            {tr("Next step", "Siguiente")}
-          </button>
-        ) : null}
-      </div>
+  const steps = [...setupSteps("avalon", options), {
+    en: "Confirm the player count, selected roles and Lady of the Lake option.",
+    es: "Confirma la cantidad de jugadores, los personajes y la opción de la Dama del Lago.",
+  }];
+  return <div className="avalon-flow">
+    {/* All three tools remain mounted as Contents and Next change the lesson. */}
+    <div className="avalon-step-layout">
+      <div>{kinds.map((kind, i) => <div hidden={step !== i} key={kind}>
+        <Tool kind={kind} initial={tools[kind] || ""} />
+      </div>)}</div>
+      <SetupChecklist id="avalon" temporary={shared} readyHref={readyHref} guided
+        lang={lang} ready={ready} steps={steps}
+        activeIndices={step === 0 ? [3] : step === 1 ? [0, 1] : [2]}
+        signature={JSON.stringify([options.players, options.avalonMode, [...options.optional].sort(), options.lady])} />
     </div>
-  );
+  </div>;
 }
 export function GameGuide({
   id,
@@ -779,6 +674,39 @@ export function GameGuide({
     ["play", tr("While playing", "Al jugar")],
     ["rules", tr("Full rules", "Reglas completas")],
   ];
+  const guideActions = <>
+            <button
+              type="button"
+              id="share-guide"
+              className="share-button"
+              aria-haspopup="dialog"
+              aria-controls="share-dialog"
+              onClick={(event) => {
+                event.currentTarget.focus();
+                setSharing(null);
+              }}
+            >
+              {tr("Share guide", "Compartir guía")}
+            </button>
+            <button
+              className="print"
+              id="print"
+              onClick={() => {
+                if (view === "rules") {
+                  setExpanded(new Set(sections.map((section) => section.id)));
+                  setTimeout(() => window.print(), 100);
+                } else {
+                  try {
+                    sessionStorage.setItem("tablefolk-print", id);
+                  } catch {}
+                  router.push(navHref("rules"));
+                }
+              }}
+            >
+              <Icon path={icons.print} />
+              {tr("Print guide", "Imprimir guía")}
+            </button>
+  </>;
   return (
     <EngineContext.Provider value={runtime}>
       <Suspense fallback={null}>
@@ -786,6 +714,7 @@ export function GameGuide({
       </Suspense>
       <main
         id="main"
+        data-view={view}
         tabIndex={-1}
         data-focus={view === "play" && focusPlay}
         data-help={showHelp}
@@ -907,19 +836,6 @@ export function GameGuide({
                 </button>
               ))}
             </div>
-            <button
-              type="button"
-              id="share-guide"
-              className="share-button"
-              aria-haspopup="dialog"
-              aria-controls="share-dialog"
-              onClick={(event) => {
-                event.currentTarget.focus();
-                setSharing(null);
-              }}
-            >
-              {tr("Share guide", "Compartir guía")}
-            </button>
             {!focusPlay ? (
               <button
                 type="button"
@@ -937,24 +853,10 @@ export function GameGuide({
                 <span>{tr("Find a rule", "Buscar una regla")}</span>
               </button>
             ) : null}
-            <button
-              className="print"
-              id="print"
-              onClick={() => {
-                if (view === "rules") {
-                  setExpanded(new Set(sections.map((section) => section.id)));
-                  setTimeout(() => window.print(), 100);
-                } else {
-                  try {
-                    sessionStorage.setItem("tablefolk-print", id);
-                  } catch {}
-                  router.push(navHref("rules"));
-                }
-              }}
-            >
-              <Icon path={icons.print} />
-              {tr("Print guide", "Imprimir guía")}
-            </button>
+            {view === "learn" ? <details className="guide-actions" id="guide-actions">
+              <summary>{tr("More", "Más")}</summary>
+              <div>{guideActions}</div>
+            </details> : guideActions}
           </div>
           <div className="detail-layout">
             {view === "rules" ? (
@@ -1016,8 +918,10 @@ export function GameGuide({
                   </button>
                 </p>
               ) : null}
-              <Variants id={id} lang={lang} options={options} />
-              <GuideSetupContext id={id} game={game} lang={lang} options={options} ready={!!runtime} onChange={(guidePlayers) => runtime?.update({guidePlayers})} />
+              {view !== "learn" ? <>
+                <Variants id={id} lang={lang} options={options} />
+                <GuideSetupContext id={id} game={game} lang={lang} options={options} ready={!!runtime} onChange={(guidePlayers) => runtime?.update({guidePlayers})} />
+              </> : null}
               {view === "learn" ? (
                 <>
                   <LearningSequence
@@ -1025,18 +929,21 @@ export function GameGuide({
                     steps={runtime ? runtime.lessonSteps() : contextualBasics(id, game.basics, options)}
                     temporary={shared} ready={!!runtime} cardTeaching={cardTeaching}
                     readyHref={navHref("play")} ruleHref={(section) => navHref("rules", section)}
-                    setup={(onContinue) => (
+                    setupChoice={changeSetup => ["coup", "skull_king", "sushi_go_party"].includes(id) ? <details className="lesson-setup-choice" id="guide-setup-options">
+                      <summary><span>{tr("Your setup", "Tu preparación")}: {edition}</span><span>{tr("Change", "Cambiar")}</span></summary>
+                      <>
+                        <Variants id={id} lang={lang} options={options} />
+                        <GuideSetupContext compact id={id} game={game} lang={lang} options={options} ready={!!runtime} onChange={(guidePlayers) => runtime?.update({guidePlayers})} />
+                      </>
+                    </details> : id === "avalon" ? <div className="lesson-setup-choice avalon-setup-choice">
+                      <span>{tr("Your setup", "Tu preparación")}: {edition}</span>
+                      <button type="button" onClick={changeSetup}>{tr("Change", "Cambiar")}</button>
+                    </div> : null}
+                    setup={(lesson) => (
                       <section
                         id="learn-setup"
                         className="learning-setup block"
-                        aria-labelledby="learn-setup-heading"
                       >
-                        <span className="eyebrow">
-                          {tr("BEFORE THE FIRST TURN", "ANTES DEL PRIMER TURNO")}
-                        </span>
-                        <h2 id="learn-setup-heading">
-                          {tr("Set up the game", "Prepara la partida")}
-                        </h2>
                         {id === "avalon" ? (
                           <AvalonSetup
                             lang={lang}
@@ -1045,7 +952,7 @@ export function GameGuide({
                             ready={!!runtime}
                             shared={shared}
                             readyHref={navHref("play")}
-                            onContinue={onContinue}
+                            lesson={lesson}
                           />
                         ) : (
                           <SetupChecklist
@@ -1054,7 +961,8 @@ export function GameGuide({
                             ready={!!runtime}
                             temporary={shared}
                             readyHref={navHref("play")}
-                            onContinue={onContinue}
+                            guided
+                            activeIndices={id === "sushi_go_party" ? lesson === "basic-menu" ? [0, 1] : [2] : undefined}
                             steps={setupSteps(id, options)}
                             artwork={cardTeaching.setupArtwork}
                             players={options.guidePlayers}
@@ -1104,10 +1012,6 @@ export function GameGuide({
                       {cardTeaching.avalon ? <AvalonLesson temporary={shared} key={`${options.players}:${options.avalonMode}:${options.optional.join(",")}`} data={cardTeaching.avalon} cards={cardTeaching.cards} lang={lang} options={options} script={runtime?.view("setup-script") || tools["setup-script"] || ""} ruleHref={(section) => navHref("rules", section)} /> : null}
                     </>}
                   />
-                  <div className="callout">
-                    <strong>{tr("Keep in mind.", "Recuerda.")} </strong>
-                    {game.reminder[lang]}
-                  </div>
                   <section id="helper">
                     <details
                       className="practice-fold feature-fold"
@@ -1363,6 +1267,16 @@ export function GameGuide({
                         >
                           <summary>{section.title[lang]}</summary>
                           <div className="rule-body">
+                            {section.paragraphs.map((paragraph, i) => (
+                              <p key={i}>
+                                <HighlightedText
+                                  text={paragraph[lang]}
+                                  id={id}
+                                  lang={lang}
+                                  query={query}
+                                />
+                              </p>
+                            ))}
                             <button
                               type="button"
                               className="share-rule"
@@ -1376,16 +1290,6 @@ export function GameGuide({
                             >
                               {tr("Share this rule", "Compartir esta regla")}
                             </button>
-                            {section.paragraphs.map((paragraph, i) => (
-                              <p key={i}>
-                                <HighlightedText
-                                  text={paragraph[lang]}
-                                  id={id}
-                                  lang={lang}
-                                  query={query}
-                                />
-                              </p>
-                            ))}
                           </div>
                         </details>
                       ))}

@@ -2,6 +2,7 @@
 import { useEffect, useRef } from "react";
 import type { Artwork, Language, ScoringTeaching } from "@/lib/types";
 import { LessonCardArt } from "./LessonCardArt";
+import { useChangeMotion } from "@/lib/use-change-motion";
 import { useLearningState } from "@/lib/learning-state";
 
 export function ScoringExample({ data, artwork, lang, ruleHref, temporary = false, gameId }: {
@@ -30,6 +31,8 @@ export function ScoringExample({ data, artwork, lang, ruleHref, temporary = fals
   const scenario = data.scenarios[selected];
   const fact = Number.isInteger(facts[scenario.id]) && scenario.states[facts[scenario.id]] ? facts[scenario.id] : 0;
   const outcome = scenario.states[fact];
+  const result = useRef<HTMLDivElement>(null);
+  useChangeMotion(result, `${scenario.id}:${fact}`);
   const tr = (en: string, es: string) => lang === "es" ? es : en;
   return <section id="scoring-example" data-scoring-owner="react" className="scoring-example block" aria-labelledby="scoring-title">
     <h2 id="scoring-title">{data.title[lang]}</h2><p>{data.intro[lang]}</p>
@@ -42,7 +45,7 @@ export function ScoringExample({ data, artwork, lang, ruleHref, temporary = fals
     <select id="scoring-fact" value={fact} onChange={event => setFacts(old => ({...old, [scenario.id]:Number(event.target.value)}))}>
       {scenario.states.map((s,i) => <option key={i} value={i}>{s.label[lang]}</option>)}
     </select>
-    <div className="scoring-outcome" aria-live="polite" aria-atomic="true">
+    <div ref={result} className="scoring-outcome" aria-live="polite" aria-atomic="true">
       <p><strong>{outcome.condition[lang]}</strong></p>
       <ul className="scoring-cards">{outcome.cards.map((card,i) => <li key={`${scenario.id}-${i}`}>
         {card.art && artwork[card.art] ? <LessonCardArt id={card.art} art={artwork[card.art]} lang={lang} /> : null}

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tablefolk · Collection before and after</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f8f7ef;color:#252c24;font:16px/1.5 system-ui,sans-serif}main{max-width:1600px;margin:auto;padding:24px}h1{font-size:28px;letter-spacing:-.04em}p{max-width:75ch}form{display:flex;flex-wrap:wrap;gap:16px;margin:24px 0}label{display:grid;gap:4px}select{font:inherit;padding:10px;border:1px solid #59634e;border-radius:8px;background:#fffdf8;color:inherit}.pair{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}figure{margin:0;min-width:0}figcaption{font-weight:650;margin-bottom:12px}img{width:100%;height:auto;border:1px solid #ccd0c5;border-radius:8px}a{color:inherit}small{font-weight:400}@media(max-width:680px){.pair{grid-template-columns:1fr}}
+</style>
+<main>
+<h1>Tablefolk · A clearer welcome, a quicker choice</h1>
+<p>Production screenshots from the unchanged baseline and the final composition. Compare all four widths, both languages and themes, and new or returning players. Each image opens at its original size.</p>
+<form>
+<label>Width<select id="width"><option>320</option><option selected>390</option><option>768</option><option>1440</option></select></label>
+<label>Language<select id="lang"><option value="en">English</option><option value="es">Español</option></select></label>
+<label>Theme<select id="theme"><option>light</option><option>dark</option></select></label>
+<label>Visitor<select id="visitor"><option value="new">New visitor</option><option value="returning">Returning · saved chess game</option></select></label>
+<label>Capture<select id="extent"><option value="viewport">First viewport</option><option value="full">Full page</option></select></label>
+</form>
+<div class="pair">
+<figure><figcaption>Before</figcaption><a id="before-link"><img id="before" alt="Collection before the composition update"></a></figure>
+<figure><figcaption>After</figcaption><a id="after-link"><img id="after" alt="Collection after the composition update"></a></figure>
+</div>
+</main>
+<script>
+const ids=['width','lang','theme','visitor','extent'];
+function update(){const [width,lang,theme,visitor,extent]=ids.map(id=>document.getElementById(id).value);for(const phase of ['before','after']){const src=`${phase}/${visitor}-${lang}-${theme}-${width}-${extent}.png`;document.getElementById(phase).src=src;document.getElementById(`${phase}-link`).href=src;}}
+document.querySelector('form').addEventListener('change',update);update();
+</script>
+</html>

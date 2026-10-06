@@ -32,6 +32,10 @@ jobs:
       - run: BROWSER=webkit npm run test:experience
       - run: npm run test:rule-preview
       - run: BROWSER=webkit npm run test:rule-preview
+      - run: npm run test:motion
+      - run: BROWSER=webkit npm run test:motion
+      - run: npm run test:controls
+      - run: BROWSER=webkit npm run test:controls
       - run: npm run test:rules-table
       - run: BROWSER=webkit npm run test:rules-table
       - run: npm run test:web
@@ -43,6 +47,7 @@ jobs:
       - run: npm run test:scoring-examples
       - run: npm run test:skull-tricks
       - run: npm run test:coup-lessons
+      - run: COMPARISON_SCREENSHOTS=/tmp/tablefolk-comparisons npm run test:comparisons
       - run: npm run test:cards
       - run: npm run test:lesson-cards
       - run: npm run test:scoreboard-ux

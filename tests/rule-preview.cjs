@@ -159,6 +159,7 @@ const check = (condition, message) => { assert.ok(condition, message); checks++;
     await page.screenshot({ path: path.join(output, 'spanish-enlarged-card.png') });
     await back();
     await page.locator('#rule-search-dialog').fill('qzxvfoo');
+    await page.waitForFunction(() => document.querySelector('#rule-search-results-dialog')?.dataset.query === 'qzxvfoo');
     check(await page.locator('#rule-dialog .rule-search-result').count() === 0 && await preview('hierarchy').count() === 0, 'Unmatched query never presents an answer');
     await page.keyboard.press('Escape');
     await page.route('**/assets/responsive/sk-card-mermaid-*.webp', route => route.abort());

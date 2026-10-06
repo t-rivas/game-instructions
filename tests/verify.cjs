@@ -17,6 +17,10 @@ const fixture = fs.mkdtempSync(path.join(os.tmpdir(),'tablefolk-build-'));
 for (const file of fs.readdirSync(root).filter(n=>/\.(js|css|mjs|py)$/.test(n)||n==='index.html')) {
   fs.writeFileSync(path.join(fixture,file),fs.readFileSync(path.join(root,file),'utf8').replace(/\r?\n/g,'\r\n'));
 }
+fs.mkdirSync(path.join(fixture, 'src/components'), {recursive: true});
+for (const file of fs.readdirSync(path.join(root, 'src/components')).filter(name => name.endsWith('.css'))) {
+  fs.writeFileSync(path.join(fixture, 'src/components', file), fs.readFileSync(path.join(root, 'src/components', file), 'utf8').replace(/\r?\n/g, '\r\n'));
+}
 fs.symlinkSync(path.join(root,'assets'),path.join(fixture,'assets'),'dir');
 execFileSync('python3',[path.join(fixture,'build.py')],{cwd:os.tmpdir()});
 const pythonBuild = fs.readFileSync(path.join(fixture,'game-night.html'));

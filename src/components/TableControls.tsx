@@ -98,8 +98,8 @@ export function TableControls({
   const messages: Record<WakeState, string> = {
     off: tr("Screen awake: off", "Pantalla activa: no"),
     requesting: tr(
-      "Requesting screen wake lock…",
-      "Solicitando mantener la pantalla activa…",
+      "Keeping screen awake…",
+      "Activando pantalla…",
     ),
     active: tr("Screen is being kept awake", "La pantalla se mantiene activa"),
     released: tr("Screen wake lock released", "Se liberó la pantalla activa"),
@@ -122,7 +122,7 @@ export function TableControls({
             aria-pressed={orientation}
             onClick={() => onOrientation(!orientation)}
           >
-            {tr("Opponent-facing clock", "Reloj de frente al rival")}
+            {tr("Face opponent", "De frente al rival")}
           </button>
         ) : null}
         <button

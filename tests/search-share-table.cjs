@@ -1,3 +1,4 @@
+const {learningStage, learningLesson} = require("./learning-navigation.cjs");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const os = require("node:os");
@@ -339,6 +340,8 @@ const server = spawn(process.execPath, ["scripts/serve-export.mjs"], {
       const trigger = section
         ? page.locator(`#${section} .share-rule`)
         : page.locator("#share-guide");
+      if (!section && await page.locator("#guide-actions").count())
+        await page.locator("#guide-actions > summary").click();
       await trigger.click();
       check(
         await page.locator("#share-dialog").isVisible(),
@@ -393,15 +396,15 @@ const server = spawn(process.execPath, ["scripts/serve-export.mjs"], {
           "Fresh link opens and highlights its exact rule",
         );
       } else {
-        await fresh.locator("[data-learning-stage=setup]").click();
-      await fresh.locator("#avalon-step-0").click();
+        await learningStage(fresh, "setup");
+
         check(
           (await fresh.locator("#players").inputValue()) === "10" &&
             (await fresh.locator("[data-role]:checked").count()) === 4,
           "Fresh setup preserves players and roles",
         );
         await fresh.locator("#setup-check-3").check();
-        await fresh.locator("#avalon-step-2").click();
+        await learningLesson(fresh, "avalon-opening");
         check(
           (await fresh.locator("[data-tool=setup-script] .script").innerText()).includes(
             "EXCEPTO Mordred",
@@ -445,8 +448,8 @@ const server = spawn(process.execPath, ["scripts/serve-export.mjs"], {
           "Language keeps shared choices",
         );
       await visit(fresh, "/en/avalon/learn/");
-      await fresh.locator("[data-learning-stage=setup]").click();
-      await fresh.locator("#avalon-step-0").click();
+      await learningStage(fresh, "setup");
+
       check(
         (await fresh.locator("#players").inputValue()) === "5",
         "Leaving shared setup restores local configuration",
@@ -462,8 +465,8 @@ const server = spawn(process.execPath, ["scripts/serve-export.mjs"], {
       page,
       "/en/avalon/learn/?shared=1&players=99&roles=anything&optional=evil,morgana,mordred,mordred&lady=true&extra=1#%ZZ",
     );
-    await page.locator("[data-learning-stage=setup]").click();
-    await page.locator("#avalon-step-0").click();
+    await learningStage(page, "setup");
+
     const invalid = new URL(page.url());
     check(
       invalid.searchParams.get("players") === "7" &&
@@ -478,8 +481,8 @@ const server = spawn(process.execPath, ["scripts/serve-export.mjs"], {
       page,
       "/en/avalon/learn/?shared=1&players=5&roles=optional&optional=morgana,mordred,oberon,percival&lady=1",
     );
-    await page.locator("[data-learning-stage=setup]").click();
-    await page.locator("#avalon-step-0").click();
+    await learningStage(page, "setup");
+
     check(
       (await page.locator("[data-role]:checked").count()) === 2 &&
         new URL(page.url()).searchParams.get("optional") === "morgana,percival",

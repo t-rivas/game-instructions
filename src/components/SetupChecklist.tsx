@@ -13,6 +13,7 @@ export function SetupChecklist({
   ready,
   activeIndices,
   showActions = true,
+  guided = false,
   temporary = false,
   readyHref,
   onContinue,
@@ -26,6 +27,7 @@ export function SetupChecklist({
   ready: boolean;
   activeIndices?: number[];
   showActions?: boolean;
+  guided?: boolean;
   temporary?: boolean;
   readyHref?: string;
   onContinue?: () => void;
@@ -70,7 +72,7 @@ export function SetupChecklist({
   return (
     <div className="setup-checklist">
       <div className="checklist-heading">
-        <h3>{tr("Before you begin", "Antes de comenzar")}</h3>
+        {!guided ? <h3>{tr("Before you begin", "Antes de comenzar")}</h3> : null}
         <span role="status" aria-atomic="true">
           {done} / {steps.length} {tr("checked", "listos")}
         </span>
@@ -122,8 +124,10 @@ export function SetupChecklist({
         </p>
       ) : null}
       {showActions ? (
+        <details className="setup-secondary" open={guided ? undefined : true}>
+          <summary>{tr("Checklist options", "Opciones de la lista")}</summary>
         <div className="checklist-actions">
-          {onContinue ? <button type="button" id="setup-ready" className="accent-button" onClick={onContinue}>
+          {onContinue && !guided ? <button type="button" id="setup-ready" className="accent-button" onClick={onContinue}>
             {tr("Continue learning", "Seguir aprendiendo")} →
           </button> : null}
           <Link prefetch={false} href={readyHref || `/${lang}/${id}/play/`}>
@@ -137,6 +141,7 @@ export function SetupChecklist({
             {tr("Clear checklist", "Limpiar lista")}
           </button>
         </div>
+        </details>
       ) : null}
     </div>
   );

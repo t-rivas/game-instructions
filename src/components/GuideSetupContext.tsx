@@ -1,8 +1,8 @@
 "use client";
 import { selectedSetup, setupSummary } from "@/generated/setup-context";
 import type { Game, Language, ToolState } from "@/lib/types";
-export function GuideSetupContext({id, game, lang, options, ready, onChange}: {
-  id: string; game: Game; lang: Language; options: ToolState; ready: boolean;
+export function GuideSetupContext({id, game, lang, options, ready, onChange, compact = false}: {
+  compact?: boolean; id: string; game: Game; lang: Language; options: ToolState; ready: boolean;
   onChange: (players: number | null) => void;
 }) {
   const copy = selectedSetup(id, options);
@@ -11,10 +11,10 @@ export function GuideSetupContext({id, game, lang, options, ready, onChange}: {
   const max = id === "coup" ? 10 : id === "sushi_go_party" ? 8 : 0;
   const sections = [...game.sections, ...(game.expansionSections || [])].filter(section =>
     ["setup", "menu", "deal", "base-options", "pirate-powers", "expansion-setup"].includes(section.id));
-  return <section className="block guide-setup-context" aria-labelledby="guide-setup-title">
-    <h2 id="guide-setup-title">{tr("Rules for your setup", "Reglas para tu preparación")}</h2>
+  return <section className="block guide-setup-context" aria-label={compact ? tr("Setup details", "Detalles de preparación") : undefined} aria-labelledby={compact ? undefined : "guide-setup-title"}>
+    {!compact ? <h2 id="guide-setup-title">{tr("Rules for your setup", "Reglas para tu preparación")}</h2> : null}
     {max ? <div className="field">
-      <label htmlFor="guide-player-count">{tr("Guide player count (optional)", "Jugadores en la guía (opcional)")}</label>
+      <label htmlFor="guide-player-count">{tr("Players (optional)", "Jugadores (opcional)")}</label>
       <select id="guide-player-count" disabled={!ready} value={options.guidePlayers || ""}
         onChange={event => onChange(event.target.value ? Number(event.target.value) : null)}>
         <option value="">{tr("Not chosen · general guidance", "Sin elegir · orientación general")}</option>

@@ -1228,54 +1228,70 @@ main[data-focus="true"][data-help="false"] #chess-clock-heading {
   background: var(--bg);
 }
 
-/* Learn: one concept at a time, with unrestricted stage navigation. */
+/* Learn follows one story. Contents is the only lesson navigation panel. */
 .learning-sequence [hidden] { display: none !important; }
-.learning-shortcuts { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 16px; }
-.learning-shortcuts button, .learning-overview button, .learning-stages button {
-  font: inherit; color: var(--text); background: var(--panel); border: 1px solid var(--border);
-  border-radius: 8px; padding: 10px 12px; min-height: 44px; text-align: left; cursor: pointer;
-}
-.learning-stages { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin: 16px 0; }
-.learning-stages button { overflow-wrap: anywhere; font-size: 14px; }
-.learning-stages button span { display: block; font-weight: 700; }
-.learning-stages [aria-current="step"] { border-color: var(--accent); box-shadow: inset 0 -3px var(--accent); font-weight: 700; }
-.learning-step-picker { display: grid; gap: 6px; margin: 16px 0; }
-.learning-step-picker select { width: 100%; min-width: 0; min-height: 44px; padding: 10px; font: inherit; color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 8px; }
-/* Native WebKit selects can ignore min-height until appearance is reset. */
-.learning-step-picker select {
-  appearance: none;
-  padding-right: 36px;
-  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
-  background-position: calc(100% - 18px) 50%, calc(100% - 12px) 50%;
-  background-size: 6px 6px;
-  background-repeat: no-repeat;
-}
-.learning-sequence .lesson-buttons { flex-wrap: wrap; }
-.learning-sequence .lesson-buttons > * { min-height: 44px; white-space: normal; overflow-wrap: anywhere; }
+main[data-view="learn"] .detail-hero { grid-template-columns: minmax(0, 1fr) 100px; padding: 18px 22px; margin-bottom: 16px; }
+main[data-view="learn"] .detail-hero :is(.theme-seal, .theme-caption, .eyebrow, .theme-title > p) { display: none; }
+main[data-view="learn"] .detail-hero h1 { font-size: clamp(28px, 4vw, 40px); margin: 0 0 8px; }
+main[data-view="learn"] .detail-hero .detail-cover { height: 90px; }
+.learning-sequence .lesson-heading { align-items: center; position: relative; margin-bottom: 8px; }
+.learning-sequence .lesson-counter { padding: 0; white-space: normal; }
+.learning-sequence .lesson-overview { margin: 0; flex: none; }
+.learning-sequence summary { cursor: pointer; min-height: 44px; padding: 10px 12px; }
+.learning-sequence .lesson-overview > summary { color: var(--text); }
+.learning-sequence .lesson-overview[open] > nav { position: absolute; z-index: 7; inset: 48px 0 auto; max-height: 65dvh; overflow-y: auto; padding: 18px; border: 1px solid var(--border); border-radius: 12px; background: var(--panel); box-shadow: var(--shadow); }
+.learning-sequence .contents-stage h3 { font-size: 14px; color: var(--muted); margin: 12px 0 4px; }
+.learning-sequence .contents-stage:first-child h3 { margin-top: 0; }
+.learning-overview { list-style: none; padding: 0; margin: 0; }
+.learning-overview li { margin: 2px 0; }
+.learning-overview button { width: 100%; min-height: 44px; font: inherit; color: var(--text); text-align: left; background: transparent; border: 1px solid transparent; border-radius: 8px; padding: 10px 12px; cursor: pointer; overflow-wrap: anywhere; }
+.learning-overview button:hover { background: var(--panel2); }
+.learning-overview [aria-current="step"] { border-color: var(--accent); color: var(--accent); font-weight: 650; }
+.lesson-setup-choice { border-bottom: 1px solid var(--border); margin-bottom: 8px; color: var(--muted); font-size: 13px; }
+.lesson-setup-choice > summary { display: flex; justify-content: space-between; align-items: center; gap: 12px; list-style: none; }
+.lesson-setup-choice > summary::-webkit-details-marker { display: none; }
+.lesson-setup-choice > summary span:last-child { flex: none; color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+.lesson-setup-choice > summary span:first-child { overflow-wrap: anywhere; }
+.lesson-setup-choice[open] > summary { margin-bottom: 12px; }
+.avalon-setup-choice { display: flex; align-items: center; gap: 12px; padding: 10px 12px; }
+.avalon-setup-choice > span { flex: 1; overflow-wrap: anywhere; }
+.avalon-setup-choice button { flex: none; min-height: 44px; padding: 8px; background: transparent; border: 0; text-decoration: underline; font: inherit; color: var(--text); }
+.learning-shortcuts { margin: 0 0 12px; }
+.learning-shortcuts button { min-height: 44px; padding: 8px 0; font: inherit; font-size: 14px; color: var(--muted); background: none; border: 0; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.learning-sequence .lesson-copy h3 { scroll-margin-top: 220px; margin-top: 0; font-size: clamp(24px, 3vw, 30px); }
+.learning-sequence .lesson-copy { padding: 24px; }
 .learning-sequence .lesson-copy > .lesson-card-art { max-width: 280px; }
-.learning-sequence .learning-setup { margin-top: 0; }
-.learning-overview { padding-left: 22px; }
-.learning-overview li { margin: 8px 0; }
-.learning-overview button { width: 100%; }
+.learning-sequence .lesson-buttons { flex-wrap: wrap; padding-top: 16px; border-top: 1px solid var(--border); }
+.learning-sequence .lesson-buttons > * { min-height: 48px; white-space: normal; overflow-wrap: anywhere; }
+.learning-sequence #lesson-prev { color: var(--muted); border-color: transparent; }
+.learning-sequence #lesson-next { min-width: 150px; }
+.learning-sequence .learning-setup { margin: 0; border: 0; border-radius: 0; padding: 0 24px 20px; background: none; }
+.optional-practice { margin: 0 24px 20px; border: 1px solid var(--border); border-radius: 10px; }
+.optional-practice > summary { color: var(--muted); font-size: 14px; }
+.optional-practice .lesson-practice { border: 0; margin: 0; }
+.setup-secondary { margin-top: 16px; }
+.setup-secondary > summary { font-size: 13px; color: var(--muted); }
+.guide-actions { position: relative; flex: none; }
+.guide-actions > summary { min-height: 44px; cursor: pointer; padding: 10px; font-size: 14px; }
+.guide-actions > div { position: absolute; top: 100%; right: 0; width: 190px; padding: 8px; display: grid; gap: 6px; background: var(--panel); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow); }
+.guide-actions :is(#share-guide, #print) { display: flex; width: 100%; min-height: 44px; margin: 0; justify-content: center; }
+.learning-sequence :is(button, summary, a):focus-visible, .guide-actions summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 @media (max-width: 600px) {
-  .learning-stages { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .learning-stages button:last-child { grid-column: 1 / -1; }
-  .learning-stages button span { display: inline; margin-right: 8px; }
-  .learning-sequence .lesson-buttons > *,
-  .learning-sequence .checklist-actions > * { flex: 1 1 100%; }
+  .learning-sequence .lesson-copy { padding: 20px 18px; }
+  .learning-sequence .learning-setup { padding: 0 16px 18px; }
+  .optional-practice { margin-inline: 16px; }
+  .learning-sequence .lesson-buttons { flex-wrap: nowrap; padding-inline: 14px; }
+  .learning-sequence #lesson-next { min-width: 120px; }
   .detail-controls { flex-wrap: wrap; }
   .detail-controls .tabs { flex: 1 1 100%; width: 100%; }
   .detail-controls .tabs button { white-space: normal; min-height: 44px; }
-  #share-guide { margin-left: auto; }
-}
-
-.learning-sequence .lesson-copy h3 { scroll-margin-top: 180px; }
-@media (max-width: 600px) {
-  .learning-sequence .lesson-copy h3 { scroll-margin-top: 240px; }
+  main[data-view="learn"] .detail-hero { padding: 14px 16px; }
+  main[data-view="learn"] .detail-controls { margin-bottom: 12px; }
+  main[data-view="learn"] .detail-controls :is(.find-rule-button, .guide-actions) { margin-left: auto; }
+  main[data-view="learn"] .detail-controls .guide-actions { margin-left: 0; }
 }
 @media (max-width: 370px) {
   .learning-sequence .lesson-card { flex-direction: column; }
-  .learning-stages { grid-template-columns: minmax(0, 1fr); }
 }
 
 /* Definitions stay in the reading flow, including narrow screens and print. */
@@ -1294,3 +1310,1032 @@ main[data-focus="true"][data-help="false"] #chess-clock-heading {
 .guide-setup-context p { overflow-wrap: anywhere; }
 
 .guide-setup-context h2 { font-size: 1.2rem; margin-bottom: 12px; }
+
+
+/* Shared reading system. Rem sizes also follow the reader's default text size.
+   Keep game colors, display fonts, tool grids, clocks and motion in their own styles. */
+:root {
+  --text-body: 1rem;
+  --text-note: .9375rem;
+  --text-caption: .875rem;
+  --text-section: clamp(1.5rem, 1.25rem + 1vw, 1.875rem);
+  --text-lesson: clamp(1.625rem, 1.375rem + 1vw, 2rem);
+  --leading-body: 1.7;
+  --leading-note: 1.55;
+  --leading-heading: 1.25;
+  --reading-width: 65ch;
+  --space-1: .5rem;
+  --space-2: .75rem;
+  --space-3: 1rem;
+  --space-4: 1.5rem;
+  --space-5: 2rem;
+  --space-6: 3rem;
+  --reading-inset: var(--space-4);
+}
+
+@media screen {
+  .site-shell {
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+  }
+  .site-shell :is(h1, h2, h3, h4, h5) {
+    line-height: var(--leading-heading);
+    text-wrap: balance;
+  }
+  .site-shell :is(p, li, label, summary, small) {
+    overflow-wrap: break-word;
+  }
+  .site-shell :is(.content, .theme-title, .card-body, .lesson-card-copy, .section-heading > *, .collection-head > *) {
+    min-width: 0;
+  }
+  .site-shell .content :is(p, li) {
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+  }
+  .site-shell .content p {
+    margin-bottom: var(--space-3);
+  }
+  .site-shell .content p:last-child { margin-bottom: 0; }
+  .site-shell :is(.eyebrow, .theme-caption, .pill) {
+    font-size: var(--text-caption);
+    line-height: var(--leading-note);
+    letter-spacing: .02em;
+    text-transform: none;
+  }
+  .site-shell :is(.eyebrow, .pill) { font-weight: 600; }
+  .site-shell .art-tag {
+    font-size: var(--text-caption);
+    line-height: var(--leading-note);
+    letter-spacing: 0;
+    text-transform: none;
+    max-width: calc(100% - 70px);
+    white-space: normal;
+  }
+  .site-shell .quest-track { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .site-shell .quest { min-width: 0; overflow-wrap: anywhere; }
+  .site-shell .quest small { overflow-wrap: anywhere; }
+  .site-shell .content small {
+    font-size: var(--text-caption);
+    line-height: var(--leading-note);
+  }
+  .site-shell :is(.meta, .detail-hero .meta) {
+    font-size: var(--text-caption);
+    line-height: var(--leading-note);
+    gap: var(--space-1) var(--space-2);
+  }
+  .site-shell .meta span { white-space: normal; }
+  .site-shell .meta svg { width: 1em; height: 1em; }
+  .site-shell :is(.hero-note, .gallery-note, .collection-results, .recent-games > span, .section-heading .muted, .save-status, #wake-status, .footer-inner) {
+    font-size: var(--text-caption);
+    line-height: var(--leading-note);
+  }
+  .site-shell .hero {
+    padding-block: var(--space-6);
+  }
+  .site-shell .hero h1 {
+    font-size: clamp(2.25rem, 1.5rem + 3.5vw, 4.875rem);
+    line-height: 1.12;
+    margin-block: var(--space-3) var(--space-4);
+  }
+  .site-shell .hero p {
+    max-width: 44ch;
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+  }
+  .site-shell .hero-note { margin-top: var(--space-4); }
+  .site-shell :is(.collection-head h2, .section-heading h2, .section-tools h2, .sheet-heading h2) {
+    font-size: var(--text-section);
+    letter-spacing: -.025em;
+  }
+  /* The title and live filter count already identify the collection. */
+  .site-shell .collection-head :is(.eyebrow, h2 > .muted) { display: none; }
+  .site-shell .collection-head {
+    padding-top: var(--space-4);
+    margin-bottom: var(--space-3);
+    gap: var(--space-3);
+  }
+  .site-shell .collection-filters {
+    margin-block: var(--space-3) var(--space-2);
+    gap: var(--space-3);
+  }
+  .site-shell .collection-filters label {
+    font-size: var(--text-note);
+    line-height: var(--leading-note);
+    gap: var(--space-1);
+  }
+  .site-shell :is(.collection-filters select, .search input) {
+    font-size: var(--text-body);
+    font-weight: 400;
+  }
+  .site-shell .collection-results { margin-block: var(--space-2) var(--space-4); }
+  .site-shell .game-grid { gap: var(--space-3); }
+  .site-shell .game-grid .card-body { padding: var(--space-3); }
+  .site-shell .game-grid .card-body h3 {
+    font-size: 1.375rem;
+    margin-bottom: var(--space-2);
+  }
+  .site-shell .game-grid .card-body p {
+    font-size: var(--text-note);
+    line-height: var(--leading-note);
+    min-height: 0;
+    margin-block: var(--space-2) var(--space-3);
+  }
+  .site-shell .card-body .card-bottom {
+    gap: var(--space-1);
+    padding-top: var(--space-2);
+  }
+  .site-shell .card-body .card-bottom a {
+    font-size: var(--text-caption);
+    line-height: var(--leading-note);
+    white-space: normal;
+    overflow-wrap: break-word;
+  }
+  .site-shell :is(.resume-card p, .recent-games a, .side-nav a, .side-nav .edition, .breadcrumb) {
+    font-size: var(--text-caption);
+    line-height: var(--leading-note);
+  }
+  .site-shell .detail-hero h1 {
+    font-size: clamp(2rem, 1.5rem + 2vw, 3rem);
+    line-height: 1.2;
+  }
+  .site-shell .detail-hero p { font-size: var(--text-note); }
+  .site-shell .detail-controls { flex-wrap: wrap; }
+  .site-shell .detail-controls .tabs {
+    display: flex;
+    flex-wrap: wrap;
+    flex: 1 1 20rem;
+    min-width: 0;
+  }
+  .site-shell .detail-controls .tabs button {
+    flex: 0 0 auto;
+    max-width: 100%;
+    overflow-wrap: normal;
+    font-size: var(--text-caption);
+    line-height: var(--leading-note);
+    white-space: normal;
+    min-width: 0;
+  }
+  .site-shell :is(.detail-controls, .section-tools, .checklist-heading, .lesson-heading) {
+    gap: var(--space-2);
+  }
+  .site-shell .learning-sequence .lesson-counter {
+    font-family: inherit;
+    font-size: var(--text-caption);
+    line-height: var(--leading-note);
+    font-variant-numeric: tabular-nums;
+  }
+  .site-shell :is(.lesson-setup-choice, .learning-shortcuts button, .learning-sequence summary, .contents-stage h3) {
+    font-size: var(--text-note);
+    line-height: var(--leading-note);
+  }
+  .site-shell .learning-sequence .lesson-copy { padding: var(--reading-inset); }
+  .site-shell .learning-sequence .lesson-copy h3 {
+    font-size: var(--text-lesson);
+    letter-spacing: -.025em;
+    margin-block: 0 var(--space-3);
+  }
+  .site-shell .learning-sequence .lesson-copy:has(> h3:only-child) { padding-bottom: 0; }
+  .site-shell .learning-sequence .lesson-copy > h3:only-child { margin-bottom: 0; }
+  .site-shell .lesson-copy > p { max-width: var(--reading-width); }
+  .site-shell .lesson-cards { padding: var(--space-3) var(--reading-inset) var(--space-4); }
+  .site-shell .learning-sequence .lesson-card {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    gap: var(--space-4);
+  }
+  .site-shell :is(.lesson-card-copy, .rule-preview-card) p {
+    font-size: var(--text-body) !important;
+    line-height: var(--leading-body) !important;
+    margin: 0 0 var(--space-3) !important;
+    max-width: var(--reading-width);
+  }
+  .site-shell :is(.lesson-card-copy small, .rule-preview-card small, .info-card small, .avalon-lesson small, .image-strip figcaption) {
+    font-size: var(--text-caption);
+    line-height: var(--leading-note);
+    margin-block: var(--space-1);
+  }
+  .site-shell .lesson-card-copy a { font-size: var(--text-note); }
+  .site-shell .learning-sequence .lesson-buttons {
+    padding: var(--space-3) var(--reading-inset);
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+  .site-shell .learning-sequence .lesson-buttons > * { font-size: var(--text-note); }
+  .site-shell .learning-sequence .learning-setup { padding: 0 var(--reading-inset) var(--space-4); }
+  .site-shell .optional-practice { margin-inline: var(--reading-inset); }
+  .site-shell :is(.setup-checklist label, .field label, .check-label, .setup-notes p, .fold-hint) {
+    font-size: var(--text-note);
+    line-height: var(--leading-note);
+  }
+  .site-shell :is(.checklist-heading > span, .setup-secondary > summary, .setup-notes summary) {
+    font-size: var(--text-caption);
+    white-space: normal;
+  }
+  .site-shell :is(.rule-section summary, .table-sheet h3, .checklist-heading h3, .info-card h3, .rule-preview-card h5) {
+    font-size: 1.125rem;
+    line-height: var(--leading-heading);
+    letter-spacing: -.015em;
+  }
+  .site-shell .rule-section { margin-bottom: var(--space-2); }
+  .site-shell .rule-section > summary { padding: var(--space-4) var(--reading-inset); }
+  .site-shell .rule-section[open] > summary { border-bottom: 0; }
+  .site-shell .rule-body { padding: 0 var(--reading-inset) var(--space-4); }
+  .site-shell .rule-body > p {
+    max-width: var(--reading-width);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+    margin-bottom: var(--space-4);
+  }
+  .site-shell .rule-body > p:last-of-type { margin-bottom: 0; }
+  .site-shell .share-rule {
+    display: inline-flex;
+    margin: var(--space-3) 0 0;
+    font-size: var(--text-caption);
+  }
+  .site-shell .rule-dialog { padding: var(--reading-inset); }
+  .site-shell .rule-dialog :is(h2, .rule-preview h3) {
+    font-size: var(--text-section);
+    line-height: var(--leading-heading);
+    letter-spacing: -.025em;
+  }
+  .site-shell .rule-preview .rule-body { padding: 0; }
+  .site-shell .rule-preview > .muted { font-size: var(--text-caption); }
+  .site-shell .rule-preview :is(h3, h4) { margin-block: var(--space-4) var(--space-3); }
+  .site-shell .rule-search-result small { font-size: var(--text-caption); }
+  .site-shell :is(.quick-row p, .quick-note, .sheet-end, .sheet-panel > p, .round-transition, .turn-end) {
+    font-size: var(--text-note) !important;
+    line-height: var(--leading-note) !important;
+  }
+  .site-shell :is(.quick-row strong, .quick-value, .turn-phases li) { font-size: var(--text-body); }
+  .site-shell .quick-row { padding: var(--space-3); gap: var(--space-2); }
+  .site-shell .turn-reference { margin-block: var(--space-4); }
+  .site-shell .turn-reference > h3 { margin-bottom: var(--space-2); }
+  .site-shell .turn-reference > .muted { font-size: var(--text-note); }
+  .site-shell .turn-phases { gap: var(--space-2); }
+  .site-shell .turn-phases li { line-height: var(--leading-note); }
+  /* The tool's own title identifies it; retain the focus target for jumps. */
+  .site-shell .active-table-tool > .sheet-heading h2 {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .site-shell .active-table-tool { margin-top: var(--space-4); padding-top: var(--space-4); }
+  .site-shell .active-table-tool > .sheet-heading { margin-block: 0 var(--space-3); }
+  .site-shell .active-table-tool > section > :is(h2, .scoreboard-heading h2) {
+    font-size: var(--text-section);
+    line-height: var(--leading-heading);
+    margin-bottom: var(--space-3);
+  }
+  .site-shell .active-table-tool :is(.chess-clock-hint, .poker-timer-hint, .score-help, label, legend, .chess-clock-player-state) {
+    font-size: var(--text-caption);
+    line-height: var(--leading-note);
+  }
+  .site-shell .active-table-tool p { max-width: var(--reading-width); }
+}
+
+@media screen and (max-width: 680px) {
+  :root { --reading-inset: min(var(--space-3), 20px); }
+  .site-shell .hero { padding-block: var(--space-4); }
+  .site-shell .hero h1 { margin-top: 0; }
+  .site-shell .collection-filters label { flex: 1 1 100%; min-width: 0; }
+  .site-shell .detail-hero h1 { font-size: clamp(1.5rem, 1.25rem + 1vw, 2rem) !important; }
+  .site-shell .detail-controls .tabs { width: 100%; min-width: 0; flex: 1 1 100%; }
+  .site-shell .detail-controls .tabs button { flex: 1 1 6.25em; padding-inline: .375rem; overflow-wrap: normal; }
+  .site-shell .learning-sequence .lesson-card { flex-direction: column; gap: var(--space-3); }
+  .site-shell .learning-sequence .lesson-card .lesson-card-art { flex-basis: auto; }
+  .site-shell .detail-hero .official-cover > span { display: none; }
+  .site-shell .rule-dialog { width: calc(100% - 24px); }
+  .site-shell .rule-dialog .dialog-heading { align-items: flex-start; }
+  .site-shell .rule-dialog .dialog-heading button { flex: 0 0 44px; }
+  .site-shell .section-tools { align-items: flex-start; }
+}
+
+
+@media screen {
+  .site-shell .lesson-card-art img { width: 100%; height: auto; }
+  .site-shell .lesson-heading { flex-wrap: wrap; }
+  .site-shell .lesson-overview { min-width: 0; max-width: 100%; }
+  .site-shell .lesson-overview[open] > nav { top: 100%; }
+  .site-shell :is(button, figcaption) { overflow-wrap: anywhere; }
+  .site-shell .quick-value { white-space: normal; max-width: 40%; }
+  .site-shell .chess-clock-actions { flex-wrap: wrap; }
+  .site-shell .active-table-tool .chess-clock-note { margin-top: var(--space-3); }
+}
+
+
+/* Shared surfaces inherit the palette where the game identity is declared.
+   Neutral reading surfaces, grouped examples, and a single accent hierarchy. */
+:where(.site-shell, .game-card[data-game]) {
+  --surface-neutral: #181b20;
+  --surface-art: #faf9f5;
+  --surface-art-text: #303740;
+  --surface-art-border: #79818b;
+  --surface-page: color-mix(in srgb, var(--bg) 80%, var(--surface-neutral));
+  --surface-reading: color-mix(in srgb, var(--panel) 65%, var(--surface-neutral));
+  --surface-group: color-mix(in srgb, var(--panel2) 55%, var(--surface-neutral));
+  --surface-accent: color-mix(in srgb, var(--accent) 9%, var(--surface-reading));
+  --border-soft: color-mix(in srgb, var(--text) 24%, var(--surface-reading));
+  --border-control: color-mix(in srgb, var(--text) 62%, var(--surface-reading));
+  --focus-ring: var(--accent);
+  --depth-card: 0 2px 4px #0002, 0 8px 20px #0002;
+  --depth-dialog: 0 16px 48px #0005;
+  --surface-radius: 12px;
+}
+[data-theme="light"] :where(.site-shell, .game-card[data-game]) {
+  --surface-neutral: #fffdf8;
+  --surface-art-border: #79818b;
+  --depth-card: 0 2px 4px #24303a0a, 0 8px 20px #24303a12;
+  --depth-dialog: 0 16px 48px #24303a26;
+}
+
+@media screen {
+  .site-shell { background: var(--surface-page); }
+  .site-shell :is(.detail-controls, #header, #footer) {
+    background: var(--surface-page);
+    border-color: var(--border-soft);
+    box-shadow: none;
+  }
+  .site-shell :is(.lesson, .rule-section, .rule-dialog, .share-dialog, .quick-list, .resume-card) {
+    background: var(--surface-reading);
+    border-color: var(--border-soft);
+  }
+  .site-shell .detail-hero {
+    background-color: var(--surface-reading);
+    border-color: var(--border-soft);
+    box-shadow: none;
+  }
+  .site-shell .detail-hero .guide-artwork { box-shadow: none; }
+  .site-shell .game-card {
+    background: var(--surface-reading);
+    border-color: var(--border-soft);
+    box-shadow: none;
+  }
+  .site-shell .game-card .game-art { background-color: var(--surface-group); }
+  .site-shell :is(.lesson-buttons, .card-bottom) { border-color: var(--border-soft); }
+  .site-shell .learning-sequence .lesson-buttons { background: var(--surface-group); }
+  .site-shell :is(.lesson-comparison, .playground, .coup-scene, .avalon-scene) {
+    background: var(--surface-reading);
+    border-color: var(--border-soft);
+    border-radius: var(--surface-radius);
+  }
+  .site-shell .lesson-comparison { margin-inline: 0; }
+  .site-shell .lesson-comparison > summary { background: var(--surface-group); }
+  .site-shell :is(.comparison-situation, .comparison-item, .rule-preview-card, .info-card) {
+    background: var(--surface-reading);
+    border-color: var(--border-soft);
+  }
+  .site-shell :is(.comparison-difference, .comparison-fact, .comparison-outcome, .watch-caption, .watch-claim, .quick-note, .round-transition) {
+    background: var(--surface-accent);
+    border-color: var(--accent);
+  }
+  .site-shell .comparison-item :is(b, small) { max-width: 100%; overflow-wrap: anywhere; }
+  .site-shell .comparison-item[data-changed="true"] {
+    background: var(--surface-accent);
+    border-color: var(--accent);
+  }
+  .site-shell :is(.watch-skull-table, .coup-public-table, .watch-bank, .watch-quest-well) {
+    background: var(--surface-group);
+    border-color: var(--border-soft);
+  }
+  .site-shell :is(.comparison-schematic, .trick-schematic, .comparison-symbol, .coup-hidden, .watch-card-back) {
+    background-color: var(--surface-group);
+    border-color: var(--border-control);
+    color: var(--text);
+  }
+  .site-shell :is(.watch-turn .trick-play[data-winner="true"], .quest.special) {
+    background: var(--surface-accent);
+    border-color: var(--accent);
+  }
+  .site-shell :is(.setup-checklist li, .optional-practice, .practice-fold, .sheet-panel) {
+    background: var(--surface-reading);
+    border-color: var(--border-soft);
+  }
+  .site-shell .setup-checklist li.checked { border-color: var(--accent); }
+  .site-shell :is(.rule-dialog, .share-dialog, #image-viewer) { box-shadow: var(--depth-dialog); }
+  .site-shell :is(.content button, .detail-controls button, .collection-filters button, .favorite-toggle, .icon-button, .language, .search input, .field select) {
+    border-color: var(--border-control);
+  }
+  .site-shell :is(.find-rule-button, .share-rule, .share-button, .table-jump, :where(.lesson-buttons #lesson-prev), .comparison-controls button, .watch-controls button, .rule-preview-navigation button, .rule-preview-actions a, .rule-preview-actions button) {
+    background: transparent;
+    color: var(--text);
+    box-shadow: none;
+  }
+  .site-shell .learning-sequence #lesson-prev { border-color: transparent; color: var(--muted); }
+  .site-shell :is(.accent-button, .card-learn, .comparison-controls button:first-child, .watch-controls button:last-child, .tabs button[aria-selected="true"], .language button[aria-pressed="true"]) {
+    background: var(--accent);
+    color: var(--on-accent);
+    border-color: var(--accent);
+    font-weight: 650;
+  }
+  .site-shell :is(.tabs button[aria-selected="true"], .score-picker button[aria-pressed="true"]) {
+    box-shadow: inset 0 -3px 0 currentColor;
+  }
+  .site-shell :is(button, a, input, select, summary):focus-visible {
+    outline: 3px solid var(--focus-ring);
+    outline-offset: 3px;
+  }
+
+  /* A neutral mount shows the complete original image, independent of theme. */
+  .site-shell .official-thumb {
+    background: var(--surface-art);
+    color: var(--surface-art-text);
+    border: 1px solid var(--surface-art-border);
+    border-radius: 8px;
+    box-shadow: var(--depth-card);
+  }
+  .site-shell .lesson-card-art {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    container-type: inline-size;
+    align-self: flex-start;
+    max-width: 100%;
+    min-height: 44px;
+    overflow: visible;
+  }
+  .site-shell .lesson-card-art .art-media {
+    display: block;
+    position: relative;
+    width: 100%;
+    aspect-ratio: var(--art-ratio);
+    flex: none;
+  }
+  .site-shell .lesson-card-art .art-media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    object-fit: contain;
+    filter: none;
+    opacity: 1;
+  }
+  .site-shell .lesson-card-art .art-media img[hidden] { display: none; }
+  .site-shell .art-enlarge {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    width: 100%;
+    font-size: var(--text-caption);
+    line-height: 1.3;
+    font-weight: 600;
+    padding-top: 6px;
+    border-top: 1px solid #c5c9cb;
+  }
+  .site-shell .art-fallback {
+    display: none;
+    position: absolute;
+    inset: 0;
+    padding: 8px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+    overflow-wrap: anywhere;
+    font-size: var(--text-caption);
+    line-height: var(--leading-note);
+    border: 1px dashed var(--surface-art-border);
+  }
+  .site-shell .art-media:has(img[hidden]) .art-fallback { display: flex; }
+  .site-shell .learning-sequence .lesson-card .lesson-card-art {
+    width: 184px;
+    flex: 0 0 184px;
+    min-height: 0;
+    padding: 12px;
+  }
+  .site-shell .learning-sequence .lesson-card-copy { padding-top: 4px; }
+  .site-shell .learning-sequence .lesson-copy > .lesson-card-art[data-art-presentation="components"] {
+    width: min(100%, 520px);
+    max-width: 520px;
+    flex-basis: auto;
+    padding: 12px;
+  }
+  .site-shell .setup-recognition .lesson-card-art { height: auto; }
+  .site-shell .official-thumb img { object-fit: contain; filter: none; }
+  .site-shell .detail-cover .official-cover img { object-fit: contain; }
+  .site-shell .image-stage { background: var(--surface-art); }
+  .site-shell #image-viewer { background: var(--surface-reading); border-color: var(--border-control); }
+  .site-shell .image-dialog-head { background: var(--surface-reading); }
+}
+@container (max-width: 110px) {
+  .art-enlarge-label { display: none; }
+}
+@media screen and (max-width: 680px) {
+  .site-shell .learning-sequence .lesson-card .lesson-card-art {
+    width: min(160px, 100%);
+    flex-basis: auto;
+    padding: 10px;
+  }
+}
+@media (forced-colors: active) {
+  .site-shell :is(.tabs button[aria-selected="true"], .comparison-item[data-changed="true"], .trick-play[data-winner="true"]) { outline: 2px solid Highlight; outline-offset: -2px; }
+  .site-shell :is(button, a, input, select, summary):focus-visible { outline-color: Highlight; }
+}
+
+/* The dark vermilion accent needs enough contrast on grouped surfaces too. */
+@media screen {
+  [data-theme="dark"] :is(.site-shell, .game-card)[data-game="secret_hitler"] { --accent: #df8072; }
+}
+
+/* Controls use the established surfaces: solid actions, outlined secondary
+   actions, and an inset indicator for persistent selection. */
+@media screen {
+  .site-shell {
+    --control-height: 48px;
+    --control-radius: 10px;
+    --control-error: #ffb7ae;
+  }
+  [data-theme="light"] .site-shell { --control-error: #9c2c22; }
+  .site-shell :is(button, .accent-button, .card-learn, .card-play, .table-jump, .checklist-actions a, .rule-preview-actions a) {
+    min-height: var(--control-height);
+    max-width: 100%;
+    border-radius: var(--control-radius);
+    line-height: var(--leading-note, 1.5);
+    white-space: normal;
+    overflow-wrap: break-word;
+    touch-action: manipulation;
+  }
+  .site-shell :is(button, .checklist-actions a, .rule-preview-actions a):where(:not(.official-thumb):not(.official-cover):not(.chess-clock-player)) {
+    border: 1px solid var(--border-control);
+    background: var(--surface-reading);
+    color: var(--text);
+    padding: 10px 14px;
+    font-family: inherit;
+    font-size: var(--text-caption, .875rem);
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .site-shell :is(.accent-button, .card-learn, .coup-primary, button[type="submit"], #chess-clock-toggle, #poker-timer-toggle, #moth-save-round, #copy-rule-link),
+  .site-shell :is(.comparison-controls button:first-child, .watch-controls button:last-child) {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--on-accent);
+    box-shadow: none;
+    font-weight: 650;
+  }
+  /* Checking entries precedes confirmation; only the available step is primary. */
+  .site-shell #moth-preview-round:has(+ #moth-save-round:not(:disabled)) {
+    background: var(--surface-reading);
+    border-color: var(--border-control);
+    color: var(--text);
+  }
+  .site-shell :is(.language button, .tabs button, .learning-overview button, .learning-shortcuts button,
+    :where(#lesson-prev), .share-rule, .share-button, .print, .rule-preview-navigation button) {
+    background: transparent;
+    border-color: transparent;
+    color: var(--muted);
+    box-shadow: none;
+  }
+  .site-shell :is(.tabs button[aria-selected="true"], .language button[aria-pressed="true"],
+    button[aria-pressed="true"], .learning-overview button[aria-current="step"]) {
+    background: var(--surface-accent);
+    border-color: var(--accent);
+    color: var(--text);
+    box-shadow: inset 0 -3px 0 var(--accent);
+    font-weight: 650;
+  }
+  .site-shell .tabs button { flex: 1 1 auto; }
+  .site-shell :is(.tabs, .language) { gap: 4px; }
+  .site-shell .language { padding: 3px; border-color: var(--border-soft); }
+  .site-shell .language button { min-width: 44px; min-height: 44px; padding: 6px; }
+  .site-shell :is(.icon-button, .favorite-toggle) {
+    min-width: 44px;
+    min-height: 44px;
+    width: 44px;
+    height: 44px;
+    padding: 10px;
+    border-radius: 50%;
+  }
+  .site-shell .favorite-toggle[aria-pressed="true"] { color: var(--accent); }
+  .site-shell button[role="switch"] {
+    display: flex;
+    width: 100%;
+    text-align: left;
+    padding: 16px;
+    border-radius: var(--control-radius);
+    border-color: var(--border-control);
+  }
+  .site-shell button[role="switch"][aria-checked="true"] {
+    background: var(--surface-accent);
+    border-color: var(--accent);
+  }
+  .site-shell .settings.coup-variants { display: grid; gap: 8px; overflow: visible; background: transparent; border: 0; }
+  .site-shell :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+    min-height: var(--control-height);
+    min-width: 0;
+    max-width: 100%;
+    border: 1px solid var(--border-control);
+    border-radius: var(--control-radius);
+    background: var(--surface-reading);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 1rem;
+    line-height: 1.5;
+    padding: 10px 12px;
+  }
+  /* A plain dropdown keeps its padding and target size in WebKit too. */
+  .site-shell select:not([multiple]):not([size]) {
+    appearance: none;
+    padding-right: 40px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='m4 6 4 4 4-4' stroke='%2379818b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+  }
+  .site-shell .search input[type="search"] { padding-left: 40px; }
+  .site-shell .search svg { pointer-events: none; top: 15px; }
+  .site-shell :is(input[type="checkbox"], input[type="radio"]) {
+    accent-color: var(--accent);
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    flex-shrink: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+  .site-shell label:has(> :is(input[type="checkbox"], input[type="radio"])) {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: var(--control-height);
+    padding-block: 10px;
+    cursor: pointer;
+  }
+  .site-shell :is(.role-options, .checklist-actions, .section-tools, .rule-search-controls) { gap: 12px; }
+  .site-shell :is(.settings .field, .scoring-fields .field) { min-width: 0; }
+  .site-shell summary {
+    min-height: var(--control-height);
+    padding: 12px;
+    border-radius: var(--control-radius);
+    cursor: pointer;
+    overflow-wrap: break-word;
+    line-height: var(--leading-note, 1.5);
+  }
+  .site-shell .feature-fold > summary { padding-right: 48px; }
+  .site-shell details[open] > summary { color: var(--accent); }
+  .site-shell summary::marker { color: var(--accent); }
+  .site-shell :is(.guide-actions, .lesson-overview, .setup-secondary, .setup-notes, .lesson-setup-choice) > summary {
+    border: 1px solid var(--border-control);
+    background: var(--surface-reading);
+    color: var(--text);
+  }
+  .site-shell :is(.guide-actions, .lesson-overview, .setup-secondary, .setup-notes, .lesson-setup-choice)[open] > summary {
+    border-color: var(--accent);
+    background: var(--surface-accent);
+  }
+  .site-shell :is(button, input, select, textarea):is(:disabled, [aria-disabled="true"]) {
+    opacity: .55;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  .site-shell button[aria-busy="true"] { cursor: progress; }
+  .site-shell :is(input, select, textarea):is([aria-invalid="true"], :user-invalid) {
+    border: 2px solid var(--control-error);
+    background: color-mix(in srgb, var(--control-error) 6%, var(--surface-reading));
+  }
+  .site-shell :is(.share-feedback[data-tone="error"], [role="alert"]) {
+    color: var(--control-error);
+  }
+  .site-shell :is(button, a, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 3px solid var(--focus-ring);
+    outline-offset: 3px;
+  }
+  .site-shell :is(button, summary, input, select, textarea, a) { scroll-margin-block: 96px 24px; }
+  .site-shell button:active:not(:disabled):not([aria-disabled="true"]):where(:not(.official-thumb):not(.official-cover):not(.chess-clock-player)) {
+    box-shadow: inset 0 0 0 2px currentColor;
+  }
+  body:has(dialog[open]) { overflow: hidden; }
+  .site-shell :is(.rule-dialog, .share-dialog, #image-viewer) {
+    width: min(640px, calc(100% - 24px));
+    max-height: calc(100dvh - 24px);
+    padding: var(--reading-inset, 24px);
+    border: 1px solid var(--border-control);
+    border-radius: 16px;
+    background: var(--surface-reading);
+    color: var(--text);
+    overflow: auto;
+    overscroll-behavior: contain;
+    scroll-padding-block: 96px 24px;
+    box-shadow: var(--depth-dialog);
+  }
+  .site-shell :is(.rule-dialog, .share-dialog, #image-viewer)::backdrop {
+    background: #000a;
+    backdrop-filter: blur(3px);
+  }
+  .site-shell :is(.dialog-heading, .image-dialog-head) {
+    position: sticky;
+    top: calc(-1 * var(--reading-inset, 24px));
+    z-index: 2;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 0;
+    margin-bottom: 16px;
+    background: var(--surface-reading);
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .site-shell :is(.dialog-heading, .image-dialog-head) h2 {
+    margin: 0;
+    min-width: 0;
+    font-size: var(--text-section, 1.5rem);
+    line-height: var(--leading-heading, 1.3);
+    overflow-wrap: break-word;
+  }
+  .site-shell :is(.dialog-heading .dialog-close, .image-close) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex: 0 0 auto;
+    width: auto;
+    height: auto;
+    padding: 10px;
+    border-radius: var(--control-radius);
+    font-size: var(--text-caption, .875rem);
+    background: var(--surface-reading);
+  }
+  .site-shell :is(.dialog-close, .image-close) [aria-hidden="true"] { font-size: 24px; line-height: 1; }
+  .site-shell #image-viewer .image-stage { margin: 0; padding: 16px; }
+  .site-shell #image-viewer .image-caption { padding: 16px 0 0; }
+  .site-shell .share-dialog label { margin-block: 16px 8px; font-weight: 600; }
+  .site-shell .share-dialog textarea { min-height: 96px; }
+  .site-shell .share-feedback { min-height: 1.5em; margin: 16px 0 0; line-height: var(--leading-note, 1.5); }
+  .site-shell .share-feedback:not(:empty) {
+    padding: 12px;
+    border: 1px solid var(--border-control);
+    border-radius: var(--control-radius);
+    background: var(--surface-group);
+  }
+  .site-shell .share-feedback[data-tone="success"]:not(:empty) {
+    border-color: var(--accent);
+    background: var(--surface-accent);
+  }
+  .site-shell :is(.share-actions, .rule-preview-actions, .rule-preview-navigation) { gap: 12px; margin-block: 16px; }
+  .site-shell .rule-preview-navigation button { text-decoration: underline; text-underline-offset: 4px; }
+  .site-shell .rule-search-result { border-color: var(--border-control); border-radius: var(--control-radius); }
+}
+@media (hover: hover) {
+  .site-shell :is(button, summary, .rule-search-result, .common-questions a):hover:not(:disabled):not([aria-disabled="true"]):where(:not(.official-thumb):not(.official-cover):not(.chess-clock-player)) {
+    filter: brightness(1.08);
+    border-color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}
+@media screen and (max-width: 680px) {
+  .site-shell :is(.share-actions, .rule-preview-actions) { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .site-shell :is(.share-actions, .rule-preview-actions) > * { width: 100%; justify-content: center; }
+  .site-shell :is(.poker-timer-actions, .poker-timer-row-actions, .moth-actions, .coup-session-actions, .chess-clock-actions, .skull-actions) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .site-shell :is(.poker-timer-actions, .moth-actions, .coup-session-actions, .chess-clock-actions, .skull-actions) > button { flex: 1 1 10rem; }
+  .site-shell .play-toolbar-actions { min-width: 0; }
+  .site-shell main[data-focus="true"] .play-toolbar-actions { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .site-shell main[data-focus="true"] #focus-play { grid-column: 1 / -1; width: 100%; }
+  .site-shell main[data-focus="true"] .play-toolbar-actions button { flex: 1 1 auto; }
+  .site-shell main[data-focus="true"] .table-control-buttons { gap: 8px; }
+  .site-shell main[data-focus="true"] .table-control-buttons button { min-height: 48px; }
+  .site-shell .checklist-actions { flex-wrap: wrap; }
+  .site-shell .checklist-actions > * { flex: 1 1 100%; }
+}
+@media (forced-colors: active) {
+  .site-shell :is(button[aria-pressed="true"], button[aria-checked="true"], button[aria-selected="true"], button[aria-current]) { outline: 2px solid Highlight; outline-offset: -4px; }
+  .site-shell :is(input, select, textarea):is([aria-invalid="true"], :user-invalid) { outline: 2px solid Mark; }
+}
+
+/* Collection composition: published artwork, quiet surfaces, and a short path to play. */
+@media screen {
+  .site-shell .collection-page .hero {
+    grid-template-columns: 1.15fr 1fr;
+    gap: 32px;
+    padding-block: 28px 24px;
+  }
+  .site-shell .collection-page .hero h1 {
+    font-size: clamp(2.25rem, 1rem + 3.25vw, 3.75rem);
+    letter-spacing: -.045em;
+    line-height: 1.1;
+    margin: 0 0 20px;
+  }
+  .collection-page .hero h1 em { letter-spacing: -.04em; }
+  .site-shell .collection-page .hero p { max-width: 39ch; margin: 0; text-wrap: pretty; }
+  .collection-page .returning-title { display: none; }
+  .site-shell .collection-page .hero-gallery {
+    display: block;
+    height: 230px;
+    isolation: isolate;
+  }
+  .collection-page .hero-gallery::before {
+    content: "";
+    position: absolute;
+    inset: 20% 2% 0;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%);
+  }
+  .collection-page .hero-box {
+    position: absolute;
+    width: 38%;
+    height: 194px;
+    top: 16px;
+    padding: 12px;
+    border: 1px solid var(--border-soft);
+    border-radius: 16px;
+    background: var(--surface-group);
+    box-shadow: 0 16px 28px -12px #0007, 0 2px 4px #0002;
+  }
+  .collection-page .hero-box img { display: block; width: 100%; height: 100%; object-fit: contain; }
+  .collection-page .hero-box-coup { left: 2%; transform: rotate(-12deg); }
+  .collection-page .hero-box-avalon { left: 31%; top: 4px; transform: rotate(2deg); z-index: 2; }
+  .collection-page .hero-box-sushi_go_party { right: 0; top: 28px; transform: rotate(12deg); }
+  .site-shell .collection-page .collection-head {
+    align-items: center;
+    padding-top: 24px;
+    margin-bottom: 16px;
+    border-color: var(--border-soft);
+  }
+  .collection-page .search { max-width: 440px; }
+  .collection-page .search input { min-height: 52px; background: var(--surface-reading); border-color: var(--border-control); }
+  .collection-page .search svg { top: 50%; transform: translateY(-50%); }
+  .site-shell .collection-page .collection-filters { gap: 12px; margin-block: 0 12px; }
+  .site-shell .collection-page .collection-filters label { flex: 0 1 230px; min-width: 0; }
+  .collection-page .collection-filters select { background: var(--surface-reading); border-color: var(--border-control); }
+  .site-shell .collection-page .collection-results { margin-block: 8px 20px; }
+  .site-shell .collection-page .game-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+  .site-shell .collection-page .game-card {
+    border-radius: 16px;
+    box-shadow: 0 4px 12px -8px #0005;
+    transition: none;
+  }
+  .site-shell .collection-page .game-card:hover { transform: none; }
+  .site-shell .collection-page .game-art {
+    height: 200px;
+    min-height: 0;
+    padding: 22px 42px;
+    border-right: 0;
+    border-bottom: 1px solid var(--theme-metal);
+  }
+  .site-shell .collection-page .game-card .game-art > img.official-cover {
+    width: 100%;
+    height: 156px;
+    max-height: none;
+    padding: 0;
+    filter: none;
+  }
+  .site-shell .collection-page .favorite-toggle { top: 10px; left: 10px; padding: 0; }
+  .site-shell .collection-page .card-body { padding: 20px; }
+  .site-shell .collection-page .card-body h3 { font-size: 1.5rem; line-height: 1.2; margin-bottom: 12px; }
+  .site-shell .collection-page .meta { flex-wrap: wrap; gap: 4px 16px; }
+  .site-shell .collection-page .card-description { margin-block: 14px 20px; }
+  .site-shell .collection-page .card-bottom { border: 0; padding: 0; gap: 10px; }
+  .site-shell .collection-page .card-bottom a { font-size: var(--text-note); min-height: 48px; border-radius: 8px; }
+  .site-shell .collection-page .card-play { background: var(--surface-reading); border-color: var(--border-control); }
+  .site-shell .collection-page .returning-hero { display: block; padding-block: 20px !important; }
+  .collection-page .returning-hero :is(.new-visitor-title, .hero-gallery) { display: none !important; }
+  .collection-page .returning-hero .returning-title { display: inline; }
+  .site-shell .collection-page .returning-hero h1 { font-size: var(--text-section); margin: 0; letter-spacing: -.025em; }
+  .site-shell .collection-page .resume-link {
+    padding: 8px 16px;
+    margin-top: 12px;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    background: var(--accent);
+    color: var(--on-accent);
+  }
+  .site-shell .collection-page .continue-playing .eyebrow { display: none; }
+}
+@media screen and (min-width: 601px) and (max-width: 1000px) {
+  .site-shell .collection-page .game-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+  .site-shell .collection-page .hero { gap: 20px; }
+  .site-shell .collection-page .hero h1 { font-size: 2.5rem; }
+  .site-shell .collection-page .hero-gallery { height: 240px; }
+  .collection-page .hero-box { height: 184px; padding: 8px; border-radius: 12px; }
+  .collection-page .search { max-width: 340px; }
+}
+@media screen and (max-width: 680px) {
+  .site-shell .collection-page .hero { display: block; padding-block: 24px; }
+  .site-shell .collection-page .hero h1 { font-size: clamp(1.875rem, 6.8vw + .5rem, 2.75rem); margin: 0 0 12px; }
+  .site-shell .collection-page .hero-gallery { display: none; }
+  .site-shell .collection-page .collection-head { padding-top: 20px; align-items: stretch; gap: 12px; }
+  .collection-page .search { max-width: none; }
+  .site-shell .collection-page .collection-filters label { flex: 1 1 calc(50% - 6px); }
+  .collection-page .collection-filters select { padding: 10px 8px; }
+  .site-shell .collection-page .collection-results { margin-bottom: 16px; }
+}
+@media screen and (max-width: 600px) {
+  .site-shell .collection-page .game-grid { grid-template-columns: 1fr; gap: 16px; }
+  .site-shell .collection-page .game-card { display: flex; flex-direction: row; flex-wrap: wrap; }
+  .site-shell .collection-page .game-art {
+    flex: 1 0 112px;
+    height: auto;
+    padding: 58px 10px 18px;
+    border-bottom: 0;
+    border-right: 1px solid var(--theme-metal);
+    align-items: start;
+  }
+  .site-shell .collection-page .game-card .game-art > img.official-cover { height: 146px; }
+  /* The text column takes spare width and wraps below artwork at enlarged text sizes. */
+  .site-shell .collection-page .card-body { flex: 999 1 10rem; padding: 16px 14px; }
+  .site-shell .collection-page .card-body h3 { font-size: 1.375rem; }
+  .site-shell .collection-page .meta { gap: 4px 12px; }
+  .site-shell .collection-page .card-bottom { gap: 8px; }
+  .site-shell .collection-page .card-bottom a { padding: 8px 5px; }
+}
+@media screen and (max-width: 360px) {
+  .site-shell .collection-page .game-art { flex-basis: 92px; }
+  .site-shell .collection-page .card-body { padding: 14px 12px; }
+  .site-shell .collection-page .collection-filters label { flex-basis: 100%; }
+  .site-shell .collection-page .card-bottom { grid-template-columns: 1fr; }
+}
+
+/* A finite motion vocabulary. Layout, controls, focus and state commit immediately. */
+@media screen {
+  .site-shell {
+    --motion-press: 120ms;
+    --motion-change: 180ms;
+    --motion-ease: cubic-bezier(.2, .7, .2, 1);
+  }
+  .site-shell dialog:not([open]), .site-shell dialog:not([open]) * { pointer-events: none; }
+  /* Keep touch hit areas still, including the older portable button treatment. */
+  .site-shell button:active:not(:disabled) { transform: none; }
+  .site-shell .collection-page .game-card .game-art > img.official-cover { transform: none; }
+}
+@media screen and (prefers-reduced-motion: no-preference) {
+  .site-shell :is(button, summary, .card-learn, .card-play, .table-jump):where(:not(.chess-clock-player)) {
+    transition: background-color var(--motion-press) var(--motion-ease),
+      border-color var(--motion-press) var(--motion-ease),
+      color var(--motion-press) var(--motion-ease), box-shadow var(--motion-press) var(--motion-ease);
+  }
+  .site-shell :is(input, select, textarea) {
+    transition: border-color var(--motion-press) var(--motion-ease);
+  }
+  .site-shell :is(button[aria-pressed="true"], button[aria-selected="true"], button[aria-checked="true"]):not(:disabled) {
+    animation: control-confirm var(--motion-change) var(--motion-ease);
+  }
+  .site-shell .share-feedback:not(:empty), .site-shell .rule-preview {
+    animation: control-confirm var(--motion-change) var(--motion-ease);
+  }
+  /* Native details closes immediately; summary feedback marks both directions.
+     Only the newly revealed body fades, without changing its size or position. */
+  .site-shell details[open]:not(.lesson-comparison) > :not(summary) {
+    animation: control-confirm var(--motion-change) var(--motion-ease);
+  }
+  .site-shell :is(.art-media img, .official-thumb > img),
+  .site-shell .collection-page .game-card .game-art > img.official-cover {
+    transition: transform var(--motion-press) var(--motion-ease);
+  }
+  .site-shell :is(.lesson-card-art, .official-thumb):active :is(.art-media img, img),
+  .site-shell .collection-page .game-card:has(:active) .game-art > img.official-cover {
+    transform: scale(.985);
+  }
+  .site-shell .collection-page .game-card {
+    transition: transform var(--motion-press) var(--motion-ease),
+      border-color var(--motion-press) var(--motion-ease), box-shadow var(--motion-press) var(--motion-ease);
+  }
+  .site-shell .collection-page .game-card:focus-within { border-color: var(--accent); }
+  .site-shell :is(.rule-dialog, .share-dialog, #image-viewer) {
+    opacity: 0;
+    transform: translateY(4px) scale(.99);
+    transition: opacity var(--motion-change) var(--motion-ease),
+      transform var(--motion-change) var(--motion-ease),
+      display var(--motion-change) allow-discrete, overlay var(--motion-change) allow-discrete;
+  }
+  .site-shell :is(.rule-dialog, .share-dialog, #image-viewer)[open] { opacity: 1; transform: none; }
+  /* The image itself travels from its thumbnail; keep title and close control still. */
+  .site-shell #image-viewer, .site-shell #image-viewer[open] { transform: none; }
+  .site-shell :is(.rule-dialog, .share-dialog, #image-viewer)::backdrop {
+    opacity: 0;
+    transition: opacity var(--motion-change) var(--motion-ease),
+      display var(--motion-change) allow-discrete, overlay var(--motion-change) allow-discrete;
+  }
+  .site-shell :is(.rule-dialog, .share-dialog, #image-viewer)[open]::backdrop { opacity: 1; }
+  .site-shell :is(.rule-dialog, .share-dialog, #image-viewer):not([open])::backdrop { pointer-events: none; }
+  @starting-style {
+    .site-shell :is(.rule-dialog, .share-dialog, #image-viewer)[open] { opacity: 0; transform: translateY(4px) scale(.99); }
+    .site-shell #image-viewer[open] { opacity: 0; transform: none; }
+    .site-shell :is(.rule-dialog, .share-dialog, #image-viewer)[open]::backdrop { opacity: 0; }
+  }
+}
+@media screen and (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  .site-shell .collection-page .game-card:hover { transform: translateY(-2px); }
+  .site-shell .collection-page .game-card:hover .game-art > img.official-cover { transform: scale(1.02); }
+  .site-shell :is(.lesson-card-art, .official-thumb):hover :is(.art-media img, img) { transform: scale(1.02); }
+  .site-shell :is(.lesson-card-art, .official-thumb):active :is(.art-media img, img),
+  .site-shell .collection-page .game-card:has(:active) .game-art > img.official-cover { transform: scale(.985); }
+}
+@keyframes control-confirm { from { opacity: .75; } to { opacity: 1; } }
+@media screen and (prefers-reduced-motion: reduce) {
+  .site-shell .collection-page .game-card:hover,
+  .site-shell .collection-page .game-card .game-art > img.official-cover { transform: none; }
+}

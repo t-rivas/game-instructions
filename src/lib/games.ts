@@ -1,6 +1,6 @@
 import "server-only";
 import catalog from "@/generated/catalog.json";
-import type { Artwork, Game, GameCardData, Language, ScoringTeaching, LessonCardTeaching, LessonCard, SkullTrickTeaching, CoupTeaching, AvalonTeaching, PracticeDecision, View } from "./types";
+import type { Artwork, Game, GameCardData, Language, ScoringTeaching, LessonCardTeaching, LessonCard, SkullTrickTeaching, CoupTeaching, AvalonTeaching, PracticeDecision, LessonComparison, View } from "./types";
 export const languages: Language[] = ["es", "en"];
 export const views: View[] = ["learn", "play", "rules"];
 export const games = catalog.games as unknown as Record<string, Game>;
@@ -37,11 +37,14 @@ export function lessonCardTeaching(id: string): LessonCardTeaching {
   };
   const setupArtwork = Object.fromEntries((setupIds[id] || []).filter(key => source.official[key]).map(key => [key, source.official[key]]));
   const practice = (catalog as unknown as {lessonPractice: Record<string, PracticeDecision[]>}).lessonPractice[id] || [];
+  const comparisons = (catalog as unknown as {lessonComparisons: Record<string, LessonComparison[]>}).lessonComparisons[id] || [];
+  const comparisonArtwork = Object.fromEntries(comparisons.flatMap(c => c.situations.flatMap(s => s.groups.flatMap(g => g.items.flatMap(item =>
+    item.art && source.official[item.art] ? [[item.art,source.official[item.art]]] : [])))));
   for (const key of new Set(practice.flatMap(item => item.cards || []))) {
     const art = source.official[key], fact = source.lessonCardFacts[key];
     if (art && fact) cards[key] = { ...fact, id:key, art };
   }
-  return { practice, setupArtwork, scoring, scoringArtwork, components, pieces, steps, cards, ...(avalon ? {avalon} : {}), ...(tricks ? {tricks} : {}), ...(coup ? {coup} : {}) };
+  return { comparisons, comparisonArtwork, practice, setupArtwork, scoring, scoringArtwork, components, pieces, steps, cards, ...(avalon ? {avalon} : {}), ...(tricks ? {tricks} : {}), ...(coup ? {coup} : {}) };
 }
 export function cover(id: string): Artwork {
   const entry = (catalog.official as unknown as Record<string, Artwork>)[

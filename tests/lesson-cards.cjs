@@ -1,4 +1,4 @@
-const {learningStage} = require("./learning-navigation.cjs");
+const {learningStage, learningLesson, learningSetupOptions} = require("./learning-navigation.cjs");
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
@@ -51,7 +51,7 @@ for(const game of ['skull_king','coup','avalon']) {
         for(const width of [320,390,768,1440]) {
           await page.setViewportSize({width,height:900});
           assert.ok(await page.locator('.lesson-cards').evaluate(el=>el.scrollWidth<=el.clientWidth+1),`${lang}/${game}/${theme}/${width}: card block fits`);
-          assert.ok(await cards(page).first().locator('h4').isVisible());
+          assert.ok(await page.locator('.lesson-copy h3').isVisible(),'The card has one lesson heading');
         }
         if(lang==='es'&&theme==='light') {
           await page.setViewportSize({width:390,height:900});
@@ -68,25 +68,27 @@ for(const game of ['skull_king','coup','avalon']) {
     }
 
     await page.goto(`${base}/en/coup/learn/`);await ready();await learningStage(page,'components');
-    await page.locator('#learning-step').selectOption('card-coup-inquisitor');
+    await learningSetupOptions(page);
+    if(await page.locator('#inquisitor-toggle').getAttribute('aria-checked')!=='true')await page.locator('#inquisitor-toggle').click();
+    await learningLesson(page, 'card-coup-inquisitor');
     assert.deepEqual(await ids(page),['coup-inquisitor']);
     await page.locator('#inquisitor-toggle').click();await learningStage(page,'components');
-    assert.equal(await page.locator('#learning-step option[value="card-coup-inquisitor"]').count(),0);
-    await page.locator('#learning-step').selectOption('card-coup-ambassador');
+    assert.equal(await page.locator('[data-lesson-target="card-coup-inquisitor"]').count(),0);
+    await learningLesson(page, 'card-coup-ambassador');
     assert.deepEqual(await ids(page),['coup-ambassador']);
     await page.goto(`${base}/en/skull_king/learn/`);await ready();
-    await page.locator('#skull-expansion-toggle').click();await learningStage(page,'turn');
-    await page.locator('#learning-step').selectOption('basic-expansion');
+    await learningSetupOptions(page);await page.locator('#skull-expansion-toggle').click();await learningStage(page,'turn');
+    await learningLesson(page, 'basic-expansion');
     assert.deepEqual(await ids(page),['exp-wild','exp-mary']);
     await page.locator('#skull-expansion-toggle').click();
     assert.equal(await page.locator('[data-lesson-card^=exp-]').count(),0);
     await page.goto(`${base}/en/avalon/learn/`);await ready();await learningStage(page,'setup');
     await page.locator('#avalon-mode').selectOption('optional');await learningStage(page,'components');
-    await page.locator('#learning-step').selectOption('card-avalon-morgana');
+    await learningLesson(page, 'card-avalon-morgana');
     assert.deepEqual(await ids(page),['avalon-morgana']);
     await learningStage(page,'setup');await page.locator('#role-morgana').uncheck();await learningStage(page,'components');
-    assert.equal(await page.locator('#learning-step option[value="card-avalon-morgana"]').count(),0);
-    await page.locator('#learning-step').selectOption('card-avalon-merlin');
+    assert.equal(await page.locator('[data-lesson-target="card-avalon-morgana"]').count(),0);
+    await learningLesson(page, 'card-avalon-merlin');
     await page.setViewportSize({width:320,height:900});
     await page.addStyleTag({content:'.lesson-card-copy h4,.lesson-card-copy p,.lesson-card-copy small,.lesson-card-copy a{font-size:180%!important;line-height:1.45!important}'});
     assert.ok(await page.locator('.lesson-cards').evaluate(el=>el.scrollWidth<=el.clientWidth+1),'Enlarged card text stays inside the lesson');
@@ -105,6 +107,7 @@ for(const game of ['skull_king','coup','avalon']) {
     await offline.goto(pathToFileURL(path.join(root,'game-night.html')).href);
     await offline.evaluate(()=>{location.hash='coup/learn';});
     await offline.waitForFunction(()=>document.querySelector('[data-lesson-card="coup-duke"]'));
+    if(await offline.locator('#inquisitor-toggle').getAttribute('aria-checked')!=='true')await offline.locator('#inquisitor-toggle').click();
     assert.ok((await ids(offline)).includes('coup-inquisitor'),'Portable lesson uses shared card definitions');
     await offline.locator('#inquisitor-toggle').click();
     assert.ok((await ids(offline)).includes('coup-ambassador'),'Portable variant selection updates cards');

@@ -1,3 +1,4 @@
+const {learningContents, learningStage, learningLesson, learningSetupOptions} = require("./learning-navigation.cjs");
 const assert = require('node:assert/strict');
 const {spawn} = require('node:child_process');
 const {chromium, webkit} = require('playwright');
@@ -15,37 +16,44 @@ const server=spawn(process.execPath,['scripts/serve-export.mjs'],{stdio:['ignore
   for(const lang of ['en','es']) for(const id of Object.keys(games)) {
    await page.goto(`${base}/${lang}/${id}/learn/`);await ready();
    assert.equal(await page.locator('[data-learning-stage]').count(),5);
+   if(id==='sushi_go_party') {await learningSetupOptions(page);await page.locator('#guide-player-count').selectOption('4');await page.locator('#guide-setup-options > summary').click();}
    await page.locator('#already-set-up').click();
-   assert.equal(await page.locator('[data-learning-stage][aria-current=step]').getAttribute('data-learning-stage'),id==='chess'?'components':'turn');
+   assert.equal(await page.locator('[data-learning-step]').getAttribute('data-current-stage'),id==='chess'?'components':'turn');
    assert.ok(await page.locator('.lesson-copy h3').evaluate(el=>el===document.activeElement));
-   await page.locator('[data-learning-stage=setup]').click();
-   if(id==='avalon')await page.locator('#avalon-step-2').click();
-   await page.locator('#setup-ready').click();
+   await learningStage(page, 'setup');
+   if(id==='avalon')await learningLesson(page, 'avalon-opening');
+   await page.locator('#lesson-next').click();
    if(id==='sushi_go_party') {
     assert.equal(await page.locator('[data-learning-step]').getAttribute('data-learning-step'),'basic-deal');
-    assert.match(await page.locator('.lesson-copy').innerText(),/5\/3\/2/);
-    await page.locator('#setup-ready').click();
+    assert.match(await page.locator('.lesson-explanation').innerText(),/5, 3 (?:and|y) 2/);
+    await page.locator('#lesson-next').click();
    }
    assert.ok(page.url().includes('/learn/'));
-   assert.equal(await page.locator('[data-learning-stage][aria-current=step]').getAttribute('data-learning-stage'),'turn');
+   assert.equal(await page.locator('[data-learning-step]').getAttribute('data-current-stage'),'turn');
    if(['coup','avalon','skull_king'].includes(id)) {
-    await page.locator('#learning-step').selectOption('example');
+    await learningLesson(page, 'example');
     assert.ok(await page.locator(id==='skull_king'?'#skull-trick-lesson':`#${id}-lesson`).isVisible());
    }
-   await page.locator('[data-learning-stage=end]').click();
+   await learningStage(page, 'end');
    assert.ok((await page.locator('.lesson-copy h3').innerText()).length);
    // Every original lesson remains reachable under its semantic ID, with its copy.
    const lessonIds=await page.locator('.learning-overview button').evaluateAll(nodes=>nodes.map(node=>node.textContent));
    assert.ok(lessonIds.every(title=>title && !title.includes('undefined')),`${id}: all lessons have meaningful labels`);
-   for(const stage of ['setup','turn','end']) {
-    await page.locator(`[data-learning-stage=${stage}]`).click();
-    const picker=page.locator('#learning-step');
-    const values=await picker.count() ? await picker.locator('option').evaluateAll(nodes=>nodes.map(node=>node.value)) : [];
-    for(const value of values.filter(value=>value.startsWith('basic-'))) {
-     await picker.selectOption(value);
-     assert.ok((await page.locator('.lesson-copy > p').first().innerText()).length>20,`${lang}/${id}/${value}: explanation visible`);
-    }
+   const values=await page.locator('.learning-overview button').evaluateAll(nodes=>nodes.map(node=>node.dataset.lessonTarget));
+   for(const value of values.filter(value=>value.startsWith('basic-'))) {
+     await learningLesson(page, value);
+     assert.ok((await page.locator('.lesson-explanation').innerText()).length>20,`${lang}/${id}/${value}: explanation visible`);
    }
+   // The objective and its Next action fit without an expanded navigation panel.
+   await learningLesson(page, 'objective');
+   for(const width of [320,390,768,1440]) {
+     await page.setViewportSize({width,height:900});
+     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`${width}/${lang}/${id}: objective fits`);
+     assert.ok(!await page.locator('#lesson-overview').evaluate(node=>node.open), 'Contents closes after keyboard selection');
+     assert.ok(await page.locator('#lesson-next').isVisible());
+     assert.equal(await page.locator('#learning-step').count(),0,'No competing lesson selector');
+   }
+   await page.setViewportSize({width:390,height:844});
   }
   await page.goto(`${base}/en/chess/learn/`);await ready();
   await page.evaluate(()=>sessionStorage.setItem('tablefolk-lesson-chess','1'));await page.reload();await ready();
@@ -60,10 +68,10 @@ const server=spawn(process.execPath,['scripts/serve-export.mjs'],{stdio:['ignore
   await page.locator('#lang-es').click();await page.waitForURL('**/es/chess/learn/');await ready();await page.waitForSelector('[data-learning-step=piece-pawn]');
   await page.locator('#tab-play').click();await page.waitForURL('**/es/chess/play/');await ready();await page.locator('#tab-learn').click();await page.waitForURL('**/es/chess/learn/');await ready();await page.waitForSelector('[data-learning-step=piece-pawn]');
   await page.goto(`${base}/en/coup/learn/`);await ready();
-  await page.locator('[data-learning-stage=turn]').click();
+  await learningStage(page, 'turn');
   const local=await page.evaluate(()=>sessionStorage.getItem('tablefolk-lesson-coup'));
   await page.goto(`${base}/en/coup/learn/?shared=1&exchange=ambassador`);await ready();
-  await page.locator('[data-learning-stage=end]').click();
+  await learningStage(page, 'end');
   assert.equal(await page.evaluate(()=>sessionStorage.getItem('tablefolk-lesson-coup')),local);
   // Setup and example bookmarks reveal content even when a different lesson was saved.
   for(const [id,hash,step,selector] of [
@@ -78,38 +86,42 @@ const server=spawn(process.execPath,['scripts/serve-export.mjs'],{stdio:['ignore
    await page.waitForSelector(`[data-learning-step=${step}]`);
    assert.ok(await page.locator(selector).isVisible(),`${id}: bookmark reveals its content`);
    assert.equal(new URL(page.url()).hash,`#${hash}`);
-   await page.locator('[data-learning-stage=objective]').click();
+   await learningStage(page, 'objective');
    await page.evaluate(hash=>window.dispatchEvent(new HashChangeEvent('hashchange')),hash);
    await page.waitForSelector(`[data-learning-step=${step}]`);
    assert.ok(await page.locator(selector).isVisible(),`${id}: repeated bookmark reopens content`);
   }
   await page.goto(`${base}/en/sushi_go_party/learn/`);await ready();
-  await page.locator('[data-learning-stage=setup]').click();
-  assert.match(await page.locator('.lesson-copy').innerText(),/three appetizers/);
-  await page.locator('#setup-ready').click();
+  await learningStage(page, 'setup');
+  assert.match(await page.locator('.lesson-explanation').innerText(),/three different appetizers/);
+  await page.locator('#lesson-next').click();
   assert.equal(await page.locator('[data-learning-step]').getAttribute('data-learning-step'),'basic-deal');
   await page.locator('#lang-es').click();await page.waitForURL('**/es/sushi_go_party/learn/');await ready();
   await page.waitForSelector('[data-learning-step=basic-deal]');
-  assert.match(await page.locator('.lesson-copy').innerText(),/5\/3\/2/);
+  assert.match(await page.locator('.lesson-explanation').innerText(),/5, 3 (?:and|y) 2/);
   await page.locator('#already-set-up').click();
   assert.equal(await page.locator('[data-learning-step]').getAttribute('data-learning-step'),'basic-draft');
   // A removed optional card keeps its ID so restoring the variant restores context.
   await page.goto(`${base}/en/coup/learn/`);await ready();
-  await page.locator('[data-learning-stage=components]').click();
-  await page.locator('#learning-step').selectOption('card-coup-inquisitor');
+  await learningStage(page, 'components');
+  await learningSetupOptions(page);
+  if(await page.locator('#inquisitor-toggle').getAttribute('aria-checked')!=='true')await page.locator('#inquisitor-toggle').click();
+  await learningLesson(page, 'card-coup-inquisitor');
   await page.locator('#inquisitor-toggle').click();
   await page.waitForSelector('[data-learning-step=objective]');
   assert.equal(await page.evaluate(()=>sessionStorage.getItem('tablefolk-lesson-coup')),'card-coup-inquisitor');
   await page.locator('#inquisitor-toggle').click();
   await page.waitForSelector('[data-learning-step=card-coup-inquisitor]');
-  await page.locator('[data-learning-stage=turn]').click();
-  await page.locator('#learning-step').selectOption('example');
+  await learningStage(page, 'turn');
+  await learningLesson(page, 'example');
   await page.locator('[data-coup-choice]').first().click();
+  await page.locator('#coup-lesson').evaluate(node=>window.__mountedCoupExample=node);
   const exampleNode=await page.locator('[data-coup-node]').getAttribute('data-coup-node');
-  await page.locator('[data-learning-stage=setup]').click();
-  await page.locator('[data-learning-stage=turn]').click();
-  await page.locator('#learning-step').selectOption('example');
+  await learningStage(page, 'setup');
+  await learningStage(page, 'turn');
+  await learningLesson(page, 'example');
   assert.equal(await page.locator('[data-coup-node]').getAttribute('data-coup-node'),exampleNode,'Changing stages preserves the example branch');
+  assert.ok(await page.locator('#coup-lesson').evaluate(node=>node===window.__mountedCoupExample),'The example stays mounted');
   // Malformed progress cannot select a different numbered lesson.
   await page.evaluate(()=>sessionStorage.setItem('tablefolk-lesson-coup','999'));
   await page.reload();await ready();await page.waitForSelector('[data-learning-step=objective]');
@@ -117,28 +129,30 @@ const server=spawn(process.execPath,['scripts/serve-export.mjs'],{stdio:['ignore
    await page.setViewportSize({width,height:900});await page.goto(`${base}/${lang}/coup/learn/`);await ready();
    await page.evaluate(theme=>document.documentElement.setAttribute('data-theme',theme),theme);
    for(const stage of ['objective','components','setup','turn','end']) {
-    await page.locator(`[data-learning-stage=${stage}]`).click();
+    await learningStage(page, stage);
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`${width}/${lang}/${stage} page fits`);
-    assert.deepEqual(await page.locator('.learning-stages button,.detail-controls .tabs button').evaluateAll(nodes=>nodes.filter(n=>n.scrollWidth>n.clientWidth+1).map(n=>n.textContent)),[]);
+    assert.deepEqual(await page.locator('.learning-overview button,.detail-controls .tabs button').evaluateAll(nodes=>nodes.filter(n=>n.scrollWidth>n.clientWidth+1).map(n=>n.textContent)),[]);
    }
-   await page.locator('[data-learning-stage=components]').click();await page.locator('#lesson-next').click();
+   await learningStage(page, 'components');await page.locator('#lesson-next').click();
    await page.locator('#basics').screenshot({style:'header,.detail-controls,.skip-link{visibility:hidden!important}',path:`${output}/${lang}-${theme}-${width}.png`});
   }
   for(const [id,step] of [['sushi_go_party','basic-deal'],['chess','piece-pawn']]) for(const lang of ['en','es']) {
    await page.goto(`${base}/${lang}/${id}/learn/`);await ready();
-   await page.locator(`[data-learning-stage=${id==='chess'?'components':'setup'}]`).click();
-   await page.locator('#learning-step').selectOption(step);
+   await learningStage(page, id==='chess'?'components':'setup');
+   await learningLesson(page, step);
    for(const width of [320,390,768,1440]) for(const theme of ['light','dark']) {
     await page.setViewportSize({width,height:900});
     await page.evaluate(theme=>document.documentElement.setAttribute('data-theme',theme),theme);
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
-    assert.ok((await page.locator('#learning-step').boundingBox()).height>=44,'Lesson selector has a touch target of at least 44px');
-    assert.deepEqual(await page.locator('.learning-stages button,.detail-controls .tabs button').evaluateAll(nodes=>nodes.filter(n=>n.scrollWidth>n.clientWidth+1).map(n=>n.textContent)),[]);
+    await learningContents(page);
+    assert.ok((await page.locator(`[data-lesson-target="${step}"]`).boundingBox()).height>=44,'Contents lessons have a touch target of at least 44px');
+    await page.keyboard.press('Escape');
+    assert.deepEqual(await page.locator('.learning-overview button,.detail-controls .tabs button').evaluateAll(nodes=>nodes.filter(n=>n.scrollWidth>n.clientWidth+1).map(n=>n.textContent)),[]);
     await page.locator('#basics').screenshot({style:'header,.detail-controls,.skip-link{visibility:hidden!important}',path:`${output}/${id}-${lang}-${theme}-${width}.png`});
    }
   }
   await page.goto(`${base}/es/coup/learn/`);await ready();
-  await page.locator('[data-learning-stage=components]').click();await page.locator('#lesson-next').click();
+  await learningStage(page, 'components');await page.locator('#lesson-next').click();
   await page.emulateMedia({reducedMotion:'reduce'});await page.setViewportSize({width:320,height:900});
   await page.addStyleTag({content:'.learning-sequence :is(p,button,label,select,a){font-size:24px!important}'});
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
@@ -146,6 +160,30 @@ const server=spawn(process.execPath,['scripts/serve-export.mjs'],{stdio:['ignore
   await page.waitForSelector('#image-viewer[open]');await page.keyboard.press('Escape');
   assert.ok(await page.locator('.lesson-cards [data-art]').first().evaluate(el=>el===document.activeElement));
   await page.locator('#basics').screenshot({style:'header,.detail-controls,.skip-link{visibility:hidden!important}',path:`${output}/enlarged-320.png`});
+  // Contents supports keyboard opening, selection and dismissal without losing focus.
+  await page.goto(`${base}/en/coup/learn/`);await ready();
+  const summary=page.locator('#lesson-overview > summary');
+  await summary.focus();await page.keyboard.press('Enter');
+  assert.ok(await page.locator('#lesson-overview').evaluate(node=>node.open));
+  await page.locator('[data-lesson-target=basic-action]').focus();await page.keyboard.press('Enter');
+  assert.ok(!await page.locator('#lesson-overview').evaluate(node=>node.open), 'Contents closes after keyboard selection');
+  assert.ok(await page.locator('.lesson-copy h3').evaluate(node=>node===document.activeElement));
+  assert.ok(await page.locator('.lesson > .optional-practice').count());
+  assert.ok(!await page.locator('.lesson > .optional-practice').evaluate(node=>node.open),'Practice starts optional');
+  await page.locator('.lesson > .optional-practice > summary').click();
+  await page.locator('[data-practice-option]').first().click();
+  const answer=await page.locator('[data-practice-option][aria-pressed=true]').getAttribute('data-practice-option');
+  await page.locator('#lesson-next').click();await learningLesson(page,'basic-action');
+  await page.locator('.lesson > .optional-practice > summary').click();
+  assert.equal(await page.locator('[data-practice-option][aria-pressed=true]').getAttribute('data-practice-option'),answer,'Optional answers recover');
+  await learningContents(page);await page.keyboard.press('Escape');
+  assert.ok(await summary.evaluate(node=>node===document.activeElement));
+  // Former Avalon setup position migrates, then the unified lesson order resumes.
+  await page.goto(`${base}/en/avalon/learn/`);await ready();
+  await page.evaluate(()=>{sessionStorage.setItem('tablefolk-lesson-avalon','0');sessionStorage.setItem('tablefolk-avalon-step','2');});
+  await page.reload();await ready();await page.waitForSelector('[data-learning-step=avalon-opening]');
+  await page.locator('#lesson-prev').click();await page.waitForSelector('[data-learning-step=avalon-prepare]');
+  await learningLesson(page,'basic-roles');await page.reload();await ready();await page.waitForSelector('[data-learning-step=basic-roles]');
   const noJS=await browser.newPage({javaScriptEnabled:false});await noJS.goto(`${base}/en/chess/learn/`);
   assert.match(await noJS.locator('.lesson-copy').innerText(),/Checkmate/);await noJS.close();
   assert.deepEqual(errors,[]);console.log(`Learning sequence: 15 games, migration, navigation, shared isolation, keyboard, image viewer and 48 responsive captures per browser passed. Screenshots: ${output}`);

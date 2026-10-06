@@ -1,4 +1,4 @@
-const {learningStage, learningExample} = require("./learning-navigation.cjs");
+const {learningStage, learningExample, learningSetupOptions} = require("./learning-navigation.cjs");
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
@@ -77,6 +77,7 @@ const origin=new Promise((resolve,reject)=>{server.stdout.once('data',d=>resolve
           else{await page.goto(`${base}/es/coup/learn/`);await ready(page);await learningExample(page);}
         }
         for(const exchange of ['ambassador','inquisitor']){
+          await learningSetupOptions(page);
           if(!(await page.locator(`[data-coup-role="coup-${exchange}"]`).count()))await page.locator('#inquisitor-toggle').click();
           assert.equal(await page.locator('[data-coup-role]').count(),5);
           assert.equal(await page.locator(`[data-coup-role="coup-${exchange==='ambassador'?'inquisitor':'ambassador'}"]`).count(),0);

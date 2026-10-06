@@ -3,8 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 const root = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "../out",
+  process.env.TABLEFOLK_EXPORT_DIR || path.join(path.dirname(fileURLToPath(import.meta.url)), "../out"),
 );
 const types = {
   ".html": "text/html; charset=utf-8",

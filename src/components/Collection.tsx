@@ -136,85 +136,60 @@ export function Collection({
       (!favoritesOnly || favorites.includes(id)),
   );
   return (
-    <main id="main" tabIndex={-1}>
+    <main id="main" className="collection-page" tabIndex={-1}>
       <div className="wrap">
         <SavedGames
           cards={cards}
           lang={lang}
           onReady={() => setSavedReady(true)}
         />
-        <section className={`hero${returning ? " returning-hero" : ""}`}>
-          <div>
-            <span className="pill">
-              {tr("YOUR GAME NIGHT COMPANION", "TU COMPAÑERO DE JUEGOS")}
-            </span>
-            <h1>
-              {tr("Less reading.", "Menos lectura.")}
-              <br />
-              <em>{tr("More playing.", "Más juego.")}</em>
+        <section
+          className={`hero${returning ? " returning-hero" : ""}`}
+          aria-labelledby="welcome-title"
+        >
+          <div className="hero-copy">
+            <h1 id="welcome-title">
+              <span className="new-visitor-title">
+                {tr("Learn the game.", "Aprende el juego.")}
+                <br />
+                <em>{tr("Enjoy the night.", "Disfruta la partida.")}</em>
+              </span>
+              <span className="returning-title">
+                {tr("Back to the table.", "Volvamos a la mesa.")}
+              </span>
             </h1>
             <p>
               {tr(
-                "Clear rules for your favorite games. Learn before you start and find answers while you play.",
-                "Las reglas, sin complicaciones. Guías sencillas para tus juegos favoritos, siempre a mano.",
+                "Pick a game for clear rules, quick answers, and tools for your table.",
+                "Elige un juego: reglas claras, respuestas rápidas y herramientas para tu mesa.",
               )}
             </p>
-            <div className="hero-note">
-              <Icon path={icons.check} />
-              {tr(
-                "Easy to learn. Easy to look up. In your language.",
-                "Fácil de aprender. Fácil de consultar. En tu idioma.",
-              )}
-            </div>
           </div>
           <div className="hero-gallery" aria-hidden="true">
-            <div className="gallery-main">
-              <ResponsiveImage
-                desktopOnly
-                sizes="450px"
-                src="/assets/avalon.jpg"
-                alt=""
-                width="1200"
-                height="800"
-              />
-            </div>
-            <div className="gallery-small">
-              <ResponsiveImage
-                desktopOnly
-                sizes="220px"
-                src="/assets/coup.jpg"
-                alt=""
-                width="1200"
-                height="800"
-              />
-            </div>
-            <div className="gallery-tiny">
-              <ResponsiveImage
-                desktopOnly
-                sizes="160px"
-                src="/assets/poker.jpg"
-                alt=""
-                width="1200"
-                height="800"
-              />
-            </div>
-            <span className="gallery-note">
-              {tr(
-                "Ready for another round?",
-                "Siempre hay tiempo para otra ronda.",
-              )}
-            </span>
+            {["coup", "avalon", "sushi_go_party"].map((id) => {
+              const card = cards.find((card) => card.id === id);
+              if (!card) return null;
+              return (
+                <div className={`hero-box hero-box-${id}`} key={id}>
+                  <ResponsiveImage
+                    desktopOnly
+                    sizes="(max-width: 1000px) 130px, 190px"
+                    src={card.cover.src}
+                    alt=""
+                    width={card.cover.width}
+                    height={card.cover.height}
+                    decoding="async"
+                  />
+                </div>
+              );
+            })}
           </div>
         </section>
         <section id="collection" aria-labelledby="collection-title">
           <div className="collection-head">
             <div>
-              <p className="eyebrow">{tr("THE GAMES", "LOS JUEGOS")}</p>
               <h2 id="collection-title">
-                {tr("Choose a game", "Elige el juego de hoy")}{" "}
-                <span className="muted" style={{ fontSize: 15, marginLeft: 8 }}>
-                  {String(cards.length).padStart(2, "0")}
-                </span>
+                {tr("Choose a game", "Elige un juego")}
               </h2>
             </div>
             <div className="search">
@@ -269,7 +244,7 @@ export function Collection({
                 }
               >
                 <option value="">
-                  {tr("Any duration", "Cualquier duración")}
+                  {tr("Any duration", "Sin límite")}
                 </option>
                 {[30, 60, 120].map((n) => (
                   <option key={n} value={n}>
@@ -352,16 +327,10 @@ export function Collection({
                     >
                       <Icon path={star} />
                     </button>
-                    {id === "coup" ? (
-                      <span className="art-tag">
-                        {tr("2 variants", "2 variantes")}
-                      </span>
-                    ) : id === "poker" ? (
-                      <span className="art-tag">Texas Hold’em</span>
-                    ) : null}
                     <ResponsiveImage
                       className="official-cover"
                       src={cover.src}
+                      sizes="(max-width: 600px) 112px, (max-width: 1000px) 240px, 280px"
                       alt={cover.title[lang]}
                       width={cover.width}
                       height={cover.height}
@@ -382,7 +351,11 @@ export function Collection({
                         {game.time} min
                       </span>
                     </div>
-                    <p style={{ marginTop: 13 }}>{game.description[lang]}</p>
+                    <p className="card-description">
+                      {id === "poker"
+                        ? `Texas Hold’em. ${game.description[lang]}`
+                        : game.description[lang]}
+                    </p>
                     <div className="card-bottom">
                       <Link
                         prefetch={false}

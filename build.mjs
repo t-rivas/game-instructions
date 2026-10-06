@@ -6,14 +6,14 @@ const root = path.dirname(fileURLToPath(import.meta.url));
 const read = name => fs.readFileSync(path.join(root, name), 'utf8').replace(/\r\n/g, '\n');
 let html = read('index.html');
 
-for (const name of ['moth-score.css', 'truco-score.css', 'skull-score.css', 'styles.css', 'enhancements.css', 'official.css', 'table-guide.css', 'game-themes.css', 'chess-clock.css', 'poker-timer.css', 'coup-session.css']) {
+for (const name of ['moth-score.css', 'truco-score.css', 'skull-score.css', 'styles.css', 'enhancements.css', 'official.css', 'table-guide.css', 'game-themes.css', 'chess-clock.css', 'poker-timer.css', 'coup-session.css', 'src/components/lesson-comparison.css']) {
   html = html.replace(
     `<link rel="stylesheet" href="${name}">`,
     () => `<style>\n${read(name)}\n</style>`
   );
 }
 
-const scriptNames = ['data.js', 'dixit.js', 'new-games.js', 'more-games.js', 'setup-diagrams.js', 'setup-context.js', 'glossary.js', 'practice.js', 'enhancements.js', 'official.js', 'card-guides.js', 'skull-tricks.js', 'scoring-examples.js', 'avalon-lessons.js', 'coup-lessons.js', 'table-guide.js', 'chess-clock.js', 'poker-timer.js', 'coup-session.js', 'skull-score.js', 'truco-score.js', 'moth-score.js', 'app.js'];
+const scriptNames = ['data.js', 'dixit.js', 'new-games.js', 'more-games.js', 'setup-diagrams.js', 'setup-context.js', 'glossary.js', 'practice.js', 'enhancements.js', 'official.js', 'card-guides.js', 'skull-tricks.js', 'scoring-examples.js', 'avalon-lessons.js', 'coup-lessons.js', 'lesson-comparisons.js', 'table-guide.js', 'chess-clock.js', 'poker-timer.js', 'coup-session.js', 'skull-score.js', 'truco-score.js', 'moth-score.js', 'app.js'];
 for (const name of scriptNames) {
   html = html.replace(`  <script src="${name}" defer></script>\n`, '');
 }

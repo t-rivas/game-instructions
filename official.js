@@ -394,9 +394,28 @@ let imageOpener=null;
 function openOfficialImage(id,opener){
  const a=OFFICIAL[id];if(!a)return;
  let dialog=document.getElementById('image-viewer');
- if(!dialog){dialog=document.createElement('dialog');dialog.id='image-viewer';dialog.setAttribute('aria-labelledby','image-title');document.body.append(dialog);dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close();});dialog.addEventListener('close',()=>{document.body.classList.remove('image-open');if(imageOpener?.isConnected)imageOpener.focus({preventScroll:true});});}
- imageOpener=opener;
- dialog.innerHTML=`<div class="image-dialog-head"><h2 id="image-title">${e(a.title)}</h2><button type="button" class="image-close" aria-label="${tr('Close image','Cerrar imagen')}">×</button></div><div class="image-stage">${officialImage(id,true)}</div><div class="image-caption"><p>${escapeHTML(a.owner)}</p><p>${tr('Original published image. Your game may have a different edition or printed language.','Imagen de la edición publicada. Tu juego puede tener otra edición u otro idioma impreso.')}</p><a href="${escapeHTML(a.url)}" target="_blank" rel="noopener noreferrer">${tr('Image source ↗','Fuente de la imagen ↗')}</a></div>`;
- dialog.querySelector('.image-close').onclick=()=>dialog.close();document.body.classList.add('image-open');dialog.showModal();dialog.querySelector('.image-close').focus({preventScroll:true});
+ if(!dialog){dialog=document.createElement('dialog');dialog.id='image-viewer';dialog.setAttribute('aria-labelledby','image-title');(document.querySelector('.site-shell')||document.body).append(dialog);dialog.addEventListener('click',event=>{if(event.target===dialog){dialog.inert=true;dialog.close();}});dialog.addEventListener('cancel',()=>{dialog.inert=true;});dialog.addEventListener('close',()=>{if(dialog.open)return;dialog.inert=true;dialog.querySelector('.image-stage img')?.getAnimations().forEach(animation=>animation.cancel());document.body.classList.remove('image-open');if(imageOpener?.isConnected&&(document.activeElement===document.body||dialog.contains(document.activeElement)))imageOpener.focus({preventScroll:true});});}
+ const thumbnail=opener?.querySelector('img')?.getBoundingClientRect();
+ imageOpener=opener;imageOpener?.focus({preventScroll:true});
+ dialog.innerHTML=`<div class="image-dialog-head"><h2 id="image-title">${e(a.title)}</h2><button type="button" class="image-close" aria-label="${tr('Close image','Cerrar imagen')}"> <span aria-hidden="true">×</span><span>${tr('Close','Cerrar')}</span></button></div><div class="image-stage">${officialImage(id,true)}</div><div class="image-caption"><p>${escapeHTML(a.owner)}</p><p>${tr('Original published image. Your game may have a different edition or printed language.','Imagen de la edición publicada. Tu juego puede tener otra edición u otro idioma impreso.')}</p><a href="${escapeHTML(a.url)}" target="_blank" rel="noopener noreferrer">${tr('Image source ↗','Fuente de la imagen ↗')}</a></div>`;
+ dialog.onkeydown=event=>{
+  if(event.key!=='Tab'||document.activeElement?.closest('dialog')!==dialog)return;
+  const controls=[...dialog.querySelectorAll('button,a[href],input,select,textarea,[tabindex]')].filter(node=>node.tabIndex>=0&&!node.matches(':disabled,[hidden]')&&node.getClientRects().length&&getComputedStyle(node).visibility!=='hidden');
+  const index=controls.indexOf(document.activeElement);
+  if(controls.length){event.preventDefault();const next=index===-1?(event.shiftKey?controls.length-1:0):(index+(event.shiftKey?controls.length-1:1))%controls.length;controls[next].focus();}
+ };
+ dialog.querySelector('.image-close').onclick=()=>{dialog.inert=true;dialog.close();};document.body.classList.add('image-open');dialog.scrollTop=0;dialog.inert=false;dialog.showModal();dialog.querySelector('.image-close').focus({preventScroll:true});
+ // Animate the same image from its thumbnail. The final layout is present immediately.
+ const image=dialog.querySelector('.image-stage img'),preference=matchMedia('(prefers-reduced-motion: reduce)');
+ const enlarge=()=>{
+  if(preference.matches||!dialog.open||!image.isConnected||!thumbnail?.width||!thumbnail.height)return;
+  const target=image.getBoundingClientRect();if(!target.width||!target.height)return;
+  const x=thumbnail.x+thumbnail.width/2-target.x-target.width/2,y=thumbnail.y+thumbnail.height/2-target.y-target.height/2;
+  const animation=image.animate([{transform:`translate(${x}px,${y}px) scale(${thumbnail.width/target.width},${thumbnail.height/target.height})`},{transform:'none'}],{duration:180,easing:'cubic-bezier(.2,.7,.2,1)'});
+  const changed=()=>{if(preference.matches)animation.cancel();};
+  preference.addEventListener('change',changed);
+  animation.finished.catch(()=>{}).finally(()=>preference.removeEventListener('change',changed));
+ };
+ if(image.complete&&image.naturalWidth)enlarge();else image.decode().then(enlarge).catch(()=>{});
 }
 document.addEventListener('click',event=>{const button=event.target.closest('[data-art]');if(button)openOfficialImage(button.dataset.art,button);});

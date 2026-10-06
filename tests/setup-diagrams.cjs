@@ -1,3 +1,4 @@
+const {learningStage, learningLesson, learningSetupOptions} = require("./learning-navigation.cjs");
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -28,7 +29,7 @@ const server = spawn(process.execPath,['scripts/serve-export.mjs'],{stdio:['igno
     const page=await browser.newPage({viewport:{width:390,height:900}}), errors=[];
     page.on('pageerror',e=>errors.push(e.message));
     const ready=()=>page.waitForSelector('[data-tool=sources][data-ready=true]');
-    const setup=async(game,lang='en')=>{await page.goto(`${base}/${lang}/${game}/learn/`);await ready();await page.locator('[data-learning-stage=setup]').click();};
+    const setup=async(game,lang='en')=>{await page.goto(`${base}/${lang}/${game}/learn/`);await ready();await learningStage(page,'setup');};
     await setup('chess');
     const board=page.locator('[data-setup-visual=chess-1]');
     assert.equal(await board.locator('[data-square]').count(),64);
@@ -57,6 +58,7 @@ const server = spawn(process.execPath,['scripts/serve-export.mjs'],{stdio:['igno
     assert.match(await placement.innerText(),/1 lumber \+ 1 brick \+ 1 grain/);
     await setup('sushi_go_party');
     assert.equal(await page.locator('[data-setup-visual=sushi_go_party-0] [data-art]').count(),8);
+    await learningLesson(page,'basic-deal');
     const before=await page.evaluate(()=>JSON.stringify({...localStorage}));
     for(const [players,[deal,...desserts]] of Object.entries(quantities)) {
       await page.locator('#setup-example-players').selectOption(players);
@@ -66,9 +68,11 @@ const server = spawn(process.execPath,['scripts/serve-export.mjs'],{stdio:['igno
       assert.deepEqual(await figure.locator('.setup-zones .setup-zone span').allTextContents(),desserts.map(n=>`Add ${n} desserts`));
     }
     assert.equal(await page.evaluate(()=>JSON.stringify({...localStorage})),before,'Example count writes no session or setup preferences');
-    await page.locator('[data-learning-stage=turn]').click();await page.locator('[data-learning-stage=setup]').click();
+    await learningStage(page,'turn');await learningStage(page,'setup');
+    await learningLesson(page,'basic-deal');
     assert.equal(await page.locator('#setup-example-players').inputValue(),'8','Reopening setup preserves example controls');
     if(await page.locator('#guide-player-count').count()) {
+      await learningSetupOptions(page);
       await page.locator('#guide-player-count').selectOption('6');
       await page.waitForFunction(()=>!document.getElementById('setup-example-players'));
       assert.match(await page.locator('[data-setup-visual=sushi_go_party-2]').innerText(),/6 players.*prepare round 1/);

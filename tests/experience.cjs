@@ -1,3 +1,4 @@
+const {learningStage, learningLesson} = require("./learning-navigation.cjs");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -161,9 +162,9 @@ const server = spawn(process.execPath, ["scripts/serve-export.mjs"], {
       for (const lang of ["en", "es"]) {
         await page.setViewportSize({ width, height: 900 });
         await navigate(`/${lang}/avalon/learn/`);
-        await page.locator('[data-learning-stage="setup"]').click();
+        await learningStage(page, "setup");
         for (const count of [5, 6, 7, 8, 9, 10]) {
-          await page.locator("#avalon-step-0").click();
+          await learningLesson(page, "basic-roles");
           await page.locator("#players").selectOption(String(count));
           await page.locator("#avalon-mode").selectOption("basic");
           check(
@@ -187,16 +188,18 @@ const server = spawn(process.execPath, ["scripts/serve-export.mjs"], {
             "Lady timing and restrictions remain available",
           );
           await fits(`${width}/${lang}/${count}: optional roles fit`);
-          await page.locator("#avalon-next").click();
-          check(
-            !(await page
-              .locator("#avalon-roster")
-              .evaluate((node) => node.open)) &&
-              !(await page
-                .locator("#avalon-quests")
-                .evaluate((node) => node.open)),
+          await page.locator("#lesson-next").click();
+          if (count === 5) check(
+            !(await page.locator("#avalon-roster").evaluate(node => node.open)) &&
+            !(await page.locator("#avalon-quests").evaluate(node => node.open)),
             "References begin collapsed",
           );
+          else check(
+            await page.locator("#avalon-roster").evaluate(node => node.open) &&
+            await page.locator("#avalon-quests").evaluate(node => node.open),
+            "Mounted setup references stay open between lessons",
+          );
+          if (!await page.locator("#avalon-roster").evaluate(node => node.open))
           await page.locator("#avalon-roster > summary").click();
           check(
             (await page.locator("#roster").innerText()).includes(
@@ -204,7 +207,8 @@ const server = spawn(process.execPath, ["scripts/serve-export.mjs"], {
             ),
             "Selected roster survives steps",
           );
-          await page.locator("#avalon-quests > summary").click();
+          if (!await page.locator("#avalon-quests").evaluate(node => node.open))
+            await page.locator("#avalon-quests > summary").click();
           const questSizes = {
             5: [2, 3, 2, 3, 3],
             6: [2, 3, 4, 3, 4],
@@ -229,7 +233,7 @@ const server = spawn(process.execPath, ["scripts/serve-export.mjs"], {
           await fits(`${width}/${lang}/${count}: expanded references fit`);
           await page.locator("#setup-check-0").check();
           await page.locator("#setup-check-1").check();
-          await page.locator("#avalon-next").click();
+          await page.locator("#lesson-next").click();
           await page.waitForSelector(
             "[data-tool=setup-script][data-ready=true]",
           );
@@ -287,8 +291,8 @@ const server = spawn(process.execPath, ["scripts/serve-export.mjs"], {
     await page.reload();
     await ready();
     check(
-      (await page.locator("#avalon-step-2").getAttribute("aria-current")) ===
-        "step",
+      (await page.locator("[data-learning-step]").getAttribute("data-learning-step")) ===
+        "avalon-opening",
       "Flow position recovers after reload",
     );
     check(
@@ -297,7 +301,7 @@ const server = spawn(process.execPath, ["scripts/serve-export.mjs"], {
         !(await page.locator("#setup-check-3").isChecked()),
       "Legacy checklist recovers after reload with the new choice check unmarked",
     );
-    await page.locator("#avalon-step-0").click();
+    await learningLesson(page, "basic-roles");
     check(
       (await page.locator("#players").inputValue()) === "10",
       "Saved setup survives reload",
@@ -315,20 +319,19 @@ const server = spawn(process.execPath, ["scripts/serve-export.mjs"], {
       !(await page.locator("#setup-check-0").isChecked()),
       "Configuration change invalidates old checks",
     );
-    await page.locator("#avalon-step-0").focus();
-    await page.keyboard.press("Tab");
+    await page.locator("#lesson-next").focus();
     await page.keyboard.press("Enter");
     check(
-      (await page.locator("#avalon-step-1").getAttribute("aria-current")) ===
-        "step",
+      (await page.locator("[data-learning-step]").getAttribute("data-learning-step")) ===
+        "avalon-prepare",
       "Flow works with keyboard",
     );
     await page.waitForFunction(() =>
-      document.activeElement?.classList.contains("avalon-step-title"),
+      document.activeElement?.matches(".lesson-copy h3"),
     );
     check(
       await page
-        .locator(".avalon-step-title")
+        .locator(".lesson-copy h3")
         .evaluate((node) => node === document.activeElement),
       "Step change focuses the heading",
     );

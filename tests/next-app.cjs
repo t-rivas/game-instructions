@@ -1,3 +1,4 @@
+const {learningStage, learningLesson} = require("./learning-navigation.cjs");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -88,7 +89,7 @@ const origin = new Promise((resolve, reject) => {
             check(
               await staticPage.locator(".lesson-copy").isVisible() && (await staticPage.locator(".lesson-copy").evaluate(node => {
                 const copy = node.cloneNode(true);
-                copy.querySelectorAll(".glossary-definition").forEach(definition => definition.remove());
+                copy.querySelectorAll(".glossary-definition, .glossary-disclosure").forEach(definition => definition.remove());
                 return copy.textContent.replace(/\s+/g, " ");
               })).includes(catalog.games[game].goal[lang]),
               "The objective is readable before JavaScript",
@@ -245,10 +246,10 @@ const origin = new Promise((resolve, reject) => {
         .evaluate((node) => node.getBoundingClientRect().top)) < 800,
       "Phone learning sequence is brought forward",
     );
-    await page.locator('[data-learning-stage="setup"]').click();
+    await learningStage(page, "setup");
     await page.locator("#players").selectOption("5");
     await page.locator("#avalon-mode").selectOption("optional");
-    await page.locator("#avalon-step-1").click();
+    await learningLesson(page, "avalon-prepare");
     await page.locator("#avalon-roster > summary").click();
     check(
       (await page.locator("#roster").innerText()).includes(
@@ -256,12 +257,12 @@ const origin = new Promise((resolve, reject) => {
       ),
       "Avalon setup still computes the roster",
     );
-    await page.locator("#avalon-step-0").click();
+    await learningLesson(page, "basic-roles");
     check(
       await page.locator("#role-mordred").isDisabled(),
       "Role capacity still enforced",
     );
-    await page.locator("#avalon-step-1").click();
+    await learningLesson(page, "avalon-prepare");
     await page.locator("#setup-check-0").check();
     await page.locator("#setup-check-1").check();
     await clickRoute(
@@ -281,11 +282,11 @@ const origin = new Promise((resolve, reject) => {
     await page.reload();
     await ready();
     check(
-      (await page.locator("#avalon-step-1").getAttribute("aria-current")) ===
-        "step" && (await page.locator("#setup-check-0").isChecked()),
+      (await page.locator("[data-learning-step]").getAttribute("data-learning-step")) ===
+        "avalon-prepare" && (await page.locator("#setup-check-0").isChecked()),
       "Avalon configuration and checklist recover after reload",
     );
-    await page.locator("#avalon-step-0").click();
+    await learningLesson(page, "basic-roles");
     check(
       (await page.locator("#players").inputValue()) === "5",
       "Saved Avalon player count recovers",
@@ -815,6 +816,7 @@ const origin = new Promise((resolve, reject) => {
         window.__printed = true;
       };
     });
+    await page.locator("#guide-actions > summary").click();
     await page.locator("#print").click();
     await page.waitForURL(base + "/en/monopoly/rules/");
     await ready();
@@ -916,7 +918,7 @@ const origin = new Promise((resolve, reject) => {
     );
     await blocked.goto(base + "/en/chess/learn/");
     await blocked.waitForSelector("[data-tool=sources][data-ready=true]");
-    await blocked.locator('[data-learning-stage="setup"]').click();
+    await learningStage(blocked, "setup");
     await blocked.locator("#setup-check-0").check();
     check(
       (await blocked.locator(".setup-checklist").innerText()).includes(

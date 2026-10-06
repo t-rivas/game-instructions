@@ -144,3 +144,7 @@
 .practice-actions button,#practice-helper-retry{border:1px solid var(--border);border-radius:9px;background:var(--panel);color:var(--text);font:inherit;cursor:pointer}
 .practice-actions button:last-child{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
 .lesson-practice>a{display:inline-flex;align-items:center;min-height:44px;overflow-wrap:anywhere}
+
+/* The same explicit close action is available in the portable image viewer. */
+.image-close{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px;border-radius:10px;font-family:inherit;font-size:14px;line-height:1.5}
+.image-close [aria-hidden=true]{font-size:24px;line-height:1}

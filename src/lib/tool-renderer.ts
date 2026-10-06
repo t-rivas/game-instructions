@@ -16,6 +16,7 @@ export function renderTools(
       ? { play: runtime.view("play") }
       : {
           helper: runtime.view("helper"),
+          ...(view === "learn" ? {"lesson-helper":runtime.view("lesson-helper"), "practice-helper":runtime.view("practice-helper")} : {}),
           ...(view === "learn" && game === "avalon"
             ? {
                 "setup-roles": runtime.view("setup-roles"),

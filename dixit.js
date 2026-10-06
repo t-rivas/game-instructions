@@ -34,4 +34,4 @@ GAMES.dixit={
  ],
  sources:[[L('Dixit · Libellud / Asmodee · 2021 rules','Dixit · Libellud / Asmodee · reglas de 2021'),'https://cdn.svc.asmodee.net/production-asmodeeca/uploads/2023/07/DIXIT_REFRESH_RULES_US-UK-AU_BD.pdf']]
 };
-function dixitHelper(){return dixitSheet()+`<details class="practice-fold" id="dixit-example"><summary>${tr('See a scoring example','Ver un ejemplo de puntuación')}</summary><p>${e(GAMES.dixit.sections.find(s=>s.id==='scoring').paragraphs[3])}</p></details>`;}
+function dixitHelper(){return dixitSheet()+`<details class="practice-fold" id="dixit-example"><summary>${tr('See a scoring example','Ver un ejemplo de puntuación')}</summary><p>${e(GAMES.dixit.sections.find(s=>s.id==='scoring').paragraphs[3])}</p><a href="#${state.game}/learn/scoring-example">${tr('Trace the cards, votes and totals above','Sigue las cartas, los votos y los totales arriba')}</a></details>`;}

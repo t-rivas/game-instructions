@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { requestRuleFocus, focusRequestedRule } from "@/lib/rule-focus";
 import { useEffect, useRef, useState } from "react";
 import { cleanQuery } from "@/lib/guide-link";
 import {
@@ -8,9 +9,11 @@ import {
   matchingHighlightTerms,
   normalizeRuleText,
   searchRules,
+  relatedRuleCards,
 } from "@/lib/rule-search";
-import type { Language, RuleSection, ToolState } from "@/lib/types";
+import type { Language, LessonCard, RuleSection, ToolState, View } from "@/lib/types";
 import { Icon } from "./Icon";
+import { LessonCardArt } from "./LessonCardArt";
 export function useRuleQuery(id: string, lang: Language) {
   const [query, setQuery] = useState(""),
     key = `tablefolk-rule-search-${lang}-${id}`;
@@ -105,6 +108,7 @@ export function RuleSearch({
   prefix = "",
   options,
   hrefFor,
+  onPreview,
 }: {
   id: string;
   lang: Language;
@@ -116,6 +120,7 @@ export function RuleSearch({
   prefix?: string;
   options?: ToolState;
   hrefFor?: (section: string, query: string) => string;
+  onPreview?: (section: string, opener: HTMLElement) => void;
 }) {
   const input = useRef<HTMLInputElement>(null),
     tr = (en: string, es: string) => (lang === "es" ? es : en),
@@ -130,7 +135,13 @@ export function RuleSearch({
   ) => {
     if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey)
       return;
+    if (onPreview) {
+      event.preventDefault();
+      onPreview(section, event.currentTarget);
+      return;
+    }
     const target = new URL(event.currentTarget.href);
+    requestRuleFocus(target.pathname, section);
     onSelect?.(section);
     if (
       target.origin === location.origin &&
@@ -145,11 +156,7 @@ export function RuleSearch({
           target.pathname + target.search + target.hash,
         );
       window.dispatchEvent(new Event("tablefolk-guide-location"));
-      requestAnimationFrame(() =>
-        document
-          .getElementById(section)
-          ?.scrollIntoView({ behavior: "instant" }),
-      );
+      requestAnimationFrame(focusRequestedRule);
     }
   };
   return (
@@ -189,8 +196,8 @@ export function RuleSearch({
         </button>
       </div>
       {shortcuts.length ? (
-        <details className="common-questions">
-          <summary>{tr("Common questions", "Preguntas frecuentes")}</summary>
+        <section className="common-questions" aria-labelledby={`common-questions-title${prefix}`}>
+          <h3 id={`common-questions-title${prefix}`}>{tr("Common questions", "Preguntas frecuentes")}</h3>
           <ul>
             {shortcuts.map((item) => (
               <li key={item.section}>
@@ -217,7 +224,7 @@ export function RuleSearch({
               </li>
             ))}
           </ul>
-        </details>
+        </section>
       ) : null}
       <div id={resultsId} data-query={query} hidden={!q}>
         <p className="muted" role="status" aria-atomic="true">
@@ -293,18 +300,38 @@ export function RuleSearch({
 export function RuleSearchDialog({
   open,
   onClose,
+  cards = {},
+  edition = "",
+  view,
+  onShare,
   ...props
 }: React.ComponentProps<typeof RuleSearch> & {
   open: boolean;
   onClose: () => void;
+  cards?: Record<string, LessonCard>;
+  edition?: string;
+  view?: View;
+  onShare: (section: string) => void;
 }) {
   const dialog = useRef<HTMLDialogElement>(null),
+    selectedRule = useRef(false),
     returnFocus = useRef<HTMLElement | null>(null),
+    resultFocus = useRef<HTMLElement | null>(null),
+    resultScroll = useRef(0),
+    heading = useRef<HTMLHeadingElement>(null),
     tr = (en: string, es: string) => (props.lang === "es" ? es : en);
+  const [selected, setSelected] = useState<string>();
+  const section = props.sections.find((item) => item.id === selected);
+  const related = section ? relatedRuleCards(section.id, cards, props.options) : [];
+  const href = section
+    ? props.hrefFor?.(section.id, props.query) || `/${props.lang}/${props.id}/rules/?q=${encodeURIComponent(props.query)}#${section.id}`
+    : "";
   useEffect(() => {
     const node = dialog.current;
     if (!node) return;
     if (open) {
+      selectedRule.current = false;
+      setSelected(undefined);
       returnFocus.current =
         document.activeElement === document.body
           ? document.getElementById("find-rule")
@@ -313,15 +340,17 @@ export function RuleSearchDialog({
       node.querySelector<HTMLInputElement>("input")?.focus();
     } else if (node.open) {
       node.close();
-      returnFocus.current?.focus();
+      if (!selectedRule.current) returnFocus.current?.focus({ preventScroll: true });
     }
     const escape = (event: KeyboardEvent) => {
-      if (open && event.key === "Escape") {
+      // Image enlargement and sharing are separate top-layer dialogs. Escape
+      // dismisses only the dialog currently holding focus.
+      if (open && event.key === "Escape" && document.activeElement?.closest("dialog") === node) {
         event.preventDefault();
         event.stopPropagation();
         node.close();
         onClose();
-        requestAnimationFrame(() => returnFocus.current?.focus());
+        requestAnimationFrame(() => returnFocus.current?.focus({ preventScroll: true }));
       }
     };
     document.addEventListener("keydown", escape, true);
@@ -330,19 +359,29 @@ export function RuleSearchDialog({
       if (node.open) node.close();
     };
   }, [open]);
+  useEffect(() => {
+    if (section) {
+      heading.current?.focus({ preventScroll: true });
+      if (dialog.current) dialog.current.scrollTop = 0;
+    }
+  }, [section?.id]);
+  const back = () => {
+    setSelected(undefined);
+    requestAnimationFrame(() => {
+      resultFocus.current?.focus({ preventScroll: true });
+      if (dialog.current) dialog.current.scrollTop = resultScroll.current;
+    });
+  };
   return (
     <dialog
       ref={dialog}
       id="rule-dialog"
       className="rule-dialog"
       aria-labelledby="rule-dialog-title"
-      onCancel={() => {
-        onClose();
-        returnFocus.current?.focus();
-      }}
+      onCancel={onClose}
       onClose={() => {
         onClose();
-        returnFocus.current?.focus();
+        if (!selectedRule.current) returnFocus.current?.focus({ preventScroll: true });
       }}
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
@@ -359,15 +398,63 @@ export function RuleSearchDialog({
         </button>
       </div>
       {open ? (
-        <RuleSearch
-          {...props}
-          prefix="-dialog"
-          onSelect={(section) => {
-            props.onSelect?.(section);
-            dialog.current?.close();
-            onClose();
-          }}
-        />
+        <>
+          <div className="rule-preview-navigation">
+            {section ? <button type="button" onClick={back}>{tr("Back to results", "Volver a los resultados")}</button> : null}
+            <button type="button" onClick={onClose}>
+              {view === "play" ? tr("Back to table", "Volver a la mesa") : tr("Back to guide", "Volver a la guía")}
+            </button>
+          </div>
+          <div hidden={!!section}>
+            <RuleSearch {...props} prefix="-dialog" onPreview={(id, opener) => {
+              resultFocus.current = opener;
+              resultScroll.current = dialog.current?.scrollTop || 0;
+              setSelected(id);
+            }} />
+          </div>
+          {section ? (
+            <article className="rule-preview" data-rule-preview={section.id} aria-labelledby="rule-preview-title">
+              <h3 id="rule-preview-title" ref={heading} tabIndex={-1}>{section.title[props.lang]}</h3>
+              {edition ? <p className="muted">{edition}</p> : null}
+              <div className="rule-body">
+                {section.paragraphs.map((paragraph, i) => <p key={i}>
+                  <HighlightedText text={paragraph[props.lang]} query={props.query} id={props.id} lang={props.lang} />
+                </p>)}
+              </div>
+              {related.length ? (
+                <section className="rule-preview-cards" aria-labelledby="rule-preview-cards-title">
+                  <h4 id="rule-preview-cards-title">{tr("Related cards", "Cartas relacionadas")}</h4>
+                  {related.map((card) => (
+                    <article className="rule-preview-card" key={card.id} data-rule-card={card.id}>
+                      <LessonCardArt id={card.id} art={card.art} lang={props.lang} />
+                      <div>
+                        <h5>{(card.name || card.art.title)[props.lang]}</h5>
+                        <p>{card.effect[props.lang]}</p>
+                        <p><strong>{tr("When it matters:", "Cuándo importa:")}</strong> {card.when[props.lang]}</p>
+                        {card.note ? <small>{card.note[props.lang]}</small> : null}
+                      </div>
+                    </article>
+                  ))}
+                </section>
+              ) : null}
+              <div className="rule-preview-actions">
+                <Link prefetch={false} href={href} onClick={(event) => {
+                  if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+                  selectedRule.current = true;
+                  requestRuleFocus(new URL(event.currentTarget.href).pathname, section.id);
+                  props.onSelect?.(section.id);
+                  onClose();
+                }}>{tr("Open full rules", "Abrir reglas completas")}</Link>
+                <button type="button" onClick={(event) => {
+                  // Safari does not focus buttons on pointer activation. Give the
+                  // share dialog an explicit opener so closing returns here.
+                  event.currentTarget.focus({ preventScroll: true });
+                  onShare(section.id);
+                }}>{tr("Share rule", "Compartir regla")}</button>
+              </div>
+            </article>
+          ) : null}
+        </>
       ) : null}
     </dialog>
   );

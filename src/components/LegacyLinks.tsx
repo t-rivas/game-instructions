@@ -22,7 +22,9 @@ export function LegacyLinks({ gameIds }: { gameIds: string[] }) {
             string
           >
         )[tab] || "learn";
-      router.replace(`/${lang}/${id}/${view}/${section ? "#" + section : ""}`);
+      router.replace(
+        `/${lang}/${id}/${view}/${location.search}${section ? "#" + section : ""}`,
+      );
     };
     migrate();
     window.addEventListener("hashchange", migrate);

@@ -126,7 +126,6 @@ const server = spawn(process.execPath, ["scripts/serve-export.mjs"], {
         );
       }
       await page.locator("#rule-search-clear").click();
-      await page.locator(".common-questions summary").click();
       await page.locator(".common-questions a").first().click();
       await ready(page);
       check(
@@ -200,7 +199,6 @@ const server = spawn(process.execPath, ["scripts/serve-export.mjs"], {
       (await page.locator(".rule-search-result").count()) >= 2,
       "Selected expansion adds its matching rules",
     );
-    await page.locator(".common-questions summary").click();
     check(
       (await page.locator(".common-questions").innerText()).includes(
         "Walk the Plank",
@@ -395,7 +393,8 @@ const server = spawn(process.execPath, ["scripts/serve-export.mjs"], {
           "Fresh link opens and highlights its exact rule",
         );
       } else {
-        await fresh.locator("#avalon-step-0").click();
+        await fresh.locator("[data-learning-stage=setup]").click();
+      await fresh.locator("#avalon-step-0").click();
         check(
           (await fresh.locator("#players").inputValue()) === "10" &&
             (await fresh.locator("[data-role]:checked").count()) === 4,
@@ -404,7 +403,7 @@ const server = spawn(process.execPath, ["scripts/serve-export.mjs"], {
         await fresh.locator("#setup-check-3").check();
         await fresh.locator("#avalon-step-2").click();
         check(
-          (await fresh.locator(".script").innerText()).includes(
+          (await fresh.locator("[data-tool=setup-script] .script").innerText()).includes(
             "EXCEPTO Mordred",
           ),
           "Fresh setup renders its selected recognition script",
@@ -446,6 +445,7 @@ const server = spawn(process.execPath, ["scripts/serve-export.mjs"], {
           "Language keeps shared choices",
         );
       await visit(fresh, "/en/avalon/learn/");
+      await fresh.locator("[data-learning-stage=setup]").click();
       await fresh.locator("#avalon-step-0").click();
       check(
         (await fresh.locator("#players").inputValue()) === "5",
@@ -462,6 +462,7 @@ const server = spawn(process.execPath, ["scripts/serve-export.mjs"], {
       page,
       "/en/avalon/learn/?shared=1&players=99&roles=anything&optional=evil,morgana,mordred,mordred&lady=true&extra=1#%ZZ",
     );
+    await page.locator("[data-learning-stage=setup]").click();
     await page.locator("#avalon-step-0").click();
     const invalid = new URL(page.url());
     check(
@@ -477,6 +478,7 @@ const server = spawn(process.execPath, ["scripts/serve-export.mjs"], {
       page,
       "/en/avalon/learn/?shared=1&players=5&roles=optional&optional=morgana,mordred,oberon,percival&lady=1",
     );
+    await page.locator("[data-learning-stage=setup]").click();
     await page.locator("#avalon-step-0").click();
     check(
       (await page.locator("[data-role]:checked").count()) === 2 &&

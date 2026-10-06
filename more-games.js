@@ -18,7 +18,7 @@ Object.assign(GAMES, {
     quick:[
       [L('Bid','Apuesta'),'0–10',L('Predict exactly how many tricks you will take this round. Reveal bids together.','Predice exactamente cuántas bazas ganarás esta ronda. Revelen las apuestas a la vez.')],
       [L('Follow suit','Seguir palo'),'1 card',L('A numbered lead sets a suit. Play that suit if you have it, or play any special card.','Una salida numérica fija el palo. Juega ese palo si lo tienes, o cualquier carta especial.')],
-      [L('Power order','Jerarquía'),'⚑',L('Escape < off-suit < lead suit < black trump < Mermaid < Pirate < Skull King; Mermaid beats Skull King.','Escape < otro palo < palo de salida < triunfo negro < Sirena < Pirata < Skull King; la Sirena vence al Skull King.')],
+      [L('Who wins?','¿Quién gana?'),'⚑',L('Numbers: highest led suit, unless black trump is played. Characters change the result: Pirate beats Mermaid, King beats Pirate, and Mermaid wins when all three meet.','Numeradas: gana la mayor del palo de salida, salvo que haya triunfo negro. Los personajes cambian el resultado: Pirata supera a Sirena, Rey supera a Pirata y Sirena gana si coinciden los tres.')],
       [L('Exact bid','Apuesta exacta'),'+20',L('Positive bid: 20 per won trick. Zero bid: 10 per card dealt. Capture bonuses count only when exact.','Apuesta positiva: 20 por baza ganada. Apuesta cero: 10 por carta repartida. Las bonificaciones cuentan solo al acertar.')],
       [L('Wrong bid','Apuesta fallida'),'−10',L('Positive bid: lose 10 per trick of difference. Failed zero bid: lose 10 per card dealt.','Apuesta positiva: pierde 10 por cada baza de diferencia. Cero fallido: pierde 10 por carta repartida.')]
     ],

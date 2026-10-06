@@ -11,6 +11,7 @@ import type { GameCardData, Language } from "@/lib/types";
 import { Icon } from "./Icon";
 import { SavedGames } from "./SavedGames";
 import {
+  canWriteStored,
   readStored,
   writeStored,
   recordGameVisit,
@@ -46,8 +47,11 @@ export function Collection({
 }) {
   const [savedReady, setSavedReady] = useState(false),
     [returning, setReturning] = useState(false);
-  const [{ query, players, duration, favoritesOnly }, updateFilters] =
-    useCollectionFilters(lang, savedReady);
+  const [
+    { query, players, duration, favoritesOnly },
+    updateFilters,
+    finishSearch,
+  ] = useCollectionFilters(lang, savedReady);
   const [favorites, setFavorites] = useState<string[]>([]),
     [favoriteError, setFavoriteError] = useState(false),
     [expansion, setExpansion] = useState(false);
@@ -63,26 +67,59 @@ export function Collection({
     setReturning(returningVisitor);
     writeStored("tablefolk-preferences", { ...preferences, visited: true });
   }, []);
+  const storedFavorites = (fallback: string[] = []) => {
+    const saved = readStored<unknown>("tablefolk-favorites", fallback);
+    return Array.isArray(saved)
+      ? [...new Set(saved.filter((id) => cards.some((card) => card.id === id)))]
+      : [];
+  };
   useEffect(() => {
-    const saved = readStored<unknown>("tablefolk-favorites", []);
-    setFavorites(
-      Array.isArray(saved)
-        ? saved.filter((id) => cards.some((card) => card.id === id))
-        : [],
-    );
-    setExpansion(
-      readStored<{ skullExpansion?: boolean }>("tablefolk-preferences", {})
-        .skullExpansion === true,
-    );
+    const sync = () => {
+      setFavorites(storedFavorites());
+      setExpansion(
+        readStored<{ skullExpansion?: boolean }>("tablefolk-preferences", {})
+          .skullExpansion === true,
+      );
+    };
+    sync();
+    const changed = (event: StorageEvent) => {
+      if (
+        event.key === null ||
+        ["tablefolk-favorites", "tablefolk-preferences"].includes(event.key)
+      )
+        sync();
+    };
+    window.addEventListener("storage", changed);
+    return () => window.removeEventListener("storage", changed);
   }, [cards]);
   const playerRange = (id: string, value: string) =>
     id === "skull_king" && expansion ? "2–9" : value;
   const toggleFavorite = (id: string) => {
-    const next = favorites.includes(id)
-      ? favorites.filter((game) => game !== id)
-      : [...favorites, id];
-    setFavorites(next);
-    setFavoriteError(!writeStored("tablefolk-favorites", next));
+    const wanted = !favorites.includes(id);
+    const save = () => {
+      // Read inside the lock, so concurrent tabs cannot replace each other's edits.
+      const current = storedFavorites(favorites);
+      const next = wanted
+        ? [...new Set([...current, id])]
+        : current.filter((game) => game !== id);
+      setFavorites(next);
+      setFavoriteError(!writeStored("tablefolk-favorites", next));
+    };
+    // Reflect the user's intent and report blocked storage during this event,
+    // rather than waiting for the asynchronous cross-tab lock callback.
+    setFavorites(
+      wanted
+        ? [...new Set([...favorites, id])]
+        : favorites.filter((game) => game !== id),
+    );
+    if (!canWriteStored()) {
+      save();
+      return;
+    }
+    setFavoriteError(false);
+    if (navigator.locks?.request)
+      void navigator.locks.request("tablefolk-favorites", save).catch(save);
+    else save();
   };
   const tr = (en: string, es: string) => (lang === "es" ? es : en);
   const matches = cards.filter(
@@ -185,6 +222,8 @@ export function Collection({
               <input
                 id="game-search"
                 type="search"
+                maxLength={120}
+                onBlur={finishSearch}
                 value={query}
                 onChange={(event) =>
                   updateFilters({ query: event.target.value })

@@ -143,8 +143,8 @@ export function TableControls({
           onClick={() => onHelp(!help)}
         >
           {help
-            ? tr("Hide help", "Ocultar ayuda")
-            : tr("Show help", "Mostrar ayuda")}
+            ? tr("Hide turn reference", "Ocultar referencia de turnos")
+            : tr("Show turn reference", "Mostrar referencia de turnos")}
         </button>
       </div>
       <span

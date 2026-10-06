@@ -1,3 +1,4 @@
+import { selectedSetup } from "@/generated/setup-context";
 import type { ToolState, Translation } from "./types";
 const step = (en: string, es: string): Translation => ({ en, es });
 const steps: Record<string, Translation[]> = {
@@ -78,11 +79,11 @@ const steps: Record<string, Translation[]> = {
     ),
     step(
       "Sort resource and development cards. Put Longest Road and Largest Army within reach.",
-      "Separa las cartas de recursos y desarrollo. Deja a mano Gran Ruta Comercial y Gran Ejército.",
+      "Separa las cartas de recursos y desarrollo. Deja a mano Camino más largo y Gran ejército.",
     ),
     step(
-      "Place the first settlements and roads clockwise, then the second pair in reverse order. Collect resources from the second settlement’s adjacent terrain.",
-      "Coloquen los primeros poblados y caminos en sentido horario y los segundos en orden inverso. Reciban los recursos de los terrenos junto al segundo poblado.",
+      "For a custom layout, place one settlement and adjacent road clockwise, then the second pair in reverse order. Keep neighboring intersections empty. Take resources from the second settlement. For the fixed beginner layout, follow your box’s positions and starting resources.",
+      "Con un mapa propio, coloquen un poblado y un camino adyacente en sentido horario y el segundo par en orden inverso. Dejen libres las intersecciones vecinas. Reciban recursos del segundo poblado. Para el mapa inicial fijo, sigan las posiciones y recursos de su caja.",
     ),
   ],
   secret_hitler: [
@@ -214,7 +215,16 @@ const steps: Record<string, Translation[]> = {
 };
 export function setupSteps(id: string, options: ToolState): Translation[] {
   return [
-    ...steps[id],
+    ...steps[id].map((text, i) => {
+      const selected = selectedSetup(id, options);
+      if (id === "coup" && i === 0) return selected[0];
+      if (id === "coup" && i === 1) return selected[1];
+      if (id === "coup" && i === 2 && options.guidePlayers && options.guidePlayers !== 2) return step("Choose who starts.", "Elijan quién empieza.");
+      if (id === "sushi_go_party" && i === 0) return {en: selected[0].en + " " + selected[2].en, es: selected[0].es + " " + selected[2].es};
+      if (id === "sushi_go_party" && i === 2) return selected[1];
+      if (id === "skull_king" && i === 0) return selected[0];
+      return text;
+    }),
     ...(id === "coup" && options.reformation
       ? [
           step(

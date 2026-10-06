@@ -1,4 +1,5 @@
-import type { Language, RuleSection, ToolState, Translation } from "./types";
+import { glossaryVocabulary } from "./glossary";
+import type { Language, LessonCard, RuleSection, ToolState, Translation } from "./types";
 export const normalizeRuleText = (value: string) =>
   value
     .normalize("NFD")
@@ -244,7 +245,7 @@ export function translatedTerms(
 ) {
   const normalized = normalizeRuleText(query.trim());
   const terms = [query];
-  for (const [en, es] of [...commonVocabulary, ...(vocabulary[id] || [])]) {
+  for (const [en, es] of [...commonVocabulary, ...(vocabulary[id] || []), ...glossaryVocabulary(id)]) {
     const all = [...en, ...es];
     if (
       all.some(
@@ -442,6 +443,12 @@ const questions: Record<string, Question[]> = {
   ],
   skull_king: [
     question(
+      "hierarchy",
+      "mermaid",
+      "Does a Mermaid beat the Skull King?",
+      "¿Una Sirena le gana a Skull King?",
+    ),
+    question(
       "scoring",
       "zero",
       "How do zero bids score?",
@@ -517,4 +524,18 @@ export function matchingHighlightTerms(
     ...translatedTerms(id, query, lang),
     ...matchingTerms(text, query, true),
   ];
+}
+
+/** Relationships use authored section/card IDs; titles are never used to guess a card. */
+export function relatedRuleCards(
+  section: string,
+  cards: Record<string, LessonCard>,
+  options?: ToolState,
+) {
+  return Object.values(cards).filter((card) =>
+    card.rule === section &&
+    (!card.exchange || card.exchange === options?.exchange) &&
+    (!card.expansion || options?.skullExpansion) &&
+    (!card.role || (options?.avalonMode !== "basic" && options?.optional.includes(card.role))),
+  );
 }

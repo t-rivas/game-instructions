@@ -37,7 +37,7 @@ export function SiteChrome({
         saved.lang === "en" &&
         (!location.hash || location.hash === "#collection")
       )
-        router.replace("/en/" + location.hash);
+        router.replace("/en/" + location.search + location.hash);
     } catch {}
   }, [pathname, router]);
   useEffect(() => {

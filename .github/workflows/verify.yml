@@ -16,8 +16,22 @@ jobs:
       - run: npx playwright install --with-deps chromium webkit
       - run: npm run build
       - run: node tests/image-assets.mjs
+      - run: npm run test:runtimes
+      - run: npm run test:setup-context
+      - run: npm run test:setup-diagrams
+      - run: BROWSER=webkit npm run test:setup-diagrams
+      - run: npm run test:improvements
+      - run: BROWSER=webkit npm run test:improvements
+      - run: npm run test:turn-reference
+      - run: BROWSER=webkit npm run test:turn-reference
+      - run: npm run test:practice
+      - run: BROWSER=webkit npm run test:practice
+      - run: npm run test:learning
+      - run: BROWSER=webkit npm run test:learning
       - run: npm run test:experience
       - run: BROWSER=webkit npm run test:experience
+      - run: npm run test:rule-preview
+      - run: BROWSER=webkit npm run test:rule-preview
       - run: npm run test:rules-table
       - run: BROWSER=webkit npm run test:rules-table
       - run: npm run test:web
@@ -25,7 +39,12 @@ jobs:
       - run: npm test
       - run: npm run test:flows
       - run: BROWSER=webkit npm run test:flows
+      - run: npm run test:avalon
+      - run: npm run test:scoring-examples
+      - run: npm run test:skull-tricks
+      - run: npm run test:coup-lessons
       - run: npm run test:cards
+      - run: npm run test:lesson-cards
       - run: npm run test:scoreboard-ux
       - run: BROWSER=webkit npm run test:scoreboard-ux
       - run: npm run test:truco

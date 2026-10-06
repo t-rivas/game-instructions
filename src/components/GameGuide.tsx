@@ -1,4 +1,7 @@
 "use client";
+import { GuideSetupContext } from "./GuideSetupContext";
+import { contextualBasics } from "@/generated/setup-context";
+import { focusRequestedRule } from "@/lib/rule-focus";
 import { ShareDialog } from "./ShareDialog";
 import { TableControls } from "./TableControls";
 import {
@@ -10,6 +13,10 @@ import {
   sharedOptions,
 } from "@/lib/guide-link";
 import { useCollectionReturn } from "@/lib/collection-state";
+import { ScoringExample } from "./ScoringExample";
+import { SkullTrickLesson } from "./SkullTrickLesson";
+import { CoupLesson } from "./CoupLesson";
+import { AvalonLesson } from "./AvalonLesson";
 import { ResponsiveImage } from "./ResponsiveImage";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -28,10 +35,10 @@ import type {
   Artwork,
   Game,
   Language,
+  LessonCardTeaching,
   ToolKind,
   ToolRuntime,
   ToolState,
-  Translation,
   View,
 } from "@/lib/types";
 import { Icon } from "./Icon";
@@ -41,6 +48,7 @@ import {
   RuleSearchDialog,
   useRuleQuery,
 } from "./RuleSearch";
+import { LearningSequence } from "./LearningSequence";
 import { SetupChecklist } from "./SetupChecklist";
 import { setupSteps } from "@/lib/setup-steps";
 import {
@@ -59,9 +67,10 @@ interface GuideProps {
   art: Artwork;
   icons: Record<string, string>;
   tools: Partial<Record<ToolKind, string>>;
+  cardTeaching: LessonCardTeaching;
 }
 const defaults: ToolState = {
-  exchange: "inquisitor",
+  exchange: "ambassador",
   reformation: false,
   skullExpansion: false,
   players: 7,
@@ -79,7 +88,11 @@ function GuideLocation() {
   }, [params]);
   return null;
 }
-function Tool({ kind, initial }: { kind: ToolKind; initial: string }) {
+function Tool({ kind, initial, onTableJump }: {
+  kind: ToolKind;
+  initial: string;
+  onTableJump?: (tool: boolean) => void;
+}) {
   const runtime = useContext(EngineContext),
     router = useRouter();
   const [html, setHtml] = useState(() =>
@@ -87,7 +100,8 @@ function Tool({ kind, initial }: { kind: ToolKind; initial: string }) {
     ),
     [prepared, setPrepared] = useState<ToolRuntime | null>(runtime),
     root = useRef<HTMLDivElement>(null),
-    open = useRef<string[]>([]);
+    open = useRef<string[]>([]),
+    resumeFocused = useRef(false);
   useEffect(() => {
     if (!runtime) return;
     const refresh = () => {
@@ -114,6 +128,20 @@ function Tool({ kind, initial }: { kind: ToolKind; initial: string }) {
       if (node) node.open = true;
     }
     root.current?.setAttribute("data-ready", "true");
+    // Recovery replaces the SSR markup. Resume must focus the bound controls,
+    // rather than a heading that is about to be detached by that replacement.
+    if (kind === "play" && !resumeFocused.current && location.hash === "#active-table-tool") {
+      resumeFocused.current = true;
+      const tool = root.current?.querySelector<HTMLElement>("#active-table-tool");
+      let fullScreen = false;
+      try {
+        fullScreen = sessionStorage.getItem(`tablefolk-focus-play-${runtime.state.game}`) === "true";
+      } catch {}
+      const focus = tool?.querySelector<HTMLElement>(fullScreen
+        ? "button:not(:disabled), input, select" : "#active-table-tool-heading");
+      tool?.scrollIntoView({ block: "start" });
+      focus?.focus({ preventScroll: true });
+    }
   }, [html, runtime, prepared, kind]);
   useEffect(() => {
     if (kind !== "play" || !root.current) return;
@@ -148,6 +176,13 @@ function Tool({ kind, initial }: { kind: ToolKind; initial: string }) {
           markGameActivity(runtime.state.game as string);
       }}
       onClickCapture={(event) => {
+        const jump = (event.target as Element).closest("#jump-to-tool, #back-to-reference");
+        if (jump && onTableJump) {
+          event.preventDefault();
+          event.stopPropagation();
+          onTableJump(jump.id === "jump-to-tool");
+          return;
+        }
         if (
           kind === "play" &&
           runtime &&
@@ -194,166 +229,6 @@ function Tool({ kind, initial }: { kind: ToolKind; initial: string }) {
       }}
       dangerouslySetInnerHTML={{ __html: html }}
     />
-  );
-}
-function useLessonStep(id: string) {
-  const [step, setStep] = useState(0);
-  useEffect(() => {
-    try {
-      const value = Number(sessionStorage.getItem(`tablefolk-lesson-${id}`));
-      setStep(Number.isInteger(value) && value >= 0 ? value : 0);
-    } catch {}
-  }, [id]);
-  return [
-    step,
-    (next: number) => {
-      setStep(next);
-      try {
-        sessionStorage.setItem(`tablefolk-lesson-${id}`, String(next));
-      } catch {}
-    },
-  ] as const;
-}
-const lessonTitles: Record<string, Translation[]> = {
-  coup: [
-    { en: "Set the table", es: "Prepara la mesa" },
-    { en: "Make your move", es: "Haz tu jugada" },
-    { en: "Challenge a character", es: "Desafía un personaje" },
-    { en: "Stay in the game", es: "Sigue en la partida" },
-    { en: "Change sides", es: "Cambia de bando" },
-  ],
-  avalon: [
-    { en: "Deal secret roles", es: "Reparte personajes" },
-    { en: "Propose a team", es: "Propón un equipo" },
-    { en: "Vote together", es: "Voten juntos" },
-    { en: "Go on the quest", es: "Completen la misión" },
-    { en: "Protect Merlin", es: "Protejan a Merlín" },
-  ],
-  poker: [
-    { en: "Cards, chips & blinds", es: "Cartas, fichas y ciegas" },
-    { en: "Make your first bet", es: "Haz tu primera apuesta" },
-    { en: "Reveal the shared cards", es: "Muestra las cartas compartidas" },
-    { en: "Find the winning hand", es: "Encuentra la mano ganadora" },
-  ],
-  moth: [
-    { en: "Meet the guard", es: "Conoce al guardián" },
-    { en: "Play your card", es: "Juega tu carta" },
-    { en: "Be a little sneaky", es: "Haz una pequeña trampa" },
-    { en: "When the guard catches you", es: "Cuando el guardián te descubre" },
-  ],
-  dixit: [
-    { en: "Deal the pictures", es: "Reparte las imágenes" },
-    { en: "Give a clue", es: "Da una pista" },
-    {
-      en: "Find the storyteller’s card",
-      es: "Encuentra la carta del narrador",
-    },
-    { en: "Count the points", es: "Cuenta los puntos" },
-    { en: "Start the next round", es: "Empieza la siguiente ronda" },
-  ],
-};
-function Lesson({
-  id,
-  game,
-  lang,
-  icons,
-  options,
-  readyHref,
-}: {
-  readyHref: string;
-  id: string;
-  game: Game;
-  lang: Language;
-  icons: Record<string, string>;
-  options: ToolState;
-}) {
-  const runtime = useContext(EngineContext),
-    [savedStep, setStep] = useLessonStep(id);
-  const tr = (en: string, es: string) => (lang === "es" ? es : en);
-  const steps = runtime ? runtime.lessonSteps() : game.basics;
-  const titles = lessonTitles[id] || [
-    ...(game.lessonTitles || []),
-    ...(id === "skull_king" && options.skullExpansion
-      ? game.expansionLessonTitles || []
-      : []),
-  ];
-  const step = Math.min(savedStep, steps.length - 1);
-  return (
-    <section id="basics" className="block">
-      <div className="lesson-heading">
-        <h2>
-          {tr("Learn one move at a time.", "Aprende una jugada a la vez.")}
-        </h2>
-        <span className="lesson-counter">
-          {step + 1} / {steps.length}
-        </span>
-      </div>
-      <div
-        className="lesson"
-        aria-roledescription={tr("Step-by-step guide", "Guía paso a paso")}
-      >
-        <div
-          className="lesson-dots"
-          role="group"
-          aria-label={tr("Choose a step", "Elige un paso")}
-        >
-          {steps.map((_, i) => (
-            <button
-              key={i}
-              id={`lesson-step-${i}`}
-              data-step={i}
-              aria-label={`${tr("Step", "Paso")} ${i + 1}: ${titles[i]?.[lang] || ""}`}
-              aria-current={i === step ? "step" : "false"}
-              onClick={() => setStep(i)}
-            >
-              <span>{i < step ? "✓" : i + 1}</span>
-            </button>
-          ))}
-        </div>
-        <div className="lesson-copy" aria-live="polite" aria-atomic="true">
-          <span className="eyebrow muted">
-            {tr("STEP", "PASO")} {step + 1}
-          </span>
-          <h3>{titles[step]?.[lang]}</h3>
-          <p>{steps[step][lang]}</p>
-        </div>
-        <div className="lesson-buttons">
-          <button
-            id="lesson-prev"
-            disabled={step === 0}
-            onClick={() => setStep(step - 1)}
-          >
-            <Icon path={icons.back} />
-            {tr("Previous", "Anterior")}
-          </button>
-          {step < steps.length - 1 ? (
-            <button
-              id="lesson-next"
-              className="accent-button"
-              onClick={() => setStep(step + 1)}
-            >
-              {tr("Next step", "Siguiente")}
-              <Icon path={icons.arrow} />
-            </button>
-          ) : (
-            <Link prefetch={false} className="accent-button" href={readyHref}>
-              {tr("Ready to play", "Listo para jugar")}
-              <Icon path={icons.check} />
-            </Link>
-          )}
-        </div>
-      </div>
-      <details className="lesson-overview" id="lesson-overview">
-        <summary>
-          {tr("See all steps together", "Ver todos los pasos juntos")}
-        </summary>
-        <ol className="step-list">
-          {steps.map((text, i) => (
-            <li key={i}>{text[lang]}</li>
-          ))}
-        </ol>
-      </details>
-    </section>
   );
 }
 function Variants({
@@ -457,6 +332,7 @@ function Variants({
   );
 }
 function AvalonSetup({
+  onContinue,
   lang,
   options,
   tools,
@@ -470,6 +346,7 @@ function AvalonSetup({
   ready: boolean;
   shared?: boolean;
   readyHref: string;
+  onContinue: () => void;
 }) {
   const stepKey = shared
     ? "tablefolk-shared-avalon-step"
@@ -545,6 +422,7 @@ function AvalonSetup({
           id="avalon"
           temporary={shared}
           readyHref={readyHref}
+          onContinue={onContinue}
           lang={lang}
           ready={ready}
           steps={steps}
@@ -589,6 +467,7 @@ export function GameGuide({
   art,
   icons,
   tools,
+  cardTeaching,
 }: GuideProps) {
   const collectionHref = useCollectionReturn(lang);
   const router = useRouter(),
@@ -627,24 +506,29 @@ export function GameGuide({
   const tr = (en: string, es: string) => (lang === "es" ? es : en);
   const changeFocus = (enabled: boolean) => {
     setFocusPlay(enabled);
+    if (enabled) setShowHelp(false);
     try {
       sessionStorage.setItem(`tablefolk-focus-play-${id}`, String(enabled));
     } catch {}
     requestAnimationFrame(() => document.getElementById("focus-play")?.focus());
   };
   useEffect(() => {
+    if (!runtime) return;
     try {
+      // A stale full-screen preference must not hide a fresh game's reference.
+      // Active sessions and explicit tool bookmarks retain the saved preference.
       setFocusPlay(
         view === "play" &&
-          sessionStorage.getItem(`tablefolk-focus-play-${id}`) === "true",
+          sessionStorage.getItem(`tablefolk-focus-play-${id}`) === "true" &&
+          (runtime.playStatus().active || location.hash === "#active-table-tool"),
       );
     } catch {}
-  }, [id, view]);
+  }, [id, view, runtime]);
   useEffect(() => {
     const shortcut = (event: KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
-        setSearchOpen(true);
+        if (!document.querySelector("dialog[open]")) setSearchOpen(true);
       }
       if (
         event.key === "Escape" &&
@@ -677,7 +561,7 @@ export function GameGuide({
     let cancelled = false,
       unsubscribe: (() => void) | undefined;
     setLoadError(false);
-    loadTools()
+    loadTools(id)
       .then((engine) => {
         if (cancelled) return;
         let previousChoices: string | undefined;
@@ -703,10 +587,16 @@ export function GameGuide({
             "goal",
             "helper",
             "learn-setup",
+            "setup-notes",
+            ...(cardTeaching.scoring ? ["scoring-example"] : []),
+            ...(cardTeaching.tricks ? ["skull-trick-lesson"] : []),
+            ...(cardTeaching.coup ? ["coup-lesson"] : []),
+            ...(cardTeaching.avalon ? ["avalon-lesson"] : []),
             "learning-tools",
             "chess-clock",
             "poker-timer",
             "table-sheet",
+            "active-table-tool",
           ];
           if (canonical.hash && !valid.includes(hash)) canonical.hash = "";
           if (canonical.href !== location.href)
@@ -808,6 +698,7 @@ export function GameGuide({
     options.reformation,
     options.skullExpansion,
     options.players,
+    options.guidePlayers,
     options.avalonMode,
     options.optional.join(","),
     options.lady,
@@ -816,6 +707,9 @@ export function GameGuide({
     () => new Set([game.sections[0].id]),
   );
   const lastFragment = useRef<string | undefined>(undefined);
+  useLayoutEffect(() => {
+    focusRequestedRule();
+  }, [expanded, searchOpen, id, lang, view]);
   useEffect(() => {
     const jump = () => {
       if (lastFragment.current === location.hash) return;
@@ -826,12 +720,18 @@ export function GameGuide({
       if (!section) lastFragment.current = location.hash;
       if (section && panel.current?.querySelector(`#${CSS.escape(section)}`)) {
         lastFragment.current = location.hash;
+        const target = document.getElementById(section);
+        if (target instanceof HTMLDetailsElement) target.open = true;
         setExpanded((previous) => new Set([...previous, section]));
-        requestAnimationFrame(() =>
-          document
-            .getElementById(section)
-            ?.scrollIntoView({ behavior: "instant" }),
-        );
+        requestAnimationFrame(() => {
+          target?.scrollIntoView({ behavior: "instant" });
+          if (section === "active-table-tool") {
+            const heading = document.getElementById("active-table-tool-heading");
+            const focus = heading?.getClientRects().length ? heading
+              : target?.querySelector<HTMLElement>("button:not(:disabled), input, select");
+            focus?.focus({ preventScroll: true });
+          }
+        });
       }
     };
     jump();
@@ -871,7 +771,7 @@ export function GameGuide({
       "rules",
       search,
       options,
-      shared || ["coup", "skull_king", "avalon"].includes(id),
+      shared || ["coup", "skull_king", "avalon", "sushi_go_party"].includes(id),
       section,
     );
   const tabs: [View, string][] = [
@@ -1117,57 +1017,62 @@ export function GameGuide({
                 </p>
               ) : null}
               <Variants id={id} lang={lang} options={options} />
+              <GuideSetupContext id={id} game={game} lang={lang} options={options} ready={!!runtime} onChange={(guidePlayers) => runtime?.update({guidePlayers})} />
               {view === "learn" ? (
                 <>
-                  <div id="goal" className="goal-box">
-                    <div className="eyebrow">
-                      {tr("THE GOAL", "EL OBJETIVO")}
-                    </div>
-                    <p>{game.goal[lang]}</p>
-                  </div>
-                  <section
-                    id="learn-setup"
-                    className="learning-setup block"
-                    aria-labelledby="learn-setup-heading"
-                  >
-                    <span className="eyebrow">
-                      {tr("BEFORE THE FIRST TURN", "ANTES DEL PRIMER TURNO")}
-                    </span>
-                    <h2 id="learn-setup-heading">
-                      {tr("Set up the game", "Prepara la partida")}
-                    </h2>
-                    {id === "avalon" ? (
-                      <AvalonSetup
-                        lang={lang}
-                        options={options}
-                        tools={tools}
-                        ready={!!runtime}
-                        shared={shared}
-                        readyHref={navHref("play")}
-                      />
-                    ) : (
-                      <SetupChecklist
-                        id={id}
-                        lang={lang}
-                        ready={!!runtime}
-                        temporary={shared}
-                        readyHref={navHref("play")}
-                        steps={setupSteps(id, options)}
-                        signature={
-                          id === "avalon"
-                            ? JSON.stringify([
-                                options.players,
-                                options.avalonMode,
-                                [...options.optional].sort(),
-                                options.lady,
-                              ])
-                            : id === "coup"
-                              ? `${options.exchange}-${options.reformation}`
-                              : id === "skull_king"
-                                ? String(options.skullExpansion)
-                                : "base"
-                        }
-                      />
+                  <LearningSequence
+                    id={id} game={game} lang={lang} options={options}
+                    steps={runtime ? runtime.lessonSteps() : contextualBasics(id, game.basics, options)}
+                    temporary={shared} ready={!!runtime} cardTeaching={cardTeaching}
+                    readyHref={navHref("play")} ruleHref={(section) => navHref("rules", section)}
+                    setup={(onContinue) => (
+                      <section
+                        id="learn-setup"
+                        className="learning-setup block"
+                        aria-labelledby="learn-setup-heading"
+                      >
+                        <span className="eyebrow">
+                          {tr("BEFORE THE FIRST TURN", "ANTES DEL PRIMER TURNO")}
+                        </span>
+                        <h2 id="learn-setup-heading">
+                          {tr("Set up the game", "Prepara la partida")}
+                        </h2>
+                        {id === "avalon" ? (
+                          <AvalonSetup
+                            lang={lang}
+                            options={options}
+                            tools={tools}
+                            ready={!!runtime}
+                            shared={shared}
+                            readyHref={navHref("play")}
+                            onContinue={onContinue}
+                          />
+                        ) : (
+                          <SetupChecklist
+                            id={id}
+                            lang={lang}
+                            ready={!!runtime}
+                            temporary={shared}
+                            readyHref={navHref("play")}
+                            onContinue={onContinue}
+                            steps={setupSteps(id, options)}
+                            artwork={cardTeaching.setupArtwork}
+                            players={options.guidePlayers}
+                            signature={
+                              id === "avalon"
+                                ? JSON.stringify([
+                                    options.players,
+                                    options.avalonMode,
+                                    [...options.optional].sort(),
+                                    options.lady,
+                                  ])
+                                : id === "coup"
+                                  ? `${options.exchange}-${options.reformation}-${options.guidePlayers}`
+                                  : id === "skull_king"
+                                    ? String(options.skullExpansion)
+                                    : id === "sushi_go_party" ? String(options.guidePlayers) : "base"
+                            }
+                          />
                     )}
                     <details className="setup-notes" id="setup-notes">
                       <summary>
@@ -1190,13 +1095,14 @@ export function GameGuide({
                         : null}
                     </details>
                   </section>
-                  <Lesson
-                    readyHref={navHref("play")}
-                    id={id}
-                    game={game}
-                    lang={lang}
-                    icons={icons}
-                    options={options}
+                    )}
+                    practiceHelper={["poker","moth"].includes(id) ? <Tool kind="practice-helper" initial={tools["practice-helper"] || ""} /> : null}
+                    scoring={cardTeaching.scoring ? <ScoringExample gameId={id} temporary={shared} data={cardTeaching.scoring} artwork={cardTeaching.scoringArtwork || {}} lang={lang} ruleHref={(section) => navHref("rules", section)} /> : null}
+                    examples={<>
+                      {cardTeaching.tricks ? <SkullTrickLesson temporary={shared} data={cardTeaching.tricks} lang={lang} expansion={options.skullExpansion} ruleHref={(section) => navHref("rules", section)} /> : null}
+                      {cardTeaching.coup ? <CoupLesson temporary={shared} data={cardTeaching.coup} cards={cardTeaching.cards} lang={lang} exchange={options.exchange} reformation={options.reformation} ruleHref={(section) => navHref("rules", section)} /> : null}
+                      {cardTeaching.avalon ? <AvalonLesson temporary={shared} key={`${options.players}:${options.avalonMode}:${options.optional.join(",")}`} data={cardTeaching.avalon} cards={cardTeaching.cards} lang={lang} options={options} script={runtime?.view("setup-script") || tools["setup-script"] || ""} ruleHref={(section) => navHref("rules", section)} /> : null}
+                    </>}
                   />
                   <div className="callout">
                     <strong>{tr("Keep in mind.", "Recuerda.")} </strong>
@@ -1224,8 +1130,8 @@ export function GameGuide({
                       <div className="fold-body">
                         <Tool
                           key={`${id}-${lang}-helper`}
-                          kind="helper"
-                          initial={tools.helper || ""}
+                          kind="lesson-helper"
+                          initial={tools["lesson-helper"] || ""}
                         />
                       </div>
                     </details>
@@ -1368,6 +1274,22 @@ export function GameGuide({
                         key={`${id}-${lang}-play`}
                         kind="play"
                         initial={tools.play || ""}
+                        onTableJump={(tool) => {
+                          if (focusPlay) setShowHelp(!tool);
+                          const move = () => {
+                            const heading = document.getElementById(
+                              tool ? "active-table-tool-heading" : "table-sheet-heading",
+                            );
+                            const focus = heading?.getClientRects().length ? heading
+                              : document.querySelector<HTMLElement>("#active-table-tool button:not(:disabled)");
+                            (tool ? document.getElementById("active-table-tool") : heading)
+                              ?.scrollIntoView({ block: "start" });
+                            focus?.focus({ preventScroll: true });
+                          };
+                          // Wait for React to reveal the full-screen reference.
+                          if (focusPlay) requestAnimationFrame(move);
+                          else move();
+                        }}
                       />
                     </>
                   ) : (
@@ -1470,8 +1392,8 @@ export function GameGuide({
                       <section id="helper" style={{ marginTop: 32 }}>
                         <Tool
                           key={`${id}-${lang}-helper`}
-                          kind="helper"
-                          initial={tools.helper || ""}
+                          kind="lesson-helper"
+                          initial={tools["lesson-helper"] || ""}
                         />
                       </section>
                     </>
@@ -1492,7 +1414,7 @@ export function GameGuide({
           href={guideHref(
             lang,
             id,
-            view,
+            searchOpen && typeof sharing === "string" ? "rules" : view,
             query,
             options,
             true,
@@ -1514,6 +1436,10 @@ export function GameGuide({
           lang={lang}
         />
         <RuleSearchDialog
+          onShare={setSharing}
+          cards={cardTeaching.cards}
+          edition={edition}
+          view={view}
           onSelect={(section) => {
             if (section)
               setExpanded((previous) => new Set([...previous, section]));

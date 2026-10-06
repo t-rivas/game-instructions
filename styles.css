@@ -13,3 +13,10 @@ header{position:sticky;top:0}main:focus{outline:none}.side-nav{top:112px}.rule-s
 @media(max-width:680px){.settings .field{min-width:180px}.info-card h3{flex-wrap:wrap}}
 @media print{header{position:static}}
 @media(max-width:680px){.art-caption{display:none}}
+
+.guide-setup-context .field { max-width: 32rem; }
+.guide-setup-context select { width: 100%; max-width: 100%; min-height: 44px; }
+.guide-setup-context summary { min-height: 44px; padding-block: 10px; cursor: pointer; }
+.guide-setup-context p { overflow-wrap: anywhere; }
+
+.guide-setup-context h2 { font-size: 1.2rem; margin-bottom: 12px; }

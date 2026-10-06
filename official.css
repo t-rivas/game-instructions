@@ -4,6 +4,143 @@
 @media print{.art-credits,.zoom-hint,#image-viewer{display:none!important}.official-thumb{border:0}.component-gallery{break-inside:avoid}}
 
 /* Card faces and their rules remain paired at every viewport size. */
+.turn-reference{margin:20px 0 26px}.turn-reference h3{margin:0 0 8px}.turn-reference>.muted{margin:0 0 12px}.turn-phases{display:grid;gap:10px;padding:0;margin:0 0 16px;list-style:none;counter-reset:phase}.turn-phases li{counter-increment:phase;display:grid;grid-template-columns:36px minmax(0,1fr) auto;align-items:start;gap:12px;padding:14px;border:1px solid var(--border);border-radius:12px;background:var(--panel);line-height:1.5}.turn-phases li:before{content:counter(phase);display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--accent);color:var(--on-accent);font-weight:700}.turn-phase-links{display:flex;flex-direction:column;align-items:flex-start}.round-transition{padding:14px;border-left:3px solid var(--accent);line-height:1.6}.round-transition a{display:inline-flex;align-items:center;min-height:44px}.turn-phases span{min-width:0;overflow-wrap:anywhere}.turn-phases a{display:inline-flex;align-items:center;min-height:44px;padding:0 6px}.turn-end{margin:16px 0}.table-jump{min-height:48px;padding:10px 16px;border:1px solid var(--accent);border-radius:9px;background:var(--panel);color:var(--accent);font:inherit;font-weight:650;cursor:pointer}.table-jump:focus-visible,.turn-phases a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}#jump-to-tool{margin:0 0 22px}.active-table-tool{margin-top:30px;padding-top:24px;border-top:1px solid var(--border);scroll-margin-top:90px}.active-table-tool .sheet-heading{flex-wrap:wrap;gap:10px}.active-table-tool .sheet-heading h2{margin:0}#table-sheet-heading,#active-table-tool-heading{scroll-margin-top:90px}
+@media(max-width:600px){.turn-phases li{grid-template-columns:32px minmax(0,1fr);gap:6px 10px;padding:12px}.turn-phase-links{grid-column:2;flex-direction:row;flex-wrap:wrap;gap:0 12px}}
+@media print{.table-jump{display:none!important}}
 .card-guide{margin:22px 0}.card-guide-group{margin-top:28px}.card-guide-group>h3{font-size:20px;margin:0 0 12px}.card-guide-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card-guide-entry{display:flex;align-items:flex-start;gap:14px;padding:16px;border:1px solid var(--border);border-radius:12px;background:var(--panel);min-width:0;break-inside:avoid}.card-guide-entry>div{min-width:0;flex:1}.card-guide-entry h4{font-size:16px;margin:0 0 8px;line-height:1.35}.card-guide-value{display:inline-block;color:var(--accent);font-size:12px;font-weight:700;line-height:1.5;margin-bottom:6px}.card-guide-entry p{font-size:13px!important;line-height:1.65!important;margin:0!important}.card-guide-art{flex:0 0 82px;width:82px;padding:4px}.card-guide-art img{width:100%;height:110px;object-fit:contain}.card-guide-group>.muted{font-size:13px}.card-guide>.image-note{margin-top:24px}
 @media(max-width:760px){.card-guide-grid{grid-template-columns:1fr}.card-guide-entry{padding:13px;gap:13px}.card-guide-art{flex-basis:76px;width:76px}.card-guide-art img{height:106px}}
 @media print{.card-guide-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.card-guide-entry{break-inside:avoid}.card-guide-entry p{font-size:9pt!important}}
+
+.lesson-cards{padding:0 24px 22px;min-width:0}.lesson-cards-label{font-size:11px!important;font-weight:700;letter-spacing:.14em;color:var(--accent);margin:0 0 10px!important}.lesson-cards-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.lesson-card{display:flex;align-items:flex-start;gap:15px;min-width:0;padding:16px;border:1px solid var(--border);border-radius:12px;background:var(--bg);break-inside:avoid}.lesson-card:first-child{grid-column:1/-1}.lesson-card-art{width:116px;flex:0 0 116px;padding:7px;min-height:140px}.lesson-card:first-child .lesson-card-art{width:156px;flex-basis:156px;min-height:175px}.lesson-card-art img{display:block;width:auto;max-width:100%;height:auto;max-height:180px;object-fit:contain}.lesson-card-art img[hidden]{display:none}.lesson-card-copy{min-width:0;flex:1}.lesson-card-copy h4{font-size:17px;line-height:1.3;margin:0 0 7px;overflow-wrap:anywhere}.lesson-card-copy p{font-size:14px!important;line-height:1.5!important;margin:0 0 8px!important}.lesson-card-copy strong{color:var(--text)}.lesson-card-copy small{display:block;color:var(--muted);font-size:12px;line-height:1.4;margin-bottom:6px}.lesson-card-copy a{display:inline-flex;align-items:center;min-height:44px;color:var(--accent);font-size:13px;font-weight:650;text-underline-offset:3px;overflow-wrap:anywhere}
+@media(max-width:900px){.lesson-cards-grid{grid-template-columns:1fr}.lesson-card:first-child{grid-column:auto}}
+@media(max-width:600px){.lesson-cards{padding:0 16px 18px}.lesson-card{padding:12px;gap:12px}.lesson-card-art,.lesson-card:first-child .lesson-card-art{width:104px;flex-basis:104px;min-height:132px;padding:5px}.lesson-card-copy h4{font-size:16px}.lesson-card-copy p{font-size:13px!important}.lesson-card-copy a{font-size:13px}}
+@media(max-width:360px){.lesson-cards{padding:0 12px 16px}.lesson-card{padding:10px;gap:9px}.lesson-card-art,.lesson-card:first-child .lesson-card-art{width:88px;flex-basis:88px;min-height:116px}}
+@media print{.lesson-card{break-inside:avoid}.lesson-card-copy a{display:none}}
+
+/* Finite Skull King teaching table: artwork and numbered diagrams share card UI. */
+.skull-trick-lesson{min-width:0}.skull-trick-lesson p{line-height:1.55}.trick-order{padding:14px;border-left:3px solid var(--accent);background:var(--bg);font-weight:650}.trick-options{margin:18px 0}.trick-options summary,.trick-source summary{cursor:pointer;min-height:44px;padding:10px 0}.trick-options label{display:flex;align-items:center;gap:12px;min-height:48px;padding:8px 0}.trick-options input,.trick-prediction input{width:20px;height:20px;flex:0 0 20px;accent-color:var(--accent)}.trick-picker{display:grid;gap:8px;font-weight:650;margin:18px 0}.trick-picker select{width:100%;min-width:0;max-width:100%;min-height:48px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:10px;font:inherit}.trick-example{padding:20px;border:1px solid var(--border);border-radius:16px;background:var(--panel)}.trick-example h3{font-size:clamp(21px,3vw,28px);line-height:1.25}.trick-example h4{margin:24px 0 12px}.trick-hand,.trick-table{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;list-style:none;padding:0;margin:12px 0 24px}.trick-hand li{display:flex;flex-direction:column;gap:6px;padding:12px;border:1px solid var(--border);border-radius:10px;min-width:0;background:var(--bg)}.trick-hand p{margin:0;font-size:14px}.trick-hand b{font-size:12px}.trick-hand [data-legal=false]{border-style:dashed}.trick-play{display:flex;flex-direction:column;align-items:center;grid-column:auto;padding:16px;text-align:center;gap:10px}.trick-player{font-weight:700;margin:0!important}.trick-card-name{display:block;font-size:16px;line-height:1.4}.trick-play .lesson-card-art,.trick-play:first-child .lesson-card-art{flex:0 0 auto;width:120px;min-height:154px;max-width:100%}.trick-play .lesson-card-art img{max-height:160px}.trick-schematic{display:flex;flex-direction:column;justify-content:space-between;align-items:center;width:120px;max-width:100%;min-height:154px;padding:10px;border:2px solid var(--text);border-radius:10px;background:var(--bg);color:var(--text)}.trick-schematic b{font-size:40px;line-height:1.2}.trick-schematic small{font-size:10px}.trick-schematic span{font-size:12px;font-weight:700}.trick-declaration{font-weight:700;font-size:13px;border:1px solid var(--border);padding:6px;border-radius:6px}.trick-reason{font-size:14px;margin:0!important}.trick-play[data-winner=true]{border:2px solid var(--accent)}.trick-prediction{display:flex;flex-wrap:wrap;gap:8px;border:0;padding:0;margin:24px 0 16px;min-width:0}.trick-prediction legend{font-weight:700;margin-bottom:10px}.trick-prediction label{display:flex;align-items:center;gap:8px;min-height:48px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;cursor:pointer}.trick-prediction label:has(:checked){border-color:var(--accent);outline:1px solid var(--accent)}.trick-result:not(:empty){margin-top:16px;padding:16px;border-left:3px solid var(--accent);background:var(--bg)}.trick-result ul{padding-left:20px}.trick-result li{margin:8px 0;line-height:1.5}.trick-controls{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0}.trick-controls button,.skull-trick-lesson button[data-trick-reveal]{min-height:48px;height:auto;white-space:normal;padding:10px 14px}.trick-rule{display:inline-flex;align-items:center;min-height:44px;color:var(--accent)}.skull-trick-lesson :is(p,li,strong,span,a,button,label){overflow-wrap:anywhere}.skull-trick-lesson :focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+@media(max-width:600px){.trick-example{padding:12px}.trick-hand,.trick-table{grid-template-columns:1fr}.trick-hand li{gap:4px}.trick-play{display:grid;grid-template-columns:minmax(80px,104px) minmax(0,1fr);text-align:left;align-items:center;padding:12px;gap:8px 14px}.trick-player{grid-column:1/-1}.trick-play .lesson-card-art,.trick-play:first-child .lesson-card-art,.trick-schematic{grid-column:1;grid-row:2/5;width:104px;min-height:132px}.trick-play .trick-card-name,.trick-declaration,.trick-reason{grid-column:2}.trick-controls button{flex:1 1 100px}.trick-picker select{font-size:14px}.trick-schematic b{font-size:36px}}
+@media print{.trick-options,.trick-picker,.trick-prediction,.trick-controls,[data-trick-reveal]{display:none}.trick-play{break-inside:avoid}}
+
+.skull-trick-lesson h3{font-family:var(--theme-heading,Georgia,serif)}.trick-controls button{border:1px solid var(--border);border-radius:9px;background:var(--bg);color:var(--text)}.skull-trick-lesson button[data-trick-reveal]{border:1px solid var(--accent);border-radius:9px;background:var(--accent);color:var(--on-accent);font-weight:650}
+
+.trick-play{min-width:0;border:1px solid var(--border);border-radius:12px;background:var(--bg);break-inside:avoid}
+
+/* Coup practice: all reveals are learner-paced; hidden identities stay hidden. */
+.coup-lesson{min-width:0}.coup-lesson p{line-height:1.55}.coup-lesson :is(p,li,strong,span,a,button,h3,h4,h5,small){overflow-wrap:anywhere}
+.coup-lesson h3{font-family:var(--theme-heading,Georgia,serif);margin-top:28px}.coup-lesson h4{font-size:18px;margin:20px 0 12px}.coup-lesson h5{font-size:18px;margin:0 0 8px}
+.coup-order,.coup-outcome,.coup-variant{padding:14px;border-left:3px solid var(--accent);background:var(--bg)}
+.coup-example-picker,.coup-controls{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0}.coup-example-picker button,.coup-controls button,.coup-choices button{min-height:48px;height:auto;white-space:normal;border:1px solid var(--border);border-radius:9px;padding:12px 16px;background:var(--bg);color:var(--text);font:inherit;text-align:left;cursor:pointer;max-width:100%}
+.coup-example-picker button[aria-pressed=true]{border:2px solid var(--accent);font-weight:700}.coup-choices{display:grid;gap:10px;margin-top:20px}.coup-choices button{border-color:var(--accent)}.coup-controls button:disabled{opacity:.45;cursor:default}.coup-lesson :focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.coup-scene{padding:22px;border:1px solid var(--border);border-radius:16px;background:var(--panel)}.coup-claim-art{display:flex;gap:16px;align-items:center;max-width:480px}.coup-claim-art p{font-size:13px;color:var(--muted)}.coup-claim-art .lesson-card-art{width:104px;flex-basis:104px;min-height:100px}.coup-scene h3{font-size:clamp(22px,3vw,28px);line-height:1.3;margin:8px 0 12px;scroll-margin-top:180px}
+.coup-public-table{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;list-style:none;margin:14px 0;padding:0}.coup-public-table>li{min-width:0;padding:14px;border:1px solid var(--border);border-radius:12px;background:var(--bg)}.coup-counts{display:grid;gap:4px;margin:0 0 12px!important}.coup-counts span{font-size:13px}.coup-hand{display:flex;flex-wrap:wrap;gap:8px;list-style:none;padding:0;margin:0}.coup-hand>li{flex:1 1 70px;min-width:0}.coup-hidden{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:10px;border:1px dashed var(--muted);border-radius:8px;text-align:center;font-size:12px;min-height:108px}.coup-hidden>span{font-size:26px;font-weight:700}.coup-revealed{display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px;border:2px solid var(--accent);border-radius:8px;text-align:center}.coup-lost{border:1px solid var(--border)}.coup-revealed>span{font-size:12px}.coup-revealed .lesson-card-art{flex:0 0 auto;width:90px;max-width:100%;min-height:70px;padding:4px}.coup-revealed .lesson-card-art img{max-height:90px}.coup-eliminated{font-weight:650;font-size:13px}
+.coup-role-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.coup-role{display:flex;align-items:flex-start;gap:16px;padding:16px;border:1px solid var(--border);border-radius:12px;background:var(--bg);min-width:0}.coup-role>div{min-width:0}.coup-role h4{margin:0 0 10px}.coup-role p{font-size:14px!important;margin:0 0 10px!important}.coup-role small{display:block;font-size:12px;color:var(--muted);line-height:1.45}.coup-role .lesson-card-art{width:104px;flex-basis:104px;min-height:112px}.coup-rule{display:inline-flex;align-items:center;min-height:44px;color:var(--accent);font-size:14px}.coup-sources summary{cursor:pointer;padding:12px 0;min-height:44px}.coup-sources{margin-top:20px}
+@media(max-width:900px){.coup-role-grid{grid-template-columns:1fr}}
+@media(max-width:600px){.coup-scene{padding:12px}.coup-public-table{grid-template-columns:1fr}.coup-public-table>li{padding:12px}.coup-hand{max-width:320px}.coup-role{padding:12px;gap:12px}.coup-role .lesson-card-art{width:88px;flex-basis:88px;min-height:100px}.coup-controls button,.coup-example-picker button{flex:1 1 140px}}
+@media(max-width:360px){.coup-role{flex-direction:column}.coup-claim-art{align-items:flex-start}.coup-claim-art .lesson-card-art{width:88px;flex-basis:88px}}
+@media print{.coup-example-picker,.coup-controls,.coup-choices{display:none}.coup-public-table>li,.coup-role{break-inside:avoid}}
+@media(max-width:360px){.trick-play{display:flex;flex-direction:column;align-items:center;text-align:center}.trick-play .trick-reason{width:100%}}
+
+/* Avalon learning: private knowledge and public actions use distinct regions. */
+.avalon-lesson{min-width:0;overflow-wrap:anywhere}.avalon-lesson h3{margin-top:28px}.avalon-lesson h4{margin:0 0 12px;font-size:20px;line-height:1.35}.avalon-lesson small{display:block;color:var(--muted);font-size:12px;line-height:1.5}.avalon-teaching-roles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.avalon-teaching-roles article{display:flex;align-items:flex-start;gap:16px;padding:18px;border:1px solid var(--border);border-radius:12px;background:var(--bg);min-width:0}.avalon-teaching-roles article>div{min-width:0}.avalon-teaching-roles p{font-size:14px;margin:0 0 10px}.avalon-teaching-roles .lesson-card-art,.avalon-role-tile{width:104px;flex:0 0 104px;min-height:100px}.avalon-role-tile{padding:12px;border:1px dashed var(--muted);border-radius:8px;text-align:center;font-weight:650;display:grid;place-items:center}.avalon-knowledge{list-style:none;padding:0;display:grid;gap:10px}.avalon-knowledge li{padding:14px;border:1px solid var(--border);border-radius:10px;background:var(--bg)}.avalon-knowledge strong{display:inline}.avalon-lesson summary{min-height:44px;padding:12px 0;cursor:pointer}.avalon-stages{display:flex;flex-wrap:wrap;gap:8px 28px;padding-left:24px;margin:20px 0}.avalon-stages li{padding:8px;max-width:100%;font-size:14px}.avalon-stages [aria-current=step]{font-weight:700;text-decoration:underline;text-underline-offset:5px}.avalon-scene{padding:22px;border:1px solid var(--border);border-radius:14px;background:var(--bg)}.avalon-scene .lesson-card-art{width:180px;max-width:100%;height:auto}.avalon-scene h4{scroll-margin-top:180px}.avalon-result-cards{display:flex;flex-wrap:wrap;gap:10px;padding:0;list-style:none}.avalon-result-cards li{border:2px solid var(--border);border-radius:8px;padding:18px 12px;font-weight:650}.avalon-example-controls{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0}.avalon-lesson button:not(.lesson-card-art),.avalon-lesson select{min-height:48px;max-width:100%;height:auto;white-space:normal;padding:12px 16px;border:1px solid var(--border);border-radius:8px;background:var(--panel);color:var(--text);font:inherit;cursor:pointer;text-align:left}.avalon-lesson button:disabled{opacity:.5;cursor:default}.avalon-lesson label{display:block;margin:12px 0 8px}.avalon-lesson :focus-visible{outline:3px solid var(--accent);outline-offset:3px}.avalon-lesson a{display:inline-flex;align-items:center;min-height:44px}.avalon-lesson details .block{padding:0;border:0}
+@media(max-width:1000px){.avalon-teaching-roles{grid-template-columns:1fr}}
+@media(max-width:400px){.avalon-teaching-roles article{flex-direction:column;padding:14px}.avalon-teaching-roles .lesson-card-art,.avalon-role-tile{flex-basis:auto;width:118px}.avalon-scene{padding:14px}}
+.avalon-public-team{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,130px),1fr));gap:10px;list-style:none;padding:0;margin:16px 0 24px}.avalon-public-team li{display:grid;gap:5px;min-width:0;border:1px dashed var(--border);border-radius:8px;padding:12px}.avalon-public-team [data-on-team=true]{border:2px solid var(--accent)}.avalon-public-team span{font-size:13px}.avalon-public-votes{padding-left:24px;columns:2;column-gap:28px}.avalon-public-votes li{break-inside:avoid;margin-bottom:8px}.avalon-hidden-quest{display:flex;flex-wrap:wrap;gap:10px;list-style:none;padding:0}.avalon-hidden-quest li{flex:1 1 110px;display:grid;gap:8px;justify-items:center;min-width:0;border:1px dashed var(--muted);border-radius:8px;padding:12px;text-align:center;font-size:13px}.avalon-hidden-quest span{font-size:26px;font-weight:700}.avalon-feedback:not(:empty){border-left:3px solid var(--accent);padding:14px;margin-top:18px;background:var(--panel)}.avalon-lesson select{width:100%}.avalon-example-sources{margin-top:16px}.avalon-example-controls [aria-pressed=true]{border:2px solid var(--accent);font-weight:700}
+@media(max-width:600px){.avalon-public-votes{columns:1}.avalon-example-controls button{flex:1 1 130px}}
+
+/* Definitions stay in the reading flow, including narrow screens and print. */
+.glossary-term dfn {font-style:normal;font-weight:600}
+.glossary-definition {color:var(--muted);font-size:.95em;overflow-wrap:anywhere}
+.glossary-term .glossary-trigger {font:inherit;color:var(--text);background:transparent;border:0;border-bottom:1px dotted currentColor;padding:8px 2px;min-height:44px;cursor:pointer}
+.glossary-trigger:focus-visible,.glossary-close:focus-visible {outline:2px solid currentColor;outline-offset:3px}
+.glossary-disclosure {display:none}
+.glossary-disclosure.is-open {display:inline}
+.glossary-close {font:inherit;min-height:44px;padding:8px;max-width:100%;white-space:normal}
+@media print {.learning-sequence .lesson {display:block!important}.glossary-disclosure {display:inline!important}.glossary-close {display:none}.glossary-trigger {border:0;padding:0;min-height:0}}
+
+/* Worked scoring examples: shared with the portable guide. */
+.scoring-example { min-width: 0; }
+.scoring-example :is(p,li,dt,dd,small,strong,a,h3,h4,label,button) { overflow-wrap: anywhere; }
+.scoring-example label { display: block; margin: 16px 0 6px; font-weight: 600; }
+.scoring-example select { display: block; width: 100%; max-width: 100%; min-width: 0; min-height: 44px; font: inherit; white-space: normal; }
+.scoring-example button { min-height: 44px; }
+.scoring-cards { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,145px),1fr)); gap: 12px; padding: 0; list-style: none; }
+.scoring-cards li { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; min-width: 0; padding: 12px; border: 1px solid var(--border); border-radius: 12px; }
+.scoring-cards .lesson-card-art { width: 100%; max-width: 118px; height: 150px; }
+.scoring-cards .lesson-card-art img { width: 100%; height: 100%; object-fit: contain; }
+.scoring-counters { display: flex; flex-wrap: wrap; gap: 8px; }
+.scoring-counters b { font-size: 1.5em; }
+.scoring-votes { display: flex; flex-wrap: wrap; gap: 8px 24px; padding-left: 20px; }
+.scoring-totals { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,240px),1fr)); gap: 12px; }
+.scoring-totals article { min-width: 0; padding: 16px; border: 1px solid var(--border); border-radius: 12px; }
+.scoring-totals h4 { margin-top: 0; }
+.scoring-totals dl { margin: 0; }
+.scoring-totals dl > div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; margin: 10px 0; }
+.scoring-totals dd { margin: 0; font-weight: 600; }
+.scoring-total { padding-top: 12px; border-top: 1px solid var(--border); }
+.scoring-total strong { font-size: 1.5em; }
+.scoring-explanation { padding: 12px; border-inline-start: 3px solid currentColor; }
+.scoring-example select, .scoring-example #scoring-replay { background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font: inherit; }
+.scoring-example #scoring-replay { cursor: pointer; }
+.scoring-example h3 { margin: 24px 0 12px; }
+.scoring-cards .lesson-card-art { flex: 0 0 auto; }
+/* Setup illustrations share readable labels with the hosted and portable guides. */
+.setup-visual { margin: 18px 0 0; min-width: 0; color: var(--text); }
+.setup-visual h4 { margin: 0 0 14px; font-size: 1.1rem; line-height: 1.4; }
+.setup-visual p { font-size: 1rem; line-height: 1.65; overflow-wrap: anywhere; }
+.setup-visual .setup-source { font-size: .85rem; }
+.setup-source a { display: inline-flex; align-items: center; min-height: 44px; }
+.setup-board-label { margin: 10px 0; text-align: center; font-weight: 700; }
+.setup-chess-board { max-width: 440px; margin: auto; }
+.setup-chess-rank, .setup-chess-files { display: grid; grid-template-columns: 1em repeat(8, minmax(0, 1fr)); align-items: center; text-align: center; }
+.setup-chess-square { position: relative; aspect-ratio: 1; display: grid; place-items: center; font-family: 'Arial Unicode MS', 'Segoe UI Symbol', serif; font-size: clamp(18px, 5vw, 36px); }
+.setup-chess-square.light { background: #f6ecd5; }
+.setup-chess-square.dark { background: #92765d; }
+.setup-chess-square.black-piece { color: #171717; }
+.setup-chess-square.white-piece { color: #fff; text-shadow: -1px 0 #222, 0 1px #222, 1px 0 #222, 0 -1px #222; }
+.setup-chess-square b { position: absolute; right: 2px; bottom: 0; font: bold 14px sans-serif; color: #171717; text-shadow: none; }
+.setup-chess-square.setup-corner { box-shadow: inset 0 0 0 3px #171717; }
+.setup-rank-label, .setup-chess-files { font-size: .8rem; }
+.setup-zones, .setup-menu, .setup-hands { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); margin: 14px 0; }
+.setup-zone { display: flex; flex-direction: column; gap: 6px; padding: 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--panel); overflow-wrap: anywhere; }
+.setup-zone span { line-height: 1.5; }
+.setup-recognition { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 88px), 1fr)); gap: 14px; margin: 16px 0; }
+.setup-recognition > div { display: flex; min-width: 0; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+.setup-recognition .official-thumb { flex: 0 0 auto; width: 100%; max-width: 200px; height: auto; aspect-ratio: auto; min-height: 44px; padding: 8px; }
+.setup-recognition .official-thumb img { width: 100%; height: auto; max-height: 240px; object-fit: contain; }
+.setup-recognition strong { font-size: .9rem; line-height: 1.4; overflow-wrap: anywhere; }
+.setup-catan-board { display: block; width: 100%; height: auto; aspect-ratio: 320 / 280; max-width: 440px; margin: auto; stroke: none; }
+.setup-hex { fill: var(--panel); stroke: var(--muted); stroke-width: 2; }
+.setup-terrain-label { fill: var(--text); font: 15px sans-serif; text-anchor: middle; }
+.setup-empty { fill: var(--panel); stroke: var(--text); stroke-width: 2; }
+.setup-blocked { stroke: var(--text); stroke-width: 3; fill: none; }
+.setup-road { stroke: var(--accent); stroke-width: 10; stroke-linecap: round; }
+.setup-house, .setup-candidate { fill: var(--text); stroke: var(--text); stroke-width: 2; }
+.setup-node-label { font: bold 16px sans-serif; fill: var(--panel); text-anchor: middle; }
+.setup-node-label:last-child { fill: var(--text); }
+.setup-order { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; margin: 16px 0; }
+.setup-order span { display: flex; flex-direction: column; text-align: center; border: 1px solid var(--border); padding: 8px 4px; border-radius: 8px; overflow-wrap: anywhere; }
+.setup-order small { font-size: .8rem; }
+.setup-order b { font-size: 1.5rem; }
+.setup-dessert-flow { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.setup-dessert-flow > .setup-zone { flex: 1 1 150px; }
+.setup-example-picker { margin-top: 20px; }
+.setup-example-picker select { min-height: 44px; width: 100%; margin-top: 6px; }
+@media print { .setup-visual { break-inside: auto; } .setup-chess-board, .setup-catan-board { break-inside: avoid; } }
+
+/* Optional checks stay beside their lesson and use the existing game palette. */
+.lesson-practice{margin-block:24px;padding:20px;border:1px solid var(--border);border-radius:16px;background:var(--panel2);min-width:0}
+.lesson-practice h4{font-size:1.1rem;line-height:1.5;margin:8px 0 16px;overflow-wrap:anywhere}
+.practice-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.practice-actions button,.lesson-practice .scenario-choices button,#practice-helper-retry{min-height:44px;padding:10px 14px;white-space:normal;overflow-wrap:anywhere}
+.practice-actions button{flex:1 1 130px}
+.practice-card-context{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:16px}
+.practice-card-context>div{display:grid;gap:8px;max-width:140px;min-width:0}
+.practice-card-context .lesson-art,.lesson-practice>.official-thumb{max-width:140px}
+.practice-picker{display:grid;gap:8px;margin-top:20px}
+.practice-picker select{width:100%;min-width:0;min-height:44px;font:inherit;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px}
+.lesson-practice .practice-feedback p{margin-block:8px}
+@media(max-width:480px){.lesson-practice{padding:14px}.lesson-practice .scenario-choices{grid-template-columns:1fr}.practice-actions{flex-direction:column}.practice-actions button{flex:auto;width:100%}}
+.practice-actions button,#practice-helper-retry{border:1px solid var(--border);border-radius:9px;background:var(--panel);color:var(--text);font:inherit;cursor:pointer}
+.practice-actions button:last-child{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.lesson-practice>a{display:inline-flex;align-items:center;min-height:44px;overflow-wrap:anywhere}

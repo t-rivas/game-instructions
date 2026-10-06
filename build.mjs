@@ -13,7 +13,7 @@ for (const name of ['moth-score.css', 'truco-score.css', 'skull-score.css', 'sty
   );
 }
 
-const scriptNames = ['data.js', 'dixit.js', 'new-games.js', 'more-games.js', 'practice.js', 'enhancements.js', 'official.js', 'card-guides.js', 'table-guide.js', 'chess-clock.js', 'poker-timer.js', 'coup-session.js', 'skull-score.js', 'truco-score.js', 'moth-score.js', 'app.js'];
+const scriptNames = ['data.js', 'dixit.js', 'new-games.js', 'more-games.js', 'setup-diagrams.js', 'setup-context.js', 'glossary.js', 'practice.js', 'enhancements.js', 'official.js', 'card-guides.js', 'skull-tricks.js', 'scoring-examples.js', 'avalon-lessons.js', 'coup-lessons.js', 'table-guide.js', 'chess-clock.js', 'poker-timer.js', 'coup-session.js', 'skull-score.js', 'truco-score.js', 'moth-score.js', 'app.js'];
 for (const name of scriptNames) {
   html = html.replace(`  <script src="${name}" defer></script>\n`, '');
 }

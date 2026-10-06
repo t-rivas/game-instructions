@@ -1,8 +1,10 @@
 "use client";
+import { GlossaryText } from "./GlossaryText";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { readStored, writeStored } from "@/lib/browser-storage";
-import type { Language, Translation } from "@/lib/types";
+import type { Artwork, Language, Translation } from "@/lib/types";
+import { SetupDiagram } from "./SetupDiagram";
 export function SetupChecklist({
   id,
   lang,
@@ -13,6 +15,9 @@ export function SetupChecklist({
   showActions = true,
   temporary = false,
   readyHref,
+  onContinue,
+  artwork = {},
+  players,
 }: {
   id: string;
   lang: Language;
@@ -23,9 +28,13 @@ export function SetupChecklist({
   showActions?: boolean;
   temporary?: boolean;
   readyHref?: string;
+  onContinue?: () => void;
+  artwork?: Record<string, Artwork>;
+  players?: number | null;
 }) {
   const [checked, setChecked] = useState<boolean[]>(steps.map(() => false)),
     [saveError, setSaveError] = useState(false);
+  const [examplePlayers, setExamplePlayers] = useState(4);
   const tr = (en: string, es: string) => (lang === "es" ? es : en),
     key = `tablefolk-setup-checklist-${id}`;
   useEffect(() => {
@@ -91,9 +100,16 @@ export function SetupChecklist({
                 <span className="setup-step-number" aria-hidden="true">
                   {i + 1}.
                 </span>{" "}
-                {step[lang]}
+                {<GlossaryText game={id} text={step[lang]} lang={lang} />}
               </span>
             </label>
+            {id === "sushi_go_party" && i === 2 && !players ? <div className="setup-example-picker">
+              <label htmlFor="setup-example-players">{tr("Players in this example", "Personas en este ejemplo")}</label>
+              <select id="setup-example-players" value={examplePlayers} onChange={event => setExamplePlayers(Number(event.target.value))}>
+                {[2,3,4,5,6,7,8].map(count => <option value={count} key={count}>{count}</option>)}
+              </select>
+            </div> : null}
+            <SetupDiagram game={id} index={i} lang={lang} players={players || examplePlayers} artwork={artwork} />
           </li>
         ))}
       </ol>
@@ -107,14 +123,11 @@ export function SetupChecklist({
       ) : null}
       {showActions ? (
         <div className="checklist-actions">
-          <Link
-            prefetch={false}
-            id="setup-ready"
-            className="accent-button"
-            href={readyHref || `/${lang}/${id}/play/`}
-          >
-            {tr("Ready to play", "Listo para jugar")}{" "}
-            <span aria-hidden="true">→</span>
+          {onContinue ? <button type="button" id="setup-ready" className="accent-button" onClick={onContinue}>
+            {tr("Continue learning", "Seguir aprendiendo")} →
+          </button> : null}
+          <Link prefetch={false} href={readyHref || `/${lang}/${id}/play/`}>
+            {tr("Go straight to the table", "Ir directo a la mesa")} →
           </Link>
           <button
             type="button"

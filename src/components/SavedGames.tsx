@@ -2,7 +2,7 @@
 import { ResponsiveImage } from "./ResponsiveImage";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { loadTools } from "@/lib/tool-client";
+import { loadSavedTools } from "@/lib/tool-client";
 import {
   gameStorageKeys,
   readStored,
@@ -61,8 +61,8 @@ export function SavedGames({
     } catch {}
     if (!hasSaved) onReady();
     if (hasSaved)
-      loadTools()
-        .then((engine) => {
+      loadSavedTools()
+        .then((engines) => {
           if (cancelled) return;
           const refresh = () => {
             const activity = gameActivity();
@@ -70,8 +70,8 @@ export function SavedGames({
             const rank = (id: string) =>
               order.includes(id) ? order.indexOf(id) : order.length;
             setSaved(
-              engine
-                .savedGames()
+              engines
+                .flatMap((engine) => engine.savedGames())
                 .sort(
                   (a, b) =>
                     (activity[b.id] || 0) - (activity[a.id] || 0) ||
@@ -132,7 +132,7 @@ export function SavedGames({
                     <Link
                       prefetch={false}
                       className="resume-link"
-                      href={`/${lang}/${session.id}/play/`}
+                      href={`/${lang}/${session.id}/play/#active-table-tool`}
                       aria-label={tr(
                         `Resume ${card.game.name[lang]}`,
                         `Retomar ${card.game.name[lang]}`,

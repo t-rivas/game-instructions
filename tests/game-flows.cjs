@@ -13,12 +13,23 @@ function check(value, message) { assert.ok(value, message); checks++; }
   try {
     for (const file of ['index.html', 'game-night.html']) {
       const context = await browser.newContext({viewport:{width:390,height:844}});
-      await context.setOffline(true);
+      // Linux WebKit offline emulation prevents even file: navigations. Keep
+      // local files available while explicitly denying every network request.
+      let probeBlocked = false;
+      if (engine === 'webkit') await context.route(/^https?:\/\//, route => {
+        if (route.request().url() === 'https://offline-check.invalid/tablefolk') probeBlocked = true;
+        return route.abort('internetdisconnected');
+      });
+      else await context.setOffline(true);
       const page = await context.newPage(), errors = [];
       page.on('pageerror', error => errors.push(error.message));
       const url = pathToFileURL(path.resolve(__dirname, '..', file)).href;
       const visit = async (game, tab='reference') => { await page.goto(`${url}#${game}/${tab}`); await page.locator('#lang-en').click(); };
       await page.goto(url); await page.locator('#lang-en').click();
+      check(await page.evaluate(async () => {
+        try { await fetch('https://offline-check.invalid/tablefolk'); return false; }
+        catch { return true; }
+      }) && (engine === 'webkit' ? probeBlocked : await page.evaluate(() => !navigator.onLine)), 'Offline harness denies network access while loading actual local files');
       const games = await page.evaluate(() => Object.keys(GAMES));
       for (const game of games) {
         check(await page.locator(`[data-game="${game}"] .card-learn`).getAttribute('href') === `#${game}/learn`, `${game}: Learn entry`);

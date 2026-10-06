@@ -161,6 +161,7 @@ const server = spawn(process.execPath, ["scripts/serve-export.mjs"], {
       for (const lang of ["en", "es"]) {
         await page.setViewportSize({ width, height: 900 });
         await navigate(`/${lang}/avalon/learn/`);
+        await page.locator('[data-learning-stage="setup"]').click();
         for (const count of [5, 6, 7, 8, 9, 10]) {
           await page.locator("#avalon-step-0").click();
           await page.locator("#players").selectOption(String(count));
@@ -232,7 +233,7 @@ const server = spawn(process.execPath, ["scripts/serve-export.mjs"], {
           await page.waitForSelector(
             "[data-tool=setup-script][data-ready=true]",
           );
-          const script = await page.locator(".script").innerText();
+          const script = await page.locator("[data-tool=setup-script] .script").innerText();
           check(
             script.includes(
               lang === "en" ? "Merlin and Morgana" : "Merlín y Morgana",
@@ -454,7 +455,7 @@ const server = spawn(process.execPath, ["scripts/serve-export.mjs"], {
           "Phone guide artwork uses a small thumbnail",
         );
       await page.locator("#learning-tools > summary").click();
-      const thumb = page.locator("[data-art]").first();
+      const thumb = page.locator("[data-art]:visible").first();
       const original = await thumb.getAttribute("data-art");
       await thumb.scrollIntoViewIfNeeded();
       await thumb.locator("img").evaluate((img) => img.decode());

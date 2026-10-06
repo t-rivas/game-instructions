@@ -1,3 +1,4 @@
+import toolStyles from "@/generated/tool-styles.json";
 import type { Metadata, Viewport } from "next";
 import type { Language } from "@/lib/types";
 import { games, icons } from "@/lib/games";
@@ -8,13 +9,6 @@ import "../../enhancements.css";
 import "../../official.css";
 import "../../table-guide.css";
 import "../../game-themes.css";
-import "../../chess-clock.css";
-import "../../coup-session.css";
-import "../../poker-timer.css";
-import "../../skull-score.css";
-import "../../truco-score.css";
-import "../../moth-score.css";
-import "./web.css";
 export const metadata: Metadata = {
   metadataBase: siteOrigin,
   title: {
@@ -48,6 +42,14 @@ export function DocumentLayout({
       suppressHydrationWarning
     >
       <head>
+        <style href="tablefolk-game-tools" precedence="game-tools">
+          {"/* Per-game styles precede hosted overrides. */"}
+        </style>
+        <link
+          rel="stylesheet"
+          href={toolStyles.web}
+          precedence="hosted-overrides"
+        />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body>

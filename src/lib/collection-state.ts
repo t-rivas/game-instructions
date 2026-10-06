@@ -1,6 +1,6 @@
 "use client";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Language } from "./types";
 export interface Filters {
   query: string;
@@ -110,8 +110,10 @@ export function useCollectionReturn(lang: Language) {
 }
 export function useCollectionFilters(lang: Language, ready: boolean) {
   const [filters, setFilters] = useState(emptyFilters);
+  const editingSearch = useRef(false);
   useEffect(() => {
     const restore = () => {
+      editingSearch.current = false;
       const url = new URL(location.href);
       const parsed = parseFilters(url.searchParams);
       setFilters(parsed);
@@ -162,14 +164,23 @@ export function useCollectionFilters(lang: Language, ready: boolean) {
     filters,
     (patch: Partial<Filters>) => {
       rememberCollection();
-      const next = { ...filters, ...patch };
+      const next = parseFilters(filterParams({ ...filters, ...patch }));
       setFilters(next);
       const url = new URL(location.href),
         params = filterParams(next, url.searchParams);
       const href = url.pathname + (params.size ? "?" + params : "") + url.hash;
-      if (href !== location.pathname + location.search + location.hash)
-        history.pushState(null, "", href);
+      const typing =
+        Object.keys(patch).length === 1 && patch.query !== undefined;
+      if (href !== location.pathname + location.search + location.hash) {
+        if (typing && editingSearch.current)
+          history.replaceState(history.state, "", href);
+        else history.pushState(history.state, "", href);
+      }
+      editingSearch.current = typing;
       rememberCollection();
+    },
+    () => {
+      editingSearch.current = false;
     },
   ] as const;
 }

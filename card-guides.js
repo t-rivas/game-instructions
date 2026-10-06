@@ -745,6 +745,60 @@ const CARD_ART = {
 };
 Object.assign(OFFICIAL, CARD_ART);
 
+// Stable lesson references. The complete card catalog below remains the table reference.
+// Rule IDs point to the named edition's full sections; artwork IDs come from OFFICIAL.
+const LESSON_CARD_STEPS = {
+  skull_king: [
+    ['sk-suits'], ['sk-suits'],
+    ['sk-suits','sk-trump','sk-escape','sk-pirate','sk-tigress','sk-king','sk-mermaid'],
+    ['sk-king','sk-mermaid'], ['exp-wild','exp-mary']
+  ],
+  coup: [
+    ['coup-duke','coup-assassin','coup-captain','coup-ambassador','coup-inquisitor','coup-contessa'],
+    ['coup-duke','coup-assassin','coup-captain','coup-ambassador','coup-inquisitor'],
+    ['coup-duke','coup-contessa'], ['coup-contessa'], []
+  ],
+  avalon: [
+    ['avalon-merlin','avalon-assassin','avalon-percival','avalon-morgana','avalon-mordred','avalon-oberon'],
+    ['avalon-merlin','avalon-assassin'], ['avalon-team'], ['avalon-mission'], ['avalon-merlin','avalon-assassin']
+  ]
+};
+const LESSON_CARD_FACTS = {
+  'sk-suits': {effect:L('Numbered cards: the highest of the led suit wins unless trump or a special card intervenes.','Cartas numeradas: gana la más alta del palo de salida, salvo que intervenga un triunfo o una especial.'),when:L('Follow the led suit if you can when playing a numbered card.','Si juegas una carta numerada, sigue el palo de salida cuando puedas.'),rule:'tricks',note:L('The picture shows several cards, not one card face.','La imagen muestra varias cartas, no una sola.')},
+  'sk-trump': {effect:L('Black numbered cards beat ordinary numbered suits.','Las numeradas negras superan a los otros palos numerados.'),when:L('A black card can win a trick even if another suit was led.','Una carta negra puede ganar aunque la salida sea de otro palo.'),rule:'tricks'},
+  'sk-escape': {effect:L('Usually loses the trick.','Normalmente pierde la baza.'),when:L('You may play it instead of following suit; if all play Escape, the first wins.','Puedes jugarla en vez de seguir palo; si todos juegan Huida, gana la primera.'),rule:'hierarchy'},
+  'sk-pirate': {effect:L('Beats numbered cards and Mermaids.','Supera a las numeradas y a las Sirenas.'),when:L('The Skull King beats Pirates; if King, Pirate and Mermaid meet, Mermaid wins.','Skull King vence a Pirata; si coinciden Rey, Pirata y Sirena, gana Sirena.'),rule:'hierarchy'},
+  'sk-tigress': {effect:L('Acts as Pirate or Escape.','Actúa como Pirata o Huida.'),when:L('Declare which as you play it.','Declara cuál al jugarla.'),rule:'hierarchy'},
+  'sk-king': {effect:L('Beats Pirates and numbers, but loses to a Mermaid.','Supera a Piratas y números, pero pierde ante una Sirena.'),when:L('Its captured Pirates earn a bonus only with an exact bid.','Sus Piratas capturados dan un bono solo con una apuesta exacta.'),rule:'hierarchy'},
+  'sk-mermaid': {effect:L('Beats numbered cards and the Skull King.','Supera a las numeradas y a Skull King.'),when:L('Normally loses to a Pirate; wins when Pirate, King and Mermaid share a trick.','Normalmente pierde ante Pirata; gana si coinciden Pirata, Rey y Sirena.'),rule:'hierarchy'},
+  'exp-wild': {effect:L('Wild Monkey follows an ordinary suit as value 15.','El Mono comodín sigue un palo común con valor 15.'),when:L('Expansion Pack only; leave it out with two players.','Solo paquete de expansión; se excluye con dos personas.'),rule:'expansion-suits',expansion:true},
+  'exp-mary': {effect:L('Mary Thorne is a Pirate.','Mary Thorne es un Pirata.'),when:L('Expansion Pack only; her power is optional.','Solo paquete de expansión; su poder es opcional.'),rule:'expansion-pirates',expansion:true},
+  'coup-duke': {effect:L('Claim Duke to take 3 coins as Tax or block Foreign Aid.','Declara Duque para cobrar 3 monedas de Impuestos o bloquear Ayuda extranjera.'),when:L('A character claim can be challenged; you need not actually hold Duke to make it.','Pueden desafiar tu declaración; no necesitas tener Duque para hacerla.'),rule:'turn',note:L('Published character portrait crop.','Recorte publicado del retrato del personaje.')},
+  'coup-assassin': {effect:L('Claim Assassin and pay 3 coins to make a target lose 1 influence.','Declara Asesino y paga 3 monedas para que un objetivo pierda 1 influencia.'),when:L('The target may claim Contessa to block.','El objetivo puede declarar Condesa para bloquear.'),rule:'turn',note:L('Published character portrait crop.','Recorte publicado del retrato del personaje.')},
+  'coup-captain': {effect:L('Claim Captain to steal up to 2 coins.','Declara Capitán para robar hasta 2 monedas.'),when:L('The target may claim Captain or the selected exchange character to block.','El objetivo puede declarar Capitán o el personaje de intercambio elegido para bloquear.'),rule:'turn',note:L('Published character portrait crop.','Recorte publicado del retrato del personaje.')},
+  'coup-ambassador': {effect:L('Claim Ambassador to exchange cards with the deck.','Declara Embajador para intercambiar cartas con el mazo.'),when:L('With Ambassador selected, it can also block a Steal against you.','Si eligieron Embajador, también bloquea un robo contra ti.'),rule:'turn',exchange:'ambassador',note:L('Published character portrait crop.','Recorte publicado del retrato del personaje.')},
+  'coup-inquisitor': {name:L('Inquisitor','Inquisidor'),effect:L('Claim Inquisitor to exchange or examine a card.','Declara Inquisidor para intercambiar o examinar una carta.'),when:L('With Inquisitor selected, it replaces Ambassador and can block a Steal against you.','Si eligieron Inquisidor, reemplaza al Embajador y puede bloquear un robo contra ti.'),rule:'inquisitor',exchange:'inquisitor',note:L('Published box portrait, not a complete card face.','Retrato publicado de la caja; no es una carta completa.')},
+  'coup-contessa': {effect:L('Claim Contessa to block an assassination against you.','Declara Condesa para bloquear un asesinato contra ti.'),when:L('The Assassin still pays 3 coins; a block claim can be challenged.','El Asesino igual paga 3 monedas; pueden desafiar la declaración de bloqueo.'),rule:'challenges',note:L('Published character portrait crop.','Recorte publicado del retrato del personaje.')},
+  'avalon-merlin': {effect:L('Good. Secretly sees Evil except Mordred.','Bien. Ve en secreto al Mal, excepto a Mordred.'),when:L('After 3 successful quests, avoid being identified by the Assassin.','Tras 3 misiones exitosas, debe evitar que el Asesino lo identifique.'),rule:'setup',note:L('Small published role portrait.','Retrato publicado pequeño del personaje.')},
+  'avalon-assassin': {effect:L('Evil. Names one player as Merlin after 3 successful quests.','Mal. Señala a una persona como Merlín tras 3 misiones exitosas.'),when:L('A correct guess wins for Evil.','Si acierta, gana el Mal.'),rule:'ending',note:L('Small published role portrait.','Retrato publicado pequeño del personaje.')},
+  'avalon-percival': {effect:L('Good. Sees Merlin and Morgana without knowing which is which.','Bien. Ve a Merlín y Morgana sin distinguirlos.'),when:L('If Morgana is absent, sees only Merlin.','Si Morgana no participa, solo ve a Merlín.'),rule:'optional',role:'percival',note:L('Small published role portrait.','Retrato publicado pequeño del personaje.')},
+  'avalon-morgana': {effect:L('Evil. Appears as a possible Merlin to Percival.','Mal. Aparece como posible Merlín ante Percival.'),when:L('Only matters when Morgana is included.','Solo importa si Morgana participa.'),rule:'optional',role:'morgana',note:L('Small published role portrait.','Retrato publicado pequeño del personaje.')},
+  'avalon-mordred': {effect:L('Evil. Hidden from Merlin.','Mal. Merlín no lo ve.'),when:L('Still recognizes other Evil players during the opening.','Igual reconoce a los demás jugadores del Mal al comienzo.'),rule:'optional',role:'mordred',note:L('Small published role portrait.','Retrato publicado pequeño del personaje.')},
+  'avalon-oberon': {effect:L('Evil. Does not recognize or get recognized by Evil.','Mal. No reconoce al Mal ni el Mal lo reconoce.'),when:L('Merlin still sees Oberon.','Merlín sí ve a Oberón.'),rule:'optional',role:'oberon',note:L('Small published role portrait.','Retrato publicado pequeño del personaje.')},
+  'avalon-team': {effect:L('Everyone votes Approve or Reject on the proposed team.','Todos votan Aprobar o Rechazar al equipo propuesto.'),when:L('Reveal votes together; more than half must approve.','Revelen los votos juntos; debe aprobar más de la mitad.'),rule:'teams',note:L('Published photo of several voting and team components.','Foto publicada de varios componentes de votación y equipo.')},
+  'avalon-mission': {effect:L('Only approved team members secretly submit quest cards.','Solo los integrantes del equipo aprobado entregan cartas de misión en secreto.'),when:L('Good must play Success; Evil may play Success or Fail.','El Bien debe jugar Éxito; el Mal puede jugar Éxito o Fracaso.'),rule:'quests',note:L('Published photo of several quest components.','Foto publicada de varios componentes de misión.')}
+};
+function lessonCardIds(game,step,choices){
+  return (LESSON_CARD_STEPS[game]?.[step]||[]).filter(id=>{
+    const card=LESSON_CARD_FACTS[id];
+    return card&&(!card.exchange||card.exchange===choices.exchange)&&(!card.expansion||choices.skullExpansion)&&(!card.role||(choices.avalonMode!=='basic'&&choices.optional.includes(card.role)));
+  });
+}
+function lessonCardBlock(game,step,choices){
+  const ids=lessonCardIds(game,step,choices);if(!ids.length)return '';
+  return `<div class="lesson-cards" role="group" aria-label="${tr('Cards in this step','Cartas de este paso')}"><p class="lesson-cards-label">${tr('SEE THE CARDS','MIRA LAS CARTAS')}</p><div class="lesson-cards-grid">${ids.map(id=>{const card=LESSON_CARD_FACTS[id],art=OFFICIAL[id];return `<article class="lesson-card" data-lesson-card="${id}">${officialButton(id,'lesson-card-art')}<div class="lesson-card-copy"><h4>${e(card.name||art.title)}</h4><p>${e(card.effect)}</p><p><strong>${tr('When it matters:','Cuándo importa:')}</strong> ${e(card.when)}</p>${card.note?`<small>${e(card.note)}</small>`:''}<a href="#${game}/full/${card.rule}">${tr('Read the full rule','Leer la regla completa')} →</a></div></article>`;}).join('')}</div></div>`;
+}
+
 // English and Spanish explanations are independent of the language printed on a card.
 function cardEntry(art, value, en, es, title) { return {art, value, text:L(en,es), title:title || CARD_ART[art].title}; }
 const SKULL_CARDS = [

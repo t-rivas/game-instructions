@@ -86,9 +86,29 @@ const origin = new Promise((resolve, reject) => {
           }
           if (view === "learn")
             check(
-              await staticPage.locator("#learn-setup").isVisible(),
-              "Essential setup is visible before JavaScript",
+              await staticPage.locator(".lesson-copy").isVisible() && (await staticPage.locator(".lesson-copy").evaluate(node => {
+                const copy = node.cloneNode(true);
+                copy.querySelectorAll(".glossary-definition").forEach(definition => definition.remove());
+                return copy.textContent.replace(/\s+/g, " ");
+              })).includes(catalog.games[game].goal[lang]),
+              "The objective is readable before JavaScript",
             );
+          if (view === "play") {
+            const phases = staticPage.locator("#table-sheet .turn-phases li");
+            check((await phases.count()) >= 2, `${game}: recurring phases render without scripts`);
+            check(await phases.first().locator("a").first().getAttribute("href") !== null,
+              `${game}: phase links to its full rule`);
+            const tool = staticPage.locator("#active-table-tool");
+            if (await tool.count()) check(await staticPage.evaluate(() =>
+              !!(document.querySelector("#table-sheet").compareDocumentPosition(document.querySelector("#active-table-tool")) & Node.DOCUMENT_POSITION_FOLLOWING)),
+              `${game}: quick reference precedes optional tool`);
+            if (game === "catan" || game === "chess")
+              check(!(await phases.allTextContents()).join(" ").toLowerCase().includes(lang === "en" ? "setup" : "preparación"),
+                `${game}: setup is not a turn phase`);
+            if (game === "sushi_go" || game === "sushi_go_party")
+              check((await phases.allTextContents()).join(" ").includes(lang === "en" ? "together" : "a la vez"),
+                `${game}: simultaneous reveal is explicit`);
+          }
         }
     for (const invalid of [
       "/en/not-a-game/rules/",
@@ -120,14 +140,17 @@ const origin = new Promise((resolve, reject) => {
     });
     page.on("request", (request) => requests.push(request.url()));
     const ready = async () => {
-      await page.waitForFunction(
+      try { await page.waitForFunction(
         () =>
           document.querySelector("main")?.dataset.route === location.pathname &&
           document.querySelector("[data-tool=sources][data-ready=true]") &&
           [...document.querySelectorAll("[data-tool]")].every(
             (node) => node.dataset.ready === "true",
           ),
-      );
+      ); } catch (error) {
+        console.error("Guide readiness:", page.url(), errors.slice(-5), await page.locator("[data-tool]").evaluateAll(nodes => nodes.map(node => ({kind:node.dataset.tool, ready:node.dataset.ready}))));
+        throw error;
+      }
     };
     const clickRoute = async (selector, path) => {
       await page.locator(selector).click();
@@ -138,6 +161,21 @@ const origin = new Promise((resolve, reject) => {
       await page.goto(`${base}/${lang}/${game}/${view}/`);
       await ready();
     };
+    await visit("coup");
+    check(await page.locator("#table-sheet").isVisible() &&
+      (await page.locator("#table-sheet").boundingBox()).y <
+      (await page.locator("#active-table-tool").boundingBox()).y,
+      "Fresh Coup opens the turn reference before session setup");
+    await page.locator("#jump-to-tool").click();
+    check(await page.locator("#active-table-tool-heading").evaluate(node => node === document.activeElement),
+      "Open tool moves keyboard focus to the active tool");
+    await page.locator("#coup-name-0").fill("Ana");
+    await page.locator("#back-to-reference").click();
+    check(await page.locator("#table-sheet-heading").evaluate(node => node === document.activeElement),
+      "Return moves keyboard focus to the turn reference");
+    await page.locator("#jump-to-tool").click();
+    check((await page.locator("#coup-name-0").inputValue()) === "Ana",
+      "Switching between reference and tool preserves an unfinished draft");
     await page.goto(base + "/en/");
     await page.locator("#filter-players").selectOption("3");
     check(
@@ -203,10 +241,11 @@ const origin = new Promise((resolve, reject) => {
     );
     check(
       (await page
-        .locator("#learn-setup")
+        .locator("#basics")
         .evaluate((node) => node.getBoundingClientRect().top)) < 800,
-      "Phone setup is brought forward",
+      "Phone learning sequence is brought forward",
     );
+    await page.locator('[data-learning-stage="setup"]').click();
     await page.locator("#players").selectOption("5");
     await page.locator("#avalon-mode").selectOption("optional");
     await page.locator("#avalon-step-1").click();
@@ -271,7 +310,7 @@ const origin = new Promise((resolve, reject) => {
       (await page.locator("#quest-demo .failure").count()) === 1,
       "Quest practice remains interactive",
     );
-    await page.locator("[data-art]").first().click();
+    await page.locator("[data-art]:visible").first().click();
     check(
       (await page.locator("dialog[open]").count()) === 1,
       "Image viewer opens",
@@ -290,6 +329,12 @@ const origin = new Promise((resolve, reject) => {
       "Search finds the selected game’s rules",
     );
     await page.locator(".rule-search-result").first().click();
+    await page.locator('[data-rule-preview="movement"]').waitFor({state:"visible"});
+    check(
+      await page.locator('[data-rule-preview="movement"]').isVisible() && page.url().includes("/play/"),
+      "Search previews the complete rule in place",
+    );
+    await page.locator(".rule-preview-actions a").click();
     await page.waitForURL(base + "/en/monopoly/rules/?q=auction#movement");
     await ready();
     await page.waitForFunction(() => document.querySelector("#movement")?.open);
@@ -669,7 +714,7 @@ const origin = new Promise((resolve, reject) => {
     );
     await clickRoute(
       ".resume-card[data-game=truco] .resume-link",
-      "/en/truco/play/",
+      "/en/truco/play/#active-table-tool",
     );
     check(
       (await page.locator("#truco-custom-1").inputValue()) === "2",
@@ -871,6 +916,7 @@ const origin = new Promise((resolve, reject) => {
     );
     await blocked.goto(base + "/en/chess/learn/");
     await blocked.waitForSelector("[data-tool=sources][data-ready=true]");
+    await blocked.locator('[data-learning-stage="setup"]').click();
     await blocked.locator("#setup-check-0").check();
     check(
       (await blocked.locator(".setup-checklist").innerText()).includes(

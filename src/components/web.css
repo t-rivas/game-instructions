@@ -466,6 +466,18 @@ main[data-focus="true"] .play-toolbar {
 main[data-focus="true"][data-has-play-tool="true"] #table-sheet {
   display: none;
 }
+main[data-focus="true"] .active-table-tool {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+main[data-focus="true"] .active-table-tool > .sheet-heading {
+  justify-content: flex-end;
+  margin: 0 0 8px;
+}
+main[data-focus="true"] .active-table-tool > .sheet-heading h2 {
+  display: none;
+}
 main[data-focus="true"]
   :is(#chess-clock-time-0, #chess-clock-time-1, #poker-timer-time) {
   font-size: clamp(52px, 10vw, 100px);
@@ -953,6 +965,82 @@ main[data-focus="true"]
   min-height: 44px;
   padding: 10px 0;
 }
+.common-questions h3 {
+  font-size: 16px;
+  margin: 18px 0 0;
+}
+.rule-preview-navigation,
+.rule-preview-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 16px 0;
+}
+.rule-preview-navigation button,
+.rule-preview-actions button,
+.rule-preview-actions a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  max-width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel2);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  white-space: normal;
+  cursor: pointer;
+}
+.rule-preview {
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+}
+.rule-preview h3 {
+  font-size: 22px;
+  line-height: 1.35;
+}
+.rule-preview-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin: 14px 0;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.rule-preview-card > div {
+  min-width: 0;
+}
+.rule-preview-card h5 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+.rule-preview-card p {
+  margin: 0 0 10px;
+}
+.rule-preview-card small {
+  color: var(--muted);
+}
+.rule-preview-card .lesson-card-art {
+  flex: 0 0 104px;
+  width: 104px;
+  min-height: 100px;
+}
+.rule-dialog :focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+@media (max-width: 400px) {
+  .rule-preview-card {
+    flex-direction: column;
+  }
+  .rule-preview-card .lesson-card-art {
+    flex-basis: auto;
+    width: 118px;
+  }
+}
 .common-questions ul {
   padding-left: 22px;
 }
@@ -1139,3 +1227,70 @@ main[data-focus="true"][data-help="false"] #chess-clock-heading {
   padding: 8px 0;
   background: var(--bg);
 }
+
+/* Learn: one concept at a time, with unrestricted stage navigation. */
+.learning-sequence [hidden] { display: none !important; }
+.learning-shortcuts { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 16px; }
+.learning-shortcuts button, .learning-overview button, .learning-stages button {
+  font: inherit; color: var(--text); background: var(--panel); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 12px; min-height: 44px; text-align: left; cursor: pointer;
+}
+.learning-stages { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin: 16px 0; }
+.learning-stages button { overflow-wrap: anywhere; font-size: 14px; }
+.learning-stages button span { display: block; font-weight: 700; }
+.learning-stages [aria-current="step"] { border-color: var(--accent); box-shadow: inset 0 -3px var(--accent); font-weight: 700; }
+.learning-step-picker { display: grid; gap: 6px; margin: 16px 0; }
+.learning-step-picker select { width: 100%; min-width: 0; min-height: 44px; padding: 10px; font: inherit; color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 8px; }
+/* Native WebKit selects can ignore min-height until appearance is reset. */
+.learning-step-picker select {
+  appearance: none;
+  padding-right: 36px;
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: calc(100% - 18px) 50%, calc(100% - 12px) 50%;
+  background-size: 6px 6px;
+  background-repeat: no-repeat;
+}
+.learning-sequence .lesson-buttons { flex-wrap: wrap; }
+.learning-sequence .lesson-buttons > * { min-height: 44px; white-space: normal; overflow-wrap: anywhere; }
+.learning-sequence .lesson-copy > .lesson-card-art { max-width: 280px; }
+.learning-sequence .learning-setup { margin-top: 0; }
+.learning-overview { padding-left: 22px; }
+.learning-overview li { margin: 8px 0; }
+.learning-overview button { width: 100%; }
+@media (max-width: 600px) {
+  .learning-stages { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .learning-stages button:last-child { grid-column: 1 / -1; }
+  .learning-stages button span { display: inline; margin-right: 8px; }
+  .learning-sequence .lesson-buttons > *,
+  .learning-sequence .checklist-actions > * { flex: 1 1 100%; }
+  .detail-controls { flex-wrap: wrap; }
+  .detail-controls .tabs { flex: 1 1 100%; width: 100%; }
+  .detail-controls .tabs button { white-space: normal; min-height: 44px; }
+  #share-guide { margin-left: auto; }
+}
+
+.learning-sequence .lesson-copy h3 { scroll-margin-top: 180px; }
+@media (max-width: 600px) {
+  .learning-sequence .lesson-copy h3 { scroll-margin-top: 240px; }
+}
+@media (max-width: 370px) {
+  .learning-sequence .lesson-card { flex-direction: column; }
+  .learning-stages { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Definitions stay in the reading flow, including narrow screens and print. */
+.glossary-term dfn {font-style:normal;font-weight:600}
+.glossary-definition {color:var(--muted);font-size:.95em;overflow-wrap:anywhere}
+.glossary-term .glossary-trigger {font:inherit;color:var(--text);background:transparent;border:0;border-bottom:1px dotted currentColor;padding:8px 2px;min-height:44px;cursor:pointer}
+.glossary-trigger:focus-visible,.glossary-close:focus-visible {outline:2px solid currentColor;outline-offset:3px}
+.glossary-disclosure {display:none}
+.glossary-disclosure.is-open {display:inline}
+.glossary-close {font:inherit;min-height:44px;padding:8px;max-width:100%;white-space:normal}
+@media print {.learning-sequence .lesson {display:block!important}.glossary-disclosure {display:inline!important}.glossary-close {display:none}.glossary-trigger {border:0;padding:0;min-height:0}}
+
+.guide-setup-context .field { max-width: 32rem; }
+.guide-setup-context select { width: 100%; max-width: 100%; min-height: 44px; }
+.guide-setup-context summary { min-height: 44px; padding-block: 10px; cursor: pointer; }
+.guide-setup-context p { overflow-wrap: anywhere; }
+
+.guide-setup-context h2 { font-size: 1.2rem; margin-bottom: 12px; }

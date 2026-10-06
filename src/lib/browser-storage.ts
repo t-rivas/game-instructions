@@ -13,6 +13,18 @@ export function writeStored(key: string, value: unknown): boolean {
     return false;
   }
 }
+// Reads can succeed while writes fail in private mode or at the storage quota.
+// A temporary unique key checks this without touching game snapshots or settings.
+export function canWriteStored(): boolean {
+  try {
+    const probe = `tablefolk-storage-probe-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    localStorage.setItem(probe, "1");
+    localStorage.removeItem(probe);
+    return true;
+  } catch {
+    return false;
+  }
+}
 export const recentGamesKey = "tablefolk-recent-games";
 export const savedGamesEvent = "tablefolk-saved-games";
 export const gameStorageKeys = [

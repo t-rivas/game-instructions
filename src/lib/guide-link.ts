@@ -1,3 +1,4 @@
+import { guidePlayerCount } from "@/generated/setup-context";
 import type { Game, Language, RuleSection, ToolState, View } from "./types";
 export const cleanQuery = (value: string) =>
   value.replace(/[\u0000-\u001f\u007f]/g, "").slice(0, 120);
@@ -11,6 +12,11 @@ const keys = [
   "optional",
   "lady",
 ];
+const optionsCount = (id: string, state: ToolState) => guidePlayerCount(id, state.guidePlayers);
+function parsedGuideCount(id: string, params: URLSearchParams) {
+  const value = params.get("players") || "";
+  return /^\d{1,2}$/.test(value) ? guidePlayerCount(id, Number(value)) : null;
+}
 const avalonRoles = ["percival", "morgana", "mordred", "oberon"];
 // An explicit marker prevents collection filters from becoming setup choices.
 export function sharedOptions(
@@ -21,9 +27,11 @@ export function sharedOptions(
   if (id === "coup")
     return {
       exchange:
-        params.get("exchange") === "ambassador" ? "ambassador" : "inquisitor",
+        params.get("exchange") === "inquisitor" ? "inquisitor" : "ambassador",
+      guidePlayers: parsedGuideCount(id, params),
       reformation: params.get("reformation") === "1",
     };
+  if (id === "sushi_go_party") return { guidePlayers: parsedGuideCount(id, params) };
   if (id === "skull_king")
     return { skullExpansion: params.get("expansion") === "1" };
   if (id === "avalon") {
@@ -52,9 +60,11 @@ export function editionParams(
   for (const key of keys) params.delete(key);
   params.set("shared", "1");
   if (id === "coup") {
+    if (optionsCount(id, state)) params.set("players", String(state.guidePlayers));
     params.set("exchange", state.exchange);
     params.set("reformation", state.reformation ? "1" : "0");
   }
+  if (id === "sushi_go_party" && optionsCount(id, state)) params.set("players", String(state.guidePlayers));
   if (id === "skull_king")
     params.set("expansion", state.skullExpansion ? "1" : "0");
   if (id === "avalon") {
@@ -87,7 +97,7 @@ export function editionLabel(
 ) {
   const tr = (en: string, es: string) => (lang === "es" ? es : en);
   if (id === "coup")
-    return `${tr(options.exchange === "inquisitor" ? "Inquisitor" : "Ambassador", options.exchange === "inquisitor" ? "Inquisidor" : "Embajador")}${options.reformation ? " + Reformation" : ""}`;
+    return `${optionsCount(id, options) ? `${options.guidePlayers} ${tr("players", "jugadores")} · ` : ""}${tr(options.exchange === "inquisitor" ? "Inquisitor" : "Ambassador", options.exchange === "inquisitor" ? "Inquisidor" : "Embajador")}${options.reformation ? " + Reformation" : ""}`;
   if (id === "skull_king")
     return tr(
       options.skullExpansion ? "Base + Expansion Pack" : "Base box",
@@ -95,6 +105,7 @@ export function editionLabel(
     );
   if (id === "avalon")
     return `${options.players} ${tr("players", "jugadores")} · ${tr("Merlin & Assassin", "Merlín y Asesino")}${options.optional.length ? ", " + options.optional.map((role) => ({ percival: "Percival", morgana: "Morgana", mordred: "Mordred", oberon: tr("Oberon", "Oberón") })[role]).join(", ") : ""} · ${tr("Lady of the Lake", "Dama del Lago")}: ${options.lady ? tr("on", "sí") : tr("off", "no")}`;
+  if (id === "sushi_go_party" && optionsCount(id, options)) return `${options.guidePlayers} ${tr("players", "jugadores")} · Sushi Go Party!`;
   return game.edition?.[lang] || game.name[lang];
 }
 export function editionSections(
@@ -133,7 +144,7 @@ export function canonicalGuideURL(url: URL, id: string) {
     editionParams(
       id,
       {
-        exchange: "inquisitor",
+        exchange: "ambassador",
         reformation: false,
         skullExpansion: false,
         players: 7,

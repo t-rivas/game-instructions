@@ -1,3 +1,4 @@
+import toolStyles from "@/generated/tool-styles.json";
 import { notFound } from "next/navigation";
 import { GameGuide } from "@/components/GameGuide";
 import {
@@ -7,6 +8,7 @@ import {
   icons,
   isLanguage,
   isView,
+  lessonCardTeaching,
   views,
 } from "@/lib/games";
 import { guideMetadata } from "@/lib/metadata";
@@ -31,15 +33,25 @@ export default async function Page({ params }: { params: Promise<Params> }) {
   if (!Object.hasOwn(games, game) || !isLanguage(lang) || !isView(view))
     notFound();
   return (
-    <GameGuide
-      key={`${lang}-${game}-${view}`}
-      id={game}
-      game={games[game]}
-      lang={lang}
-      view={view}
-      art={artwork(game)}
-      icons={icons}
+    <>
+      {Object.hasOwn(toolStyles, game) ? (
+        <link
+          rel="stylesheet"
+          href={toolStyles[game as keyof typeof toolStyles]}
+          precedence="game-tools"
+        />
+      ) : null}
+      <GameGuide
+        key={`${lang}-${game}-${view}`}
+        id={game}
+        game={games[game]}
+        lang={lang}
+        view={view}
+        art={artwork(game)}
+        icons={icons}
       tools={renderTools(lang, game, view)}
-    />
+      cardTeaching={lessonCardTeaching(game)}
+      />
+    </>
   );
 }

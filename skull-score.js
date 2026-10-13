@@ -121,7 +121,7 @@ function skullScoreRoundForm() {
       <div class="skull-fields">${[
         ['bid', tr('Final bid', 'Apuesta final')], ['tricks', tr('Tricks won', 'Bazas ganadas')]
       ].map(([key, label]) => `<label>${label}<input id="skull-${key}-${i}" data-skull-field="${key}" data-skull-player="${i}" type="number" inputmode="numeric" min="0" max="${escapeHTML(draft.cards)}" step="1" required value="${escapeHTML(entry[key])}"></label>`).join('')}</div>
-      <label>${tr('Capture bonus', 'Bonificación por capturas')}<input id="skull-bonus-${i}" data-skull-field="bonus" data-skull-player="${i}" type="number" step="1" required value="${escapeHTML(entry.bonus)}" aria-describedby="skull-bonus-note skull-bonus-status-${i}"></label>
+      <label>${tr('Capture bonus', 'Bonificación por capturas')}<input id="skull-bonus-${i}" data-skull-field="bonus" data-skull-player="${i}" type="number" step="10" required value="${escapeHTML(entry.bonus)}" aria-describedby="skull-bonus-note skull-bonus-status-${i}"></label>
       <p id="skull-bonus-status-${i}" class="skull-hint" aria-live="polite"></p>
       <details class="score-help" id="skull-adjustments-${i}" ${Number(entry.adjustment)!==0?'open':''}><summary>${tr('Special power / manual adjustment', 'Poder especial / ajuste manual')}</summary>
         <label>${tr('Manual adjustment (signed)', 'Ajuste manual (con signo)')}<input id="skull-adjustment-${i}" data-skull-field="adjustment" data-skull-player="${i}" type="number" step="1" required value="${escapeHTML(entry.adjustment)}"></label>

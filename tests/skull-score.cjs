@@ -101,12 +101,18 @@ async function visit(page, hash) {
       check(await page.locator('.skull-player-entry').count() === 2, 'Only two real players are scored');
       check(await page.locator('.skull-player-entry input[type=number]').evaluateAll(inputs => inputs.every(input => input.value === '0')), 'Bids, tricks, bonuses and adjustments start at zero');
       check(await page.locator('.skull-player-entry legend').first().textContent() === '<Ada>', 'Player names are escaped');
-      await fillEntry(page, 0, {bonus:15, adjustment:-5, explanation:'Optional power'});
+      await page.locator('#skull-bonus-0').focus();
+      await page.keyboard.press('ArrowUp');
+      check(await page.locator('#skull-bonus-0').inputValue() === '10', 'Capture bonus increases by ten points');
+      await page.keyboard.press('ArrowDown');
+      await page.keyboard.press('ArrowDown');
+      check(await page.locator('#skull-bonus-0').inputValue() === '-10', 'Capture bonus decreases by ten points and permits negative bonuses');
+      await fillEntry(page, 0, {bonus:20, adjustment:-10, explanation:'Optional power'});
       await fillEntry(page, 1, {bid:1, bonus:40, adjustment:10, explanation:'Documented exception'});
       check((await page.locator('#skull-preview-0').innerText()).includes('20'), 'Live preview includes the separate adjustment');
       await page.locator('#skull-expansion-toggle').click();
       check((await page.locator('#skull-game-edition').textContent()).includes('Base box'), 'Guide expansion toggle does not reinterpret a base game');
-      check(await page.locator('#skull-bonus-0').inputValue() === '15', 'Round draft survives guide switch');
+      check(await page.locator('#skull-bonus-0').inputValue() === '20', 'Round draft survives guide switch');
       await page.locator('#lang-es').click(); await page.locator('#theme').click();
       await visit(page, 'skull_king/full'); await visit(page, 'coup/reference'); await visit(page, 'skull_king/reference');
       check(await page.locator('#skull-explanation-0').inputValue() === 'Optional power', 'Unfinished entries survive languages, themes and guides');
@@ -124,7 +130,7 @@ async function visit(page, hash) {
       await page.locator('#skull-edit-cancel').click();
       check(await page.locator('#skull-adjustment-0').inputValue() === '5', 'Cancel correction restores unfinished next round');
       await page.locator('[data-skull-edit="1"]').click();
-      await fillEntry(page, 0, {bid:1, tricks:1, bonus:-5, adjustment:-20, explanation:'Pirate power'});
+      await fillEntry(page, 0, {bid:1, tricks:1, bonus:-10, adjustment:-15, explanation:'Pirate power'});
       await page.locator('#skull-round-form button[type=submit]').click();
       check(await page.locator('[data-skull-total="0"]').textContent() === '-5', 'Correction updates cumulative total, including negative eligible bonuses');
       check(await page.locator('#skull-adjustment-0').inputValue() === '5', 'Saving correction restores next-round draft');
@@ -134,7 +140,7 @@ async function visit(page, hash) {
       await page.locator('#skull-round-form button[type=submit]').click();
       for (let round = 2; round <= 10; round++) {
         await page.locator('#skull-cards').fill(String(Math.min(round, 8)));
-        for (const player of [0,1]) await fillEntry(page, player, {bid:0, tricks:1, bonus:-5, adjustment:0, explanation:''});
+        for (const player of [0,1]) await fillEntry(page, player, {bid:0, tricks:1, bonus:-10, adjustment:0, explanation:''});
         await page.locator('#skull-round-form button[type=submit]').click();
       }
       check((await page.locator('#skull-game-result').textContent()).includes('Joint winners: <Ada>, Ben'), 'Round ten presents tied leaders jointly');

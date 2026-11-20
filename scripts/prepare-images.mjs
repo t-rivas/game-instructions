@@ -5,13 +5,7 @@ import sharp from "sharp";
 
 // Build-time assets work on Vercel and a plain static file server alike.
 export async function prepareImages(root, catalog) {
-  const sources = new Set([
-    ...Object.values(catalog.official).map((art) => art.src),
-    ...Object.values(catalog.artwork).map((art) => art[0]),
-    "assets/avalon.jpg",
-    "assets/coup.jpg",
-    "assets/poker.jpg",
-  ]);
+  const sources = new Set(Object.values(catalog.official).map((art) => art.src));
   const target = path.join(root, "public/assets/responsive");
   fs.mkdirSync(target, { recursive: true });
   const manifest = {};

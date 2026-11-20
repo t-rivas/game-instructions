@@ -145,45 +145,31 @@ export function Collection({
           onReady={() => setSavedReady(true)}
         />
         <section
-          className={`hero${returning ? " returning-hero" : ""}`}
+          className={`hero manual-cover${returning ? " returning-hero" : ""}`}
           aria-labelledby="welcome-title"
         >
           <div className="hero-copy">
             <h1 id="welcome-title">
               <span className="new-visitor-title">
-                {tr("Learn the game.", "Aprende el juego.")}
+                {tr("Game night", "El manual")}
                 <br />
-                <em>{tr("Enjoy the night.", "Disfruta la partida.")}</em>
+                <em>{tr("manual.", "de juegos.")}</em>
               </span>
               <span className="returning-title">
-                {tr("Back to the table.", "Volvamos a la mesa.")}
+                {tr("Your game shelf", "Tu colección")}
               </span>
             </h1>
             <p>
               {tr(
-                "Pick a game for clear rules, quick answers, and tools for your table.",
-                "Elige un juego: reglas claras, respuestas rápidas y herramientas para tu mesa.",
+                "Setup, rules, and score sheets for your next game.",
+                "Preparación, reglas y planillas de puntos para tu próxima partida.",
               )}
             </p>
           </div>
           <div className="hero-gallery" aria-hidden="true">
-            {["coup", "avalon", "sushi_go_party"].map((id) => {
-              const card = cards.find((card) => card.id === id);
-              if (!card) return null;
-              return (
-                <div className={`hero-box hero-box-${id}`} key={id}>
-                  <ResponsiveImage
-                    desktopOnly
-                    sizes="(max-width: 1000px) 130px, 190px"
-                    src={card.cover.src}
-                    alt=""
-                    width={card.cover.width}
-                    height={card.cover.height}
-                    decoding="async"
-                  />
-                </div>
-              );
-            })}
+            <span className="domino domino-ochre" />
+            <span className="domino domino-ivory" />
+            <span className="domino domino-red" />
           </div>
         </section>
         <section id="collection" aria-labelledby="collection-title">
@@ -193,6 +179,8 @@ export function Collection({
                 {tr("Choose a game", "Elige un juego")}
               </h2>
             </div>
+          </div>
+          <div className="catalog-toolbar">
             <div className="search">
               <Icon path={icons.search} />
               <input
@@ -211,82 +199,82 @@ export function Collection({
                 )}
               />
             </div>
+            <ResponsiveDisclosure id="collection-filter-options" storageKey="tablefolk-collection-filter-panel-v1" className="collection-filter-options" label={<span>{tr("Filter games", "Filtrar juegos")}{players || duration || favoritesOnly ? <small> · {[players ? `${players} ${tr("players", "jugadores")}` : "", duration ? duration === "long" ? "120+ min" : `≤ ${duration} min` : "", favoritesOnly ? tr("Favorites", "Favoritos") : ""].filter(Boolean).join(" · ")}</small> : null}</span>}>
+              <div
+                className="collection-filters"
+                aria-label={tr("Filter games", "Filtrar juegos")}
+              >
+                <label htmlFor="filter-players">
+                  {tr("Players", "Jugadores")}
+                  <select
+                    id="filter-players"
+                    value={players}
+                    onChange={(event) =>
+                      updateFilters({ players: event.target.value })
+                    }
+                  >
+                    <option value="">
+                      {tr("Any group size", "Cualquier grupo")}
+                    </option>
+                    {[2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
+                      <option key={n} value={n}>
+                        {n} {tr("players", "jugadores")}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label htmlFor="filter-duration">
+                  {tr("Time available", "Tiempo disponible")}
+                  <select
+                    id="filter-duration"
+                    value={duration}
+                    onChange={(event) =>
+                      updateFilters({ duration: event.target.value })
+                    }
+                  >
+                    <option value="">
+                      {tr("Any duration", "Sin límite")}
+                    </option>
+                    {[30, 60, 120].map((n) => (
+                      <option key={n} value={n}>
+                        {tr(`Up to ${n} min`, `Hasta ${n} min`)}
+                      </option>
+                    ))}
+                    <option value="long">
+                      {tr("More than 120 min", "Más de 120 min")}
+                    </option>
+                  </select>
+                </label>
+                <button
+                  type="button"
+                  id="filter-favorites"
+                  aria-pressed={favoritesOnly}
+                  onClick={() => updateFilters({ favoritesOnly: !favoritesOnly })}
+                >
+                  <Icon path={star} />
+                  {tr("Favorites", "Favoritos")}
+                </button>
+                {query || players || duration || favoritesOnly ? (
+                  <button
+                    type="button"
+                    className="clear-filters"
+                    id="clear-filters"
+                    onClick={() => {
+                      updateFilters(emptyFilters);
+                    }}
+                  >
+                    {tr("Clear filters", "Limpiar filtros")}
+                  </button>
+                ) : null}
+              </div>
+            </ResponsiveDisclosure>
           </div>
-          <ResponsiveDisclosure id="collection-filter-options" storageKey="tablefolk-collection-filter-panel-v1" className="collection-filter-options" label={<span>{tr("Filter games", "Filtrar juegos")}{players || duration || favoritesOnly ? <small> · {[players ? `${players} ${tr("players", "jugadores")}` : "", duration ? duration === "long" ? "120+ min" : `≤ ${duration} min` : "", favoritesOnly ? tr("Favorites", "Favoritos") : ""].filter(Boolean).join(" · ")}</small> : null}</span>}>
-          <div
-            className="collection-filters"
-            aria-label={tr("Filter games", "Filtrar juegos")}
-          >
-            <label htmlFor="filter-players">
-              {tr("Players", "Jugadores")}
-              <select
-                id="filter-players"
-                value={players}
-                onChange={(event) =>
-                  updateFilters({ players: event.target.value })
-                }
-              >
-                <option value="">
-                  {tr("Any group size", "Cualquier grupo")}
-                </option>
-                {[2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
-                  <option key={n} value={n}>
-                    {n} {tr("players", "jugadores")}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label htmlFor="filter-duration">
-              {tr("Time available", "Tiempo disponible")}
-              <select
-                id="filter-duration"
-                value={duration}
-                onChange={(event) =>
-                  updateFilters({ duration: event.target.value })
-                }
-              >
-                <option value="">
-                  {tr("Any duration", "Sin límite")}
-                </option>
-                {[30, 60, 120].map((n) => (
-                  <option key={n} value={n}>
-                    {tr(`Up to ${n} min`, `Hasta ${n} min`)}
-                  </option>
-                ))}
-                <option value="long">
-                  {tr("More than 120 min", "Más de 120 min")}
-                </option>
-              </select>
-            </label>
-            <button
-              type="button"
-              id="filter-favorites"
-              aria-pressed={favoritesOnly}
-              onClick={() => updateFilters({ favoritesOnly: !favoritesOnly })}
-            >
-              <Icon path={star} />
-              {tr("Favorites", "Favoritos")}
-            </button>
-            {query || players || duration || favoritesOnly ? (
-              <button
-                type="button"
-                className="clear-filters"
-                id="clear-filters"
-                onClick={() => {
-                  updateFilters(emptyFilters);
-                }}
-              >
-                {tr("Clear filters", "Limpiar filtros")}
-              </button>
-            ) : null}
-          </div>
-          </ResponsiveDisclosure>
           <p
             className="collection-results muted"
             role="status"
             aria-atomic="true"
           >
-            {tr(
+            {matches.length === cards.length ? tr(`${cards.length} games`, `${cards.length} juegos`) : tr(
               `${matches.length} of ${cards.length} games`,
               `${matches.length} de ${cards.length} juegos`,
             )}
@@ -398,15 +386,6 @@ export function Collection({
             )}
           </div>
         </section>
-        <div className="bottom-note">
-          <Icon path={icons.book} />
-          <span>
-            {tr(
-              "New to a game? Start with Learn. Need a rule during the game? Open While playing.",
-              "¿Es tu primera vez? Abre Aprender. ¿Tienes una duda durante la partida? Consulta la pestaña Al jugar.",
-            )}
-          </span>
-        </div>
       </div>
     </main>
   );

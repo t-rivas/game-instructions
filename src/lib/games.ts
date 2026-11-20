@@ -52,19 +52,6 @@ export function cover(id: string): Artwork {
   ];
   return { ...entry, src: "/" + entry.src.replace(/^\//, "") };
 }
-export function artwork(id: string): Artwork {
-  const art = (
-    catalog.artwork as unknown as Record<string, [string, number, number]>
-  )[id];
-  return art
-    ? {
-        src: "/" + art[0].replace(/^\//, ""),
-        width: art[1],
-        height: art[2],
-        title: games[id].name,
-      }
-    : { ...cover(id), officialId: id + "-box" };
-}
 export function collection(): GameCardData[] {
   return gameIds.map((id) => {
     const { name, category, description, players, time, color } = games[id];

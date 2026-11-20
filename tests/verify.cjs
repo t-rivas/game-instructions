@@ -161,7 +161,7 @@ async function verifyInteractions(page,file) {
       await page.waitForFunction(()=>document.querySelectorAll('.game-card').length===Object.keys(GAMES).length);
       check(await page.locator('html').getAttribute('lang')==='es','Spanish default');
       const assets=await page.evaluate(async()=>{
-        const entries=[...Object.entries(OFFICIAL).map(([id,a])=>[id,a.src]),...Object.entries(GUIDE_ART).map(([id,a])=>[id,a[0]])];
+        const entries=Object.entries(OFFICIAL).map(([id,a])=>[id,a.src]);
         return Promise.all(entries.map(async([id,src])=>{const image=new Image();image.src=src;try{await image.decode();return null;}catch{return id;}}));
       });
       check(assets.every(a=>a===null),'Every registered image must decode: '+assets.filter(Boolean));

@@ -250,7 +250,6 @@ export function prepareGameRuntimes({
           ([, art]) => art.group === id && art.cardGuide,
         ),
       ),
-      GUIDE_ART: catalog.artwork[id] ? { [id]: catalog.artwork[id] } : {},
       PRACTICE: practice[id] ? { [id]: practice[id] } : {},
       BASE_LESSON_PRACTICE: {},
       EXTRA_LESSON_PRACTICE: {},

@@ -98,3 +98,190 @@ html[data-game=coup] .content :is(.lesson-copy h3,.section-tools h2,.practice-fo
 .variant-switch{touch-action:manipulation;cursor:pointer}
 .variant-switch:focus-visible{outline:3px solid var(--accent);outline-offset:-4px}
 @media(max-width:480px){.variant-switch{padding:14px;gap:12px}.variant-copy strong{font-size:15px}.variant-copy>span{font-size:13px}}
+
+/* The catalog uses a single ink and paper palette. Game colors stay with
+   the illustrations and the tools inside each guide. */
+@media screen {
+  html[data-game="library"], html:has(.collection-page) {
+    --bg: #1d211e;
+    --panel: #262a26;
+    --panel2: #31362f;
+    --text: #f5f0df;
+    --muted: #b9bcb0;
+    --border: #4b5147;
+    --accent: #edc47b;
+    --on-accent: #252019;
+  }
+  html[data-theme="light"][data-game="library"], html[data-theme="light"]:has(.collection-page) {
+    --bg: #f5f2e9;
+    --panel: #fcfaf4;
+    --panel2: #eae7dc;
+    --text: #252d26;
+    --muted: #545e53;
+    --border: #c4c5b8;
+    --accent: #34563d;
+    --on-accent: #fffaf0;
+  }
+  #header .brand, #footer .footer-name {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-weight: 700;
+    letter-spacing: -.055em;
+  }
+  #header .brand { font-size: 1.75rem; }
+  #header .brand-mark { border-radius: 3px; transform: rotate(-7deg); }
+  #header .language, #header .language button, #header .icon-button { border-radius: 4px; }
+  #footer .footer-name { font-size: 1.05rem; color: var(--text); }
+  #main .manual-cover {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    margin: 24px 0;
+    padding: clamp(24px, 3.3vw, 44px);
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    align-items: center;
+    border-radius: 5px;
+    color: #fff5df;
+    background: #194e3d;
+    box-shadow: inset 0 0 0 1px #ffffff26;
+  }
+  #main .manual-cover::after {
+    content: '';
+    position: absolute;
+    inset: 7px;
+    border: 1px solid #eadba14d;
+    border-radius: 2px;
+    pointer-events: none;
+  }
+  #main .manual-cover h1 {
+    font: 500 clamp(3rem, 5.2vw, 4.6rem)/.96 Georgia, 'Times New Roman', serif;
+    letter-spacing: -.055em;
+    margin: 0 0 17px;
+  }
+  #main .manual-cover h1 em { color: #f1d08e; font-weight: inherit; }
+  #main .manual-cover p { color: #e6e9d9; max-width: 37ch; line-height: 1.5; margin: 0; }
+  #main .manual-cover .hero-gallery {
+    position: relative;
+    height: 190px;
+    width: min(100%, 400px);
+    justify-self: center;
+  }
+  #main .hero-gallery::before { content: none; }
+  .domino {
+    position: absolute;
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    width: 5.4em;
+    height: 10.8em;
+    border-radius: .55em;
+    padding: .45em;
+    color: #242b25;
+    box-shadow: inset 0 -4px 0 #0003, inset 1px 1px 0 #fff5, 4px 7px 0 #102f2670;
+  }
+  .domino::before, .domino::after {
+    content: '';
+    background: var(--spots);
+  }
+  .domino::before { border-bottom: 2px solid currentColor; }
+  .domino {
+    --dot: currentColor 0 .43em, transparent .46em;
+    --pair: radial-gradient(circle at 26% 26%, var(--dot)), radial-gradient(circle at 74% 74%, var(--dot));
+    --four: var(--pair), radial-gradient(circle at 74% 26%, var(--dot)), radial-gradient(circle at 26% 74%, var(--dot));
+    --one: radial-gradient(circle at center, var(--dot));
+  }
+  .domino-ochre { --spots: var(--four); background: #e8b152; left: 13%; top: 9%; transform: rotate(-39deg); }
+  .domino-ochre::after { --spots: var(--one); }
+  .domino-ivory { --spots: var(--pair), var(--one); left: 41%; top: -2%; background: #f8ebcf; transform: rotate(13deg); }
+  .domino-ivory::after { --spots: var(--four), var(--one); }
+  .domino-red { --spots: var(--pair); background: #ba5038; color: #fff2d6; left: 67%; top: 23%; transform: rotate(51deg); }
+  .domino-red::after { --spots: var(--four); }
+  #main .manual-cover.returning-hero {
+    display: block;
+    margin: 0;
+    padding-inline: 0;
+    background: transparent;
+    color: var(--text);
+    box-shadow: none;
+  }
+  #main .manual-cover.returning-hero::after { content: none; }
+  #main .returning-hero h1 { font-size: 2rem; margin: 0; }
+  #collection { padding-bottom: 3rem; }
+  #collection .collection-head { border-top: 0; padding-top: 4px; margin-bottom: 12px; }
+  #collection h2, #main .continue-playing h2 {
+    font: 500 clamp(1.6rem, 3vw, 2.3rem)/1.12 Georgia, serif;
+    letter-spacing: -.035em;
+  }
+  #collection .catalog-toolbar { display: grid; gap: 10px 16px; align-items: end; }
+  #collection .catalog-toolbar .search { max-width: none; }
+  #collection .collection-filter-options, #collection .collection-filters { margin: 0; }
+  #collection .catalog-toolbar :is(input, select, button, summary), #collection .search input { border-radius: 4px; }
+  #collection .catalog-toolbar :is(input, select, button) { min-height: 48px; }
+  #collection .collection-results { padding-bottom: 10px; border-bottom: 1px solid var(--border); margin-block: 14px; }
+  #collection .game-card {
+    --text: inherit;
+    --muted: inherit;
+    --panel: inherit;
+    --border: inherit;
+    --accent: inherit;
+    --on-accent: inherit;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    border-radius: 5px;
+    box-shadow: none;
+  }
+  #collection .game-art {
+    background: color-mix(in srgb, var(--art) 22%, #e9e3d4);
+    border: 0;
+    border-radius: 4px 4px 0 0;
+  }
+  #collection .game-art::before, #collection .game-art::after { content: none; }
+  #collection .card-body h3 {
+    font: 500 1.65rem/1.12 Georgia, 'Times New Roman', serif;
+    letter-spacing: -.04em;
+    color: var(--text);
+    text-transform: none;
+  }
+  #collection .card-bottom a { border-radius: 4px; font-weight: 600; }
+  #collection .card-play { background: transparent; border-color: var(--border-control, var(--border)); }
+  #collection .favorite-toggle { border-radius: 4px; }
+  #collection .game-card:focus-within { border-color: var(--accent); }
+  html[data-game] #main .detail-hero {
+    background: transparent;
+    box-shadow: none;
+    border: 0;
+    border-radius: 0;
+    padding-inline: 0;
+  }
+  html[data-game] #main .detail-hero h1 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-weight: 500;
+    letter-spacing: -.04em;
+    text-transform: none;
+    font-variant: normal;
+    transform: none;
+    color: var(--text);
+  }
+  #main .detail-cover .official-cover { width: 100%; max-width: 180px; }
+  #main .detail-cover .official-cover img { position: static; width: 100%; height: 100%; object-fit: contain; filter: none; }
+  body.compact-hero #main .theme-title { display: block; }
+  html[data-game] #main .detail-controls { border-color: var(--border); }
+  html[data-game] #main .tabs button { border-radius: 3px; box-shadow: none; }
+}
+@media screen and (min-width: 768px) {
+  #collection .catalog-toolbar { grid-template-columns: minmax(13rem, 1fr) minmax(0, 1.8fr); }
+  #collection .collection-filters label { flex: 1 1 8rem; }
+  #collection .game-card .favorite-toggle { left: auto; right: 10px; background: #faf5e9; color: #32352d; border-color: #a19e90; }
+  #collection .favorite-toggle[aria-pressed="true"] svg { fill: currentColor; }
+  #main .detail-hero .detail-cover { height: 136px; }
+  #main .detail-hero .detail-cover .official-cover { margin-left: auto; }
+}
+@media screen and (max-width: 767px) {
+  #header .brand { font-size: 1.35rem; }
+  #main .manual-cover { display: block; margin: 14px 0 20px; padding: 22px; }
+  #main .manual-cover h1 { font-size: clamp(2rem, 7vw, 3rem); line-height: 1.05; margin-bottom: 8px; }
+  #main .manual-cover h1 br { display: none; }
+  #main .manual-cover h1 em::before { content: ' '; }
+  #main .manual-cover .hero-gallery { display: none; }
+  #collection .game-art { border-radius: 4px 0 0 0; }
+  #collection .card-body h3 { font-size: 1.35rem; }
+}

@@ -119,7 +119,7 @@ function bindAuxiliary(){
  $$('[data-score]').forEach(input=>input.oninput=()=>{const n=+input.value;state.score[+input.dataset.score]=Number.isFinite(n)?Math.min(71,Math.max(0,Math.floor(n))):0;$('#score-result').textContent=scoreText();});
 }
 return {
- state, games:GAMES, official:OFFICIAL, artwork:GUIDE_ART, icons:paths, lessonCardFacts:LESSON_CARD_FACTS, lessonCardSteps:LESSON_CARD_STEPS, skullTricks:SKULL_TRICKS, scoringExamples:SCORING_EXAMPLES, avalonTeaching:AVALON_TEACHING, coupLesson:COUP_LESSON, lessonPractice:LESSON_PRACTICE, lessonComparisons:LESSON_COMPARISONS,
+ state, games:GAMES, official:OFFICIAL, icons:paths, lessonCardFacts:LESSON_CARD_FACTS, lessonCardSteps:LESSON_CARD_STEPS, skullTricks:SKULL_TRICKS, scoringExamples:SCORING_EXAMPLES, avalonTeaching:AVALON_TEACHING, coupLesson:COUP_LESSON, lessonPractice:LESSON_PRACTICE, lessonComparisons:LESSON_COMPARISONS,
  setRoute(lang,game,view,choices=null){
   if(sharedRoute&&localGuideState)Object.assign(state,localGuideState,{optional:[...localGuideState.optional]});
   if(choices&&!sharedRoute)localGuideState={exchange:state.exchange,reformation:state.reformation,skullExpansion:state.skullExpansion,guidePlayers:state.guidePlayers,players:state.players,avalonMode:state.avalonMode,optional:[...state.optional],lady:state.lady};
@@ -187,7 +187,7 @@ vm.runInContext(
   context,
 );
 const catalog = vm.runInContext(
-  "JSON.stringify({games:runtime.games,official:runtime.official,artwork:runtime.artwork,icons:runtime.icons,lessonCardFacts:runtime.lessonCardFacts,lessonCardSteps:runtime.lessonCardSteps,skullTricks:runtime.skullTricks,scoringExamples:runtime.scoringExamples,avalonTeaching:runtime.avalonTeaching,coupLesson:runtime.coupLesson,lessonPractice:runtime.lessonPractice,lessonComparisons:runtime.lessonComparisons})",
+  "JSON.stringify({games:runtime.games,official:runtime.official,icons:runtime.icons,lessonCardFacts:runtime.lessonCardFacts,lessonCardSteps:runtime.lessonCardSteps,skullTricks:runtime.skullTricks,scoringExamples:runtime.scoringExamples,avalonTeaching:runtime.avalonTeaching,coupLesson:runtime.coupLesson,lessonPractice:runtime.lessonPractice,lessonComparisons:runtime.lessonComparisons})",
   context,
 );
 fs.writeFileSync(path.join(root, "src/generated/catalog.json"), catalog + "\n");

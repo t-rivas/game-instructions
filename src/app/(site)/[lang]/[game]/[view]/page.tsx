@@ -2,7 +2,7 @@ import toolStyles from "@/generated/tool-styles.json";
 import { notFound } from "next/navigation";
 import { GameGuide } from "@/components/GameGuide";
 import {
-  artwork,
+  cover,
   gameIds,
   games,
   icons,
@@ -47,7 +47,7 @@ export default async function Page({ params }: { params: Promise<Params> }) {
         game={games[game]}
         lang={lang}
         view={view}
-        art={artwork(game)}
+        art={cover(game)}
         icons={icons}
       tools={renderTools(lang, game, view)}
       cardTeaching={lessonCardTeaching(game)}

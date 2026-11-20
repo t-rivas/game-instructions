@@ -5,8 +5,6 @@ type Entry = {
   height: number;
   variants: { src: string; width: number }[];
 };
-export const emptyImage =
-  "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
 export function imageAttributes(src: string, sizes: string) {
   const art = (manifest as Record<string, Entry>)[src];
   if (!art) return { src, sizes };
@@ -21,28 +19,10 @@ export function imageAttributes(src: string, sizes: string) {
 export function ResponsiveImage({
   src,
   sizes = "(max-width: 370px) 80vw, (max-width: 680px) 40vw, (max-width: 1000px) 40vw, 280px",
-  desktopOnly = false,
   ...props
 }: ImgHTMLAttributes<HTMLImageElement> & {
   src: string;
-  desktopOnly?: boolean;
 }) {
   const attributes = imageAttributes(src, sizes);
-  if (desktopOnly)
-    return (
-      <picture>
-        <source
-          media="(min-width: 681px)"
-          srcSet={attributes.srcSet || src}
-          sizes={sizes}
-        />
-        <img
-          {...props}
-          width={attributes.width || props.width}
-          height={attributes.height || props.height}
-          src={emptyImage}
-        />
-      </picture>
-    );
   return <img {...props} {...attributes} />;
 }

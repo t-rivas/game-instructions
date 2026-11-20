@@ -734,15 +734,11 @@ export function GameGuide({
           </Link>
           <div className="detail-hero">
             <div className="theme-title">
-              <span className="theme-seal" aria-hidden="true">
-                <Icon path={icons[game.icon] || icons.book} />
-              </span>
               <span className="eyebrow muted">{game.category[lang]}</span>
               <h1>{game.name[lang]}</h1>
               <div className="theme-caption">
                 {game.caption?.[lang] || edition}
               </div>
-              <p>{game.subtitle[lang]}</p>
               <div className="meta">
                 <span>
                   <Icon path={icons.people} />
@@ -758,41 +754,25 @@ export function GameGuide({
               </div>
             </div>
             <div className={`detail-cover guide-art-cover ${game.color}`}>
-              <>
-                {art.officialId ? (
-                  <button
-                    className="official-cover"
-                    data-art={art.officialId}
-                    aria-label={tr(
-                      "Enlarge game image",
-                      "Ampliar imagen del juego",
-                    )}
-                  >
-                    <ResponsiveImage
-                      sizes="(max-width: 680px) 68px, (max-width: 1000px) 35vw, 450px"
-                      src={art.src}
-                      alt={art.title[lang]}
-                      width={art.width}
-                      height={art.height}
-                      decoding="async"
-                    />
-                    <span>{tr("View image ↗", "Ver imagen ↗")}</span>
-                  </button>
-                ) : (
-                  <ResponsiveImage
-                    sizes="(max-width: 680px) 68px, (max-width: 1000px) 35vw, 450px"
-                    className="guide-artwork"
-                    src={art.src}
-                    alt={tr(
-                      `Illustration for ${game.name[lang]}`,
-                      `Ilustración de ${game.name[lang]}`,
-                    )}
-                    width={art.width}
-                    height={art.height}
-                    decoding="async"
-                  />
+              <button
+                className="official-cover"
+                data-art={`${id}-box`}
+                aria-label={tr(
+                  "Enlarge game image",
+                  "Ampliar imagen del juego",
                 )}
-              </>
+              >
+                <ResponsiveImage
+                  className="guide-artwork"
+                  sizes="(max-width: 767px) 68px, 180px"
+                  src={art.src}
+                  alt={art.title[lang]}
+                  width={art.width}
+                  height={art.height}
+                  decoding="async"
+                />
+                <span>{tr("View image ↗", "Ver imagen ↗")}</span>
+              </button>
             </div>
           </div>
           <div className="detail-controls">

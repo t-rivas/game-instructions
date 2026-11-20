@@ -2137,28 +2137,6 @@ main[data-view="learn"] .detail-hero .detail-cover { height: 90px; }
     height: 230px;
     isolation: isolate;
   }
-  .collection-page .hero-gallery::before {
-    content: "";
-    position: absolute;
-    inset: 20% 2% 0;
-    border-radius: 50%;
-    background: radial-gradient(ellipse, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%);
-  }
-  .collection-page .hero-box {
-    position: absolute;
-    width: 38%;
-    height: 194px;
-    top: 16px;
-    padding: 12px;
-    border: 1px solid var(--border-soft);
-    border-radius: 16px;
-    background: var(--surface-group);
-    box-shadow: 0 16px 28px -12px #0007, 0 2px 4px #0002;
-  }
-  .collection-page .hero-box img { display: block; width: 100%; height: 100%; object-fit: contain; }
-  .collection-page .hero-box-coup { left: 2%; transform: rotate(-12deg); }
-  .collection-page .hero-box-avalon { left: 31%; top: 4px; transform: rotate(2deg); z-index: 2; }
-  .collection-page .hero-box-sushi_go_party { right: 0; top: 28px; transform: rotate(12deg); }
   .site-shell .collection-page .collection-head {
     align-items: center;
     padding-top: 24px;
@@ -2220,7 +2198,6 @@ main[data-view="learn"] .detail-hero .detail-cover { height: 90px; }
   .site-shell .collection-page .hero { gap: 20px; }
   .site-shell .collection-page .hero h1 { font-size: 2.5rem; }
   .site-shell .collection-page .hero-gallery { height: 240px; }
-  .collection-page .hero-box { height: 184px; padding: 8px; border-radius: 12px; }
   .collection-page .search { max-width: 340px; }
 }
 @media screen and (max-width: 680px) {

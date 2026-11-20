@@ -65,7 +65,7 @@ const check = (value, message) => { checks++; if (!value) failures.push(message)
     await staticPage.goto(base + '/en/');
     check(await staticPage.locator('.game-card').count() === 15, 'Initial HTML includes all 15 games');
     check(await staticPage.locator('.card-learn[href], .card-play[href]').count() === 30, 'Initial HTML includes working Learn/Play routes');
-    check(await staticPage.locator('h1').innerText() === 'Learn the game.\nEnjoy the night.', 'Initial HTML explains purpose');
+    check(await staticPage.locator('h1').innerText() === 'Game night\nmanual.', 'Initial HTML explains purpose');
     await staticPage.close();
     console.log('Prerendered collection verified without JavaScript.');
     // Delay every image to verify that loading does not move the collection.
@@ -84,7 +84,7 @@ const check = (value, message) => { checks++; if (!value) failures.push(message)
       release();
       await page.locator('img:visible').evaluateAll(images => Promise.all(images.filter(img => img.getBoundingClientRect().top < innerHeight).map(img => { img.loading = "eager"; return img.decode(); })));
       check(JSON.stringify(before) === JSON.stringify(await geometry()), `${width}: image loading does not shift layout`);
-      if (width === 390) check(await page.locator('.hero-gallery img').evaluateAll(images => images.every(img => img.currentSrc.startsWith('data:'))), 'Mobile does not download decorative hero artwork');
+      if (width === 390) check(await page.locator('.hero-gallery').isHidden(), 'Mobile keeps the decorative cover compact');
       await page.close();
     }
     fs.writeFileSync(`docs/collection-review/checks${process.env.BROWSER === 'webkit' ? '-webkit' : ''}.json`, JSON.stringify({ checks, failures }, null, 2) + '\n');

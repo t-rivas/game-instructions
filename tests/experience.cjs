@@ -509,28 +509,15 @@ const server = spawn(process.execPath, ["scripts/serve-export.mjs"], {
         "Every collection card uses responsive images and dimensions",
       );
       if (width === 390) {
-        const manifest = JSON.parse(
-          fs.readFileSync(path.join(__dirname, "../src/generated/images.json")),
-        );
-        const desktopPhotos = [
-          "/assets/avalon.jpg",
-          "/assets/coup.jpg",
-          "/assets/poker.jpg",
-        ].flatMap((src) =>
-          manifest[src].variants.map((variant) => variant.src),
-        );
-        check(
-          await page.evaluate(
-            (paths) =>
-              performance
-                .getEntriesByType("resource")
-                .every(
-                  (entry) => !paths.includes(new URL(entry.name).pathname),
-                ),
-            desktopPhotos,
-          ),
-          "Phones never fetch hidden homepage hero photos",
-        );
+        const requestedImages = await page.evaluate(() => performance
+          .getEntriesByType("resource")
+          .filter(entry => entry.initiatorType === "img")
+          .map(entry => entry.name));
+        const cardImages = await page.locator(".game-card img").evaluateAll(images =>
+          images.flatMap(image => image.srcset.split(",").map(candidate =>
+            new URL(candidate.trim().split(/\s+/)[0], document.baseURI).href)));
+        check(requestedImages.every(src => cardImages.includes(src)),
+          "Phone collection loads only game box images");
       }
       await fits(`Collection fits at ${width}`);
       await page.screenshot({

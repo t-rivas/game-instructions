@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { artwork, gamePath, games } from "./games";
+import { cover, gamePath, games } from "./games";
 import type { Language, View } from "./types";
 const configuredOrigin =
   process.env.NEXT_PUBLIC_SITE_URL ||
@@ -15,6 +15,7 @@ export function guideMetadata(
   view: View,
 ): Metadata {
   const game = games[id];
+  const image = cover(id);
   const label = {
     learn: { en: "Learn", es: "Aprender" },
     play: { en: "While playing", es: "Al jugar" },
@@ -42,9 +43,9 @@ export function guideMetadata(
       images: siteOrigin
         ? [
             {
-              url: artwork(id).src,
-              width: artwork(id).width,
-              height: artwork(id).height,
+              url: image.src,
+              width: image.width,
+              height: image.height,
             },
           ]
         : undefined,

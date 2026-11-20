@@ -2,7 +2,7 @@
 
 Created with the built-in image generation tool. Original themed illustrations, not official game packaging.
 
-The original interior-guide images are `coup.jpg`, `avalon.jpg`, `poker.jpg` and `moth.jpg`, with their full-resolution versions preserved in `assets/originals/`. The seven additional interior-guide scenes live in `assets/ai/`. The HTML export embeds the optimized banners for offline use. These illustrations are used only as atmospheric guide banners; game boxes, pieces and card references use real published imagery.
+The original interior-guide images are `coup.jpg`, `avalon.jpg`, `poker.jpg` and `moth.jpg`, with their full-resolution versions preserved in `assets/originals/`. The seven additional interior-guide scenes live in `assets/ai/`. These illustrations were used in earlier guide headers. The current guides show published box and deck photographs.
 
 ## Additional interior guide scenes
 

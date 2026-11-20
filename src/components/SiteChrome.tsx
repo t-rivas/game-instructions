@@ -151,12 +151,7 @@ export function SiteChrome({
       {children}
       <footer id="footer">
         <div className="wrap footer-inner">
-          <span>
-            {tr(
-              "Made for good company and one more round.",
-              "Para disfrutar en compañía y jugar una ronda más.",
-            )}
-          </span>
+          <span className="footer-name">Tablefolk</span>
           <a href="/game-night.html" download>
             {tr("Download the offline guide", "Descargar la guía sin conexión")}
           </a>

@@ -66,6 +66,21 @@ const nine = create(Array.from({length:9}, (_, i) => `Player ${i + 1}`), true);
 for (let round = 1; round <= 10; round++) save(nine, round, round, Array.from({length:9}, () => entry(0, 0)));
 check(summary(nine).winners.length === 9, 'Every tied leader wins without a tiebreaker');
 
+for (const mode of ['classic', 'rascal', 'cannonball']) {
+  for (const keepCards of [false, true]) {
+    const setup = create(['A', 'B'], true, mode, keepCards).setup;
+    for (const shot of ['grapeshot', 'cannonball']) {
+      for (const difference of [0, 1, 2]) {
+        const result = score({...entry(2, 2 - difference), shot, wager: 20, picks: {king: 1, loot: 1, seven: 1}}, 6, setup);
+        const useCannon = mode === 'cannonball' && shot === 'cannonball';
+        const expectedBase = mode === 'classic' ? [40,-10,-20] : useCannon ? [90,0,0] : [60,30,0];
+        const expectedCards = keepCards || !difference ? 55 : mode !== 'classic' && !useCannon && difference === 1 ? 20 : 0;
+        check(result.total === expectedBase[difference] + expectedCards + (difference ? -20 : 20), 'Mode, shot, exact-only cards and wager settle independently');
+      }
+    }
+  }
+}
+
 async function fillEntry(page, player, values) {
   if ('adjustment' in values || 'explanation' in values) await page.locator(`#skull-adjustments-${player}`).evaluate(node => { node.open = true; });
   for (const [key, value] of Object.entries(values)) await page.locator(`#skull-${key}-${player}`).fill(String(value));
@@ -92,8 +107,8 @@ async function visit(page, hash) {
       const errors = [];
       page.on('pageerror', error => errors.push(error.message));
       await page.goto(pathToFileURL(path.join(root, file)).href+'#skull_king/reference');
-      check((await page.locator('#skull-score-heading').textContent()).includes('clásico'), 'Spanish classic sheet is available offline');
-      check((await page.locator('#skull-score').textContent()).includes('Rascal'), 'Unsupported scoring is clearly labeled');
+      check((await page.locator('#skull-mode option:checked').textContent()).includes('Clásico'), 'Spanish classic sheet is available offline');
+      check((await page.locator('#skull-score').textContent()).includes('Rascal'), 'Alternate scoring modes are available');
       check(await page.locator('#skull-player-count option').count() === 7, 'Base setup supports 2–8');
       await page.locator('#lang-en').click();
       await start(page, ['<Ada>', 'Ben']);
@@ -103,10 +118,10 @@ async function visit(page, hash) {
       check(await page.locator('.skull-player-entry legend').first().textContent() === '<Ada>', 'Player names are escaped');
       await page.locator('#skull-bonus-0').focus();
       await page.keyboard.press('ArrowUp');
-      check(await page.locator('#skull-bonus-0').inputValue() === '10', 'Capture bonus increases by ten points');
+      check(await page.locator('#skull-bonus-0').inputValue() === '1', 'Capture bonus increases by one point');
       await page.keyboard.press('ArrowDown');
       await page.keyboard.press('ArrowDown');
-      check(await page.locator('#skull-bonus-0').inputValue() === '-10', 'Capture bonus decreases by ten points and permits negative bonuses');
+      check(await page.locator('#skull-bonus-0').inputValue() === '-1', 'Capture bonus permits single-point penalties');
       await fillEntry(page, 0, {bonus:20, adjustment:-10, explanation:'Optional power'});
       await fillEntry(page, 1, {bid:1, bonus:40, adjustment:10, explanation:'Documented exception'});
       check((await page.locator('#skull-preview-0').innerText()).includes('20'), 'Live preview includes the separate adjustment');
@@ -197,6 +212,26 @@ async function visit(page, hash) {
       check(await page.evaluate(() => skullScoreGame.rounds.length) === 9 && await page.locator('#skull-bid-0').inputValue() === '0', 'Undo reopens last round with its entries');
       await page.reload();
       check(await page.evaluate(() => skullScoreGame.rounds.length) === 9, 'Undo is persisted');
+      page.once('dialog', dialog => dialog.accept());
+      await page.locator('#skull-new-game').click();
+      await page.locator('#skull-mode').selectOption('cannonball');
+      await page.locator('#skull-keep-cards').check();
+      await start(page, ['A','B']);
+      await page.locator('[data-skull-field="shot"]').first().selectOption('cannonball');
+      await page.locator('#skull-bid-0').fill('1');
+      const picker = page.locator('.skull-player-entry').first();
+      await picker.locator('details').first().locator('summary').first().click();
+      await picker.locator('[data-skull-harry="-1"]').click();
+      check(await page.locator('#skull-bid-0').inputValue() === '0', 'Harry changes the final bid used for scoring');
+      await picker.locator('[data-skull-harry="1"]').click();
+      await picker.locator('[data-skull-card="pirate"]').fill('1');
+      await picker.locator('[data-skull-field="bounty"]').fill('-5');
+      await picker.locator('[data-skull-field="wager"]').selectOption('10');
+      await page.reload();
+      await page.locator('#skull-round-form button[type=submit]').click();
+      check(await page.locator('[data-skull-total="0"]').textContent() === '15', 'Missed Cannonball keeps the capture and negative bounty, and loses the wager after reload');
+      await page.locator('#skull-undo-round').click();
+      check(await picker.locator('[data-skull-card="pirate"]').inputValue() === '1' && await picker.locator('[data-skull-field="shot"]').inputValue() === 'cannonball', 'Undo restores picker and individual shot');
       check(errors.length === 0, `No browser errors: ${errors.join(', ')}`);
       await context.close();
     }

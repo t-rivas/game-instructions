@@ -30,3 +30,5 @@
 #skull-game-result{padding:12px;border-left:3px solid var(--accent);background:var(--panel2)}
 @media(max-width:600px){.skull-score{padding:14px}.skull-entry-grid{grid-template-columns:1fr}.skull-name-grid{gap:10px}.skull-totals li{flex-direction:column}}
 @media print{.skull-score{display:none!important}}
+.skull-score .skull-house-rule{flex-direction:row;align-items:center;min-height:44px}
+.skull-score .skull-house-rule input{width:20px;height:20px;min-height:20px;flex:none}

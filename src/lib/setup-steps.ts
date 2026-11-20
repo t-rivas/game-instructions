@@ -176,8 +176,8 @@ const steps: Record<string, Translation[]> = {
       "Prepara el mazo de la edición elegida y entrega las ayudas de juego. Consulta las notas de preparación para las cartas opcionales.",
     ),
     step(
-      "Prepare the score sheet with everyone’s name. Play 10 rounds using classic scoring.",
-      "Prepara la planilla con todos los nombres. Jueguen 10 rondas con puntuación clásica.",
+      "Prepare the score sheet with everyone’s name. Choose a scoring system for all 10 rounds.",
+      "Prepara la planilla con todos los nombres. Elijan el sistema de puntuación para las 10 rondas.",
     ),
     step(
       "Shuffle and deal 1 card each for round 1. Everyone chooses a bid, then reveals it together before the first trick.",
